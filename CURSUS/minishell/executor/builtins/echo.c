@@ -6,7 +6,7 @@
 /*   By: druiz-ca <druiz-ca@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 19:15:57 by druiz-ca          #+#    #+#             */
-/*   Updated: 2024/10/04 18:27:59 by druiz-ca         ###   ########.fr       */
+/*   Updated: 2024/10/07 16:11:52 by druiz-ca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ void echo(char **args, t_shell *shell)
     i = 0;
     j = 1;
     new_line = 1;
-    while (args[i][0] == '-' && args[i][1] == 'n' && args[i][2] == '\0')
+    while (args[i][0] == '-' && args[i][1] == 'n' && args[i] == '\0')
     {    
         while (args[i][j] == 'n')
             j++;
