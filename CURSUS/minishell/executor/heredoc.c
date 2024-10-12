@@ -6,7 +6,7 @@
 /*   By: druiz-ca <druiz-ca@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/12 11:46:06 by druiz-ca          #+#    #+#             */
-/*   Updated: 2024/10/12 12:16:01 by druiz-ca         ###   ########.fr       */
+/*   Updated: 2024/10/12 12:56:41 by druiz-ca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,11 @@ void apply_heredoc(char *delimiter, t_shell *shell)
         line = get_next_line(STDIN_FILENO);
         if (!line || ft_strcmp(line, delimiter) == 0)
             break ;
+        line[ft_strlen(line) - 1] = '\0';
+        ft_putstr_fd(line, fdpipe[1]);
+        free(line);
     }
     close(fdpipe[1]);
+    shell->fdin = fdpipe[0];
+    dup2(shell->fdin, STDIN_FILENO);
 }
