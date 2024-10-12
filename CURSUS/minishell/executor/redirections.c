@@ -6,13 +6,49 @@
 /*   By: druiz-ca <druiz-ca@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 18:21:49 by druiz-ca          #+#    #+#             */
-/*   Updated: 2024/10/11 18:46:23 by druiz-ca         ###   ########.fr       */
+/*   Updated: 2024/10/12 11:47:02 by druiz-ca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/minishell.h"
 
-/* Guarda los descriptores de archivo acuales de entrada y salida estándar */
+/* Función que gestiona las redirecciones de entrada */
+void redir_infile(char *cmd, t_shell *shell, int i)
+{
+    if (shell->fdin > 2)
+        close(shell->fdin);
+    if (ft_strcmp(cmd[i], "<<") == 0)
+        apply_heredoc(cmd[i + 1], shell);
+    else
+        shell->fdin = open(cmd[i + 1], O_RDONLY);
+    if (shell->fdin == -1)
+    {
+        write(STDERR_FILENO, cmd[i + 1], ft_strlen(cmd[i + 1]));
+        write(STDERR_FILENO, ": no such file or directory\n", 29);
+        shell->exec_signal = 1;
+        shell->g_status = 1;
+    }
+}
+
+/* Función que gestiona las redirecciones de salida */
+void    redir_outfile(char *cmd, t_shell *shell, int i)
+{
+    if (shell->fdout > 2)
+        close(shell->fdout);
+    if (ft_strcmp(cmd[i], ">>") == 0)
+        shell->fdout = open(cmd[i + 1], O_WRONLY | O_CREAT | O_APPEND, S_IRWXU);
+    else
+        shell->fdout = open(cmd[i + 1], O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
+    if (shell->fdout == -1)
+    {
+        write(STDERR_FILENO, cmd[i + 1], ft_strlen(cmd[i + 1]));
+        write(STDERR_FILENO, ": no such file or directory\n", 29);
+        shell->exec_signal = 1;
+        shell->g_status = 1;
+    }
+}
+
+/* Guarda los descriptores de archivo actuales de entrada y salida estándar */
 void    save_fds(t_shell *shell)
 {
     shell->exec_signal = 0;
@@ -20,7 +56,19 @@ void    save_fds(t_shell *shell)
     shell->outfile = dup(STDOUT_FILENO);
 }
 
-void    choose_redirections(char **redirections, t_shell *shell)
+/* Ejemplo de lo que debe contener cmd:
+char *redirrections[] = {"<", "entrada.txt", ">", "salida.txt", NULL};*/
+void    choose_redirections(char **cmd, t_shell *shell)
 {
-    
+    int i;
+
+    i = 0;
+    while (cmd[i] != NULL && cmd != NULL)
+    {
+        if (ft_strcmp(cmd[i], ">") == 0 || ft_strcmp(cmd[i], ">>") == 0)
+            redir_outfile(cmd, shell, i);
+        else if (ft_strcmp(cmd[i], "<") == 0 || ft_strcmp(cmd[i], "<<") == 0)
+            redir_infile(cmd, shell, i);
+        i++;
+    }
 }
