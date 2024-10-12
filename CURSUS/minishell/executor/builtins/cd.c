@@ -6,7 +6,7 @@
 /*   By: druiz-ca <druiz-ca@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 17:19:32 by druiz-ca          #+#    #+#             */
-/*   Updated: 2024/10/04 17:51:53 by druiz-ca         ###   ########.fr       */
+/*   Updated: 2024/10/12 10:25:13 by druiz-ca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,13 @@ void	ft_cd(char **full_command, t_shell *shell)
 		exec_cd_home(shell);
 	else if (full_command[0][0] == '-')
 		exec_backpwd(shell);
+	else if (chdir(full_command[0]) == -1)
+	{
+		write(STDERR_FILENO, "cd: no such file or directory: ", 31);
+		write(STDERR_FILENO, full_command[0], ft_strlen(full_command[0]));
+		write(STDERR_FILENO, "\n", 2);
+		shell->g_status = 1;
+	}
 	if (shell->g_status == 1)
 	{
 		free(shell->oldpwd);
