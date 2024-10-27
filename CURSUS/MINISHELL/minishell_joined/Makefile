@@ -38,7 +38,43 @@ MK_				= && make
 
 # ***** DIRECTORIES ********************************************************** #
 
-SRCS			= parse/ft_action.c \
+SRCS			= parser/ft_action.c \
+				  parser/ft_checkers.c \
+				  parser/ft_elements.c \
+				  parser/ft_env_tools.c \
+				  parser/ft_environment.c \
+				  parser/ft_envp.c \
+				  parser/ft_free_utils.c \
+				  parser/ft_handing.c \
+				  parser/ft_mem_utils.c \
+				  parser/ft_quotes.c \
+				  parser/ft_remove.c \
+				  parser/ft_struct_len.c \
+				  parser/ft_struct_parse.c \
+				  parser/ft_struct_process.c \
+				  parser/ft_struct_start.c \
+				  parser/ft_token.c \
+				  parser/ft_tools.c \
+				  signals/ft_c_signals.c \
+				  signals/ft_p_signals.c \
+				  signals/ft_signals.c \
+				  executor/check_and_exec_bultins.c \
+				  executor/ft_execute_bin.c \
+				  executor/ft_execute_bin2.c\
+				  executor/ft_execute_builtins.c \
+				  executer/ft_heredoc.c \
+				  executor/ft_redirections.c \
+				  executor/builtins/cd_erros.c \
+				  executor/builtins/cd.c \
+				  executor/builtins/delete_env_unset.c \
+				  executor/builtins/echo.c \
+				  executor/builtins/exit.c \
+				  executor/builtins/print_env.c \
+				  executor/builtins/pwd.c \
+				  executor/builtins/some_errors.c \
+				  executor/builtins/update_env_errors.c \
+				  executor/builtins/update_env_export.c \
+				  executor/builtins/update_env2.c \
 				
 # The variable SRCS is used to get all the source files in the SRCS directory.
 
