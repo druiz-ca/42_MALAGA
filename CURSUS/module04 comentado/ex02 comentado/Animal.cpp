@@ -1,0 +1,53 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Animal.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: druiz-ca <druiz-ca@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/02/13 18:01:59 by daniel            #+#    #+#             */
+/*   Updated: 2025/03/01 14:08:24 by druiz-ca         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "Animal.hpp"
+
+
+Animal::Animal()
+{
+    this->_type = "Animal";
+    cout << "Animal Constructor default is called" << endl;
+}
+
+Animal::Animal(Animal const &copyAnimal)
+{
+    cout << "Animal Copy constructor is called" << endl;
+    this->_type = copyAnimal._type;
+    // se establece el tipo del objeto que se crea con el tipo del objeto que se copia
+}
+
+Animal::~Animal()
+{
+    cout << "Animal destructor is called" << endl;
+}
+
+// cuando se desarrolla el método, operator ya no necesita el &
+// pero los parámetros que recibe y retorna si ( no con *)
+// comprueba si el objeto que se copia es el mismo que el objeto que se crea
+// si no lo es, se copia el tipo del objeto que se copia al objeto que se crea
+Animal& Animal::operator=(const Animal &copyAnimal)
+{//this es un puntero implicito que apunta a la direccion de memoria del objeto
+    if (this != &copyAnimal)
+        this->_type = copyAnimal._type; // con "." pq es por referencia
+    return (*this);
+} // ENTONCES SOLO ASIGNA EL TIPO?? O SE LLAMA AL CONSTRUCTOR POR MANDAR EL TYPO..
+
+string Animal::getType() const
+{
+    return (this->_type);
+}
+
+void Animal::makeSound() const 
+{
+    cout << "This animal doesn't make any sound" << endl;
+}
