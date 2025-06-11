@@ -1,0 +1,238 @@
+
+                            --- COPILOT SUBJECT ----
+
+### Enunciado: Sistema de Hechizos y Objetivos
+
+#### Introducción
+- Eres un mago que desea crear un sistema para gestionar hechizos y objetivos en un mundo mágico. 
+- Este sistema debe permitir que un mago aprenda hechizos, los olvide y los lance contra objetivos específicos. 
+- Cada hechizo tiene un nombre y un efecto, y cada objetivo tiene un tipo. 
+- El sistema debe ser extensible, permitiendo la creación de nuevos hechizos y objetivos sin modificar el código existente.
+
+---
+
+### Requisitos
+
+#### 1. Clase Warlock
+
+- Representa a un mago que puede aprender, olvidar y lanzar hechizos.
+
+- **Atributos**:
+  - name : El nombre del mago (cadena de texto).
+  - title : El título del mago (cadena de texto).
+  - `spells`: Una lista de punteros a hechizos (ASpell*) que el mago ha aprendido.
+
+- **Métodos**:
+  - Constructor que inicializa el nombre y el título del mago.
+  - Destructor que libera los recursos asociados a los hechizos aprendidos.
+  - getName(): Devuelve el nombre del mago.
+  - getTitle(): Devuelve el título del mago.
+  - setTitle(): Cambia el título del mago.
+  - introduce(): Imprime un mensaje en el formato:  
+    `"My name is <name>, <title>!"`.
+  - learnSpell(ASpell*): Permite al mago aprender un hechizo.
+  - forgetSpell(std::string const&): Permite al mago olvidar un hechizo por su nombre.
+  - launchSpell(std::string const&, ATarget const&): Lanza un hechizo contra un objetivo.
+
+---
+
+#### 2. Clase Abstracta ASpell
+
+
+- Representa un hechizo genérico.
+
+- **Atributos**:
+  - name: El nombre del hechizo.
+  - effects: El efecto del hechizo.
+
+- **Métodos**:
+  - Constructor que inicializa el nombre y los efectos del hechizo.
+  - Destructor virtual.
+  - getName(): Devuelve el nombre del hechizo.
+  - getEffects(): Devuelve los efectos del hechizo.
+  - launch(ATarget const&): Lanza el hechizo contra un objetivo.
+  - Método virtual puro clone(): Devuelve una copia del hechizo.
+
+---
+
+#### 3. Clase Abstracta ATarget
+
+
+- Representa un objetivo genérico.
+
+- **Atributos**:
+  - type: El tipo del objetivo.
+
+- **Métodos**:
+  - Constructor que inicializa el tipo del objetivo.
+  - Destructor virtual.
+  - getType(): Devuelve el tipo del objetivo.
+  - getHitBySpell(ASpell const&): Imprime un mensaje en el formato:  
+    `"<type> has been <effects>!"`.
+  - Método virtual puro clone(): Devuelve una copia del objetivo.
+
+---
+
+#### 4. Clases Concretas de Hechizos
+
+- **Clase Fwoosh**:
+  - Hereda de ASpell.
+  - Representa un hechizo llamado "Fwoosh" con el efecto "fwooshed".
+  - Implementa el método clone().
+
+---
+
+#### 5. Clases Concretas de Objetivos
+
+- **Clase Dummy**:
+  - Hereda de ATarget.
+  - Representa un objetivo llamado "Dummy Practice".
+  - Implementa el método clone().
+
+---
+
+### Ejemplo de Uso
+
+#### Código Principal (main.cpp)
+
+```cpp
+#include "Warlock.hpp"
+#include "Dummy.hpp"
+#include "Fwoosh.hpp"
+
+int main(void)
+{
+    Warlock richard("Richard", "Master of the Universe");
+    Fwoosh *spell = new Fwoosh();
+    Dummy targetPractice;
+
+    richard.introduce();
+
+    richard.launchSpell("Fwoosh", targetPractice);
+
+    richard.learnSpell(spell);
+    richard.launchSpell("Fwoosh", targetPractice);
+
+    richard.forgetSpell("Fwoosh");
+    richard.launchSpell("Fwoosh", targetPractice);
+
+    delete spell;
+    return 0;
+}
+```
+
+#### Salida Esperada
+
+```
+Richard: My name is Richard, Master of the Universe!
+Richard: What a boring day
+Richard: My name is Richard, Master of the Universe!
+Richard: My name is Richard, Master of the Universe!
+Dummy Practice has been fwooshed!
+Richard: My name is Richard, Master of the Universe!
+```
+
+---
+
+### Notas Adicionales
+
+1. **Herencia y Polimorfismo**:
+   - Las clases ASpell y ATarget son abstractas y deben ser heredadas para crear hechizos y objetivos concretos.
+
+2. **Gestión de Memoria**:
+   - Asegúrate de liberar correctamente los recursos dinámicos (como los hechizos aprendidos) en el destructor de Warlock.
+
+3. **Extensibilidad**:
+   - El sistema debe permitir agregar nuevos hechizos y objetivos simplemente creando nuevas clases que hereden de ASpell y ATarget.
+
+4. **Encapsulación**:
+   - Los atributos deben ser privados y accesibles solo a través de métodos públicos.
+
+---
+
+### Resumen
+
+Este enunciado describe un sistema de hechizos y objetivos que utiliza herencia, polimorfismo y encapsulación. El objetivo es crear un programa extensible y modular que permita a un mago aprender, olvidar y lanzar hechizos contra objetivos. Puedes usar este enunciado como base para recrear el programa desde cero. ¡Buena suerte!
+
+
+
+                            ----- EXAM SUBJECT ------
+
+Assignment name  : cpp_module01
+Expected files   : Warlock.cpp Warlock.hpp
+                   ASpell.hpp ASpell.cpp
+				   ATarget.hpp ATarget.cpp
+				   Fwoosh.hpp Fwoosh.cpp
+				   Dummy.hpp Dummy.cpp
+--------------------------------------------------------------------------------
+
+En la clase Warlock, la sentencia switch está PROHIBIDA y su uso daría
+como resultado un -42.
+
+
+# ASPELL
+  - Cree una clase abstracta llamada ASpell, en la forma de Coplien, que tenga los siguientes atributos protegidos:
+    * nombre (cadena)
+    * efectos (cadena)
+
+  - Ambos tendrán getters (getName y getEffects) que devuelven cadenas.
+  - Añade también un método clone pure que devuelva un puntero a ASpell.
+  - Todas estas funciones pueden ser llamadas sobre un objeto constante.
+  - constructor que toma su nombre y sus efectos, en ese orden.
+  - función de lanzamiento que tome una referencia a la constante ATarget. (AQUI NO PIDE QUE ESTE METODO SEA CONST!!!!!)
+      - Esta llamará al getHitBySpell del objeto pasado, pasando la instancia actual como parámetro.
+
+# ATARGET
+  - Ahora creará una clase abstracta ATarget, en la forma de Coplien. 
+  - Tiene un atributo type , que es una cadena
+  - Un método getType, que devuelven una referencia a la constante string.
+  - De forma muy similar a ASpell, tiene un método puro clone().
+  - Todas estas funciones pueden ser llamadas sobre un objeto constante.
+  - Tiene un constructor que toma su tipo.
+  - una función getHitBySpell que tome una referencia a la constante ASpell.      Mostrará :
+    ¡<TIPO> ha sido <EFECTOS>!
+    <TYPE> es el tipo del ATarget, y <EFFECTS> es el retorno de la función getEffects del ASpell.
+
+# DUMMY
+  - crea un ATarget concreto llamado Dummy, cuyo tipo sea "Target Practice Dummy". 
+  - También debes implementar su método clone().
+
+# FWOSSH
+  - crea una implementación de ASpell llamada Fwoosh. 
+  - Su constructor por defecto establecerá el nombre a "Fwoosh" y los efectos a "fwooshed". 
+  - el método clone() devolverá un puntero a un nuevo objeto Fwoosh.
+
+
+# WARLOOK
+Añade al Warlock las siguientes funciones miembro:
+  - learnSpell, toma un puntero a ASpell, que hace que el Brujo aprenda un hechizo
+  - forgetSpell, toma una cadena correspondiente a un nombre de hechizo, y hace que el Warlock lo olvide. Si no es un hechizo conocido, no hace nada.
+  - launchSpell, toma una cadena (un nombre de hechizo) y una referencia a ATarget, que lanza el hechizo sobre el objetivo seleccionado. Si no es un hechizo conocido, no hace nada.
+
+Necesitarás un nuevo atributo para almacenar los hechizos que conoce tu Brujo. Varios tipos de encajan, depende de ti elegir el mejor.
+
+
+
+Abajo hay una posible prueba principal y su salida esperada:
+
+int main()
+{
+  Warlock richard("Richard", "the Titled");
+
+  Dummy bob;
+  Fwoosh* fwoosh = new Fwoosh();
+
+  richard.learnSpell(fwoosh);
+
+  richard.introduce();
+  richard.launchSpell("Fwoosh", bob);
+
+  richard.forgetSpell("Fwoosh");
+  richard.launchSpell("Fwoosh", bob);
+}
+
+~$ ./a.out | cat -e
+Richard: This looks like another boring day.$
+Richard: I am Richard, the Titled!$
+Target Practice Dummy has been fwooshed!$
+Richard: My job here is done!$

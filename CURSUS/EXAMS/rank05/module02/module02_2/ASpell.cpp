@@ -1,0 +1,26 @@
+#include "ASpell.hpp"
+#include "ATarget.hpp"
+
+ASpell::ASpell(const string& name, const string& effects)
+{
+    this->_name = name;
+    this->_effects = effects;
+}
+
+ASpell::~ASpell()
+{}
+
+const string& ASpell::getName() const
+{
+    return (this->_name);
+}
+
+const string& ASpell::getEffects() const
+{
+    return (this->_effects);
+}
+
+void ASpell::launch(const ATarget& target) const
+{
+    target.getHitBySpell(*this);
+}
