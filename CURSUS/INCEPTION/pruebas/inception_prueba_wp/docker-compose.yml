@@ -1,0 +1,82 @@
+# Define un entonro de contenedres para WordPress y MariaDB utilizando Docker Compose
+# Este archivo define los servicios, redes y volúmenes necesarios para ejecutar WordPress y MariaDB
+
+
+# version del archivo de configuración compose
+#version: '3.8'
+
+# DEFINICIÓN DE LOS SERVICIOS 
+services:
+
+  # DEFINICIÓN DEL SERVICIO DE MARIADB
+  mariadb:
+
+    # Imagen de MariaDB que se va a utilizar
+    #image: mariadb:10.5
+
+    build:
+      context: ./mariadb
+      dockerfile: Dockerfile
+
+    # Nombre del contenedor de MariaDB
+    container_name: mariadb
+
+    # Reiniciar el contenedor automáticamente si se detiene
+    restart: always
+
+    # define las variables de entorno necesarias para la configuración de MariaDB
+    # Estas variables se definen en el archivo .env
+    environment:
+
+      # bebe de las variables de entorno definidas en el archivo .env
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+    # Define los volúmenes para persistir los datos de MariaDB
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+
+
+  # DEFINICIÓN DEL SERVICIO DE WORDPRESS
+  wordpress:
+
+    # Imagen de WordPress que se va a utilizar
+    #image: wordpress:6.0
+
+    build:
+      context: ./wordpress
+      dockerfile: Dockerfile
+
+    # Nombre del contenedor de WordPress
+    container_name: wordpress
+
+    # Reiniciar el contenedor automáticamente si se detiene
+    restart: always
+
+    # Define el puerto en el que se va a exponer WordPress
+    ports:
+      - "8080:80"
+
+    # Define las variables de entorno necesarias para la configuración de WordPress
+    environment:
+      WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+
+    # Define los volúmenes para persistir los datos de WordPress
+    volumes:
+      - wordpress_data:/var/www/html
+
+    # Define la dependencia del contenedor de WordPress con el contenedor de MariaDB
+    depends_on:
+      - mariadb
+
+
+# DEFINICIÓN DE LOS VOLUMENES 
+volumes:
+  mariadb_data:
+  wordpress_data:

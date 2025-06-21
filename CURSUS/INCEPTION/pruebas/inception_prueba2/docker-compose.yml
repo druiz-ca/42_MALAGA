@@ -1,0 +1,59 @@
+# docker-compose.yml esta en lenguaje YAML
+# Este archivo es un archivo de configuración para Docker Compose, que permite definir y ejecutar aplicaciones Docker de múltiples contenedores.
+
+version: '3.8'
+
+# con servicios se refiere a los contenedores
+services: 
+
+  mariadb:
+
+    build:
+      context: ./mariadb
+      dockerfile: Dockerfile
+
+    container_name: mariadb
+
+    # variables de entorno para la base de datos
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: wordpress_db
+      MYSQL_USER: wordpress_user
+      MYSQL_PASSWORD: wordpress_password
+
+    # especifica el lugar donde se guardan los datos de la base de datos
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+    # especifica el nombre de la red a la que se conecta el contenedor
+    networks:
+      - inception_network
+
+
+  wordpress:
+    build:
+      context: ./wordpress
+      dockerfile: Dockerfile
+
+    container_name: wordpress
+
+    environment:
+      WORDPRESS_DB_HOST: mariadb
+      WORDPRESS_DB_NAME: wordpress_db
+      WORDPRESS_DB_USER: wordpress_user
+      WORDPRESS_DB_PASSWORD: wordpress_password
+
+    ports:
+      - "8080:80"
+    # 8000 es el puerto del host (el puerto de la máquina local)
+    # 80 es el puerto del contenedor
+
+    networks:
+      - inception_network
+
+# 
+networks:
+  inception_network:
+
+volumes:
+  mariadb_data:

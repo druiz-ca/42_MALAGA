@@ -1,0 +1,224 @@
+
+---
+
+### 1. **Cada imagen Docker debe tener el mismo nombre que su servicio correspondiente.**
+
+**¿Qué significa?**  
+- Cuando defines un servicio en tu `docker-compose.yml`, por ejemplo:
+  ```yaml
+  services:
+    mariadb:
+      build: ./mariadb
+  ```
+- La imagen que se construya para ese servicio debe llamarse igual que el servicio, es decir, `mariadb`.
+- Esto se puede hacer usando la opción `image:` en el servicio:
+  ```yaml
+  services:
+    mariadb:
+      build: ./mariadb
+      image: mariadb
+  ```
+- Así, cuando hagas `docker images`, verás una imagen llamada `mariadb`.
+
+---
+
+### 2. **Cada servicio debe ejecutarse en un contenedor dedicado.**
+
+**¿Qué significa?**  
+- Cada servicio (por ejemplo, nginx, wordpress, mariadb) debe correr en su propio contenedor, no todos juntos en uno solo.
+- En tu `docker-compose.yml` tendrás algo así:
+  ```yaml
+  services:
+    nginx:
+      ...
+    wordpress:
+      ...
+    mariadb:
+      ...
+  ```
+- Así, cada uno se ejecuta de forma aislada y puedes gestionarlos por separado.
+
+---
+
+### 4. **Los Dockerfiles deben ser llamados en su docker-compose.yml por su Makefile.**
+
+**¿Qué significa?**  
+- El `docker-compose.yml` debe usar la opción `build:` para cada servicio, apuntando al Dockerfile correspondiente.
+- Ejemplo:
+  ```yaml
+  services:
+    nginx:
+      build: ./nginx
+  ```
+- El Makefile debe ejecutar `docker-compose up --build` para que se construyan las imágenes usando esos Dockerfiles.
+
+---
+
+### 5. **Esto significa que usted mismo debe construir las imágenes Docker para su proyecto.**
+
+**¿Qué significa?**  
+- No puedes usar imágenes pre-hechas de Docker Hub (como `nginx:latest` o `wordpress:latest`).
+- Debes escribir tus propios Dockerfiles para cada servicio y construir las imágenes tú mismo.
+- Así, tienes control total sobre la configuración y el contenido de cada imagen.
+
+---
+
+## **Resumen Visual**
+
+```plaintext
+Makefile
+   |
+   v
+docker-compose.yml
+   |
+   v
+Dockerfile (uno por cada servicio)
+   |
+   v
+Contenedor dedicado para cada servicio
+```
+
+---
+
+## **¿Qué tienes que hacer tú?**
+
+1. Crear un **Dockerfile** para cada servicio (nginx, wordpress, mariadb, etc.) usando Alpine o Debian (penúltima versión estable).
+2. En tu **docker-compose.yml**, para cada servicio, usar `build: ./carpeta_del_servicio` y `image: nombre_del_servicio`.
+3. En tu **Makefile**, usar `docker-compose up --build` para construir y arrancar los servicios.
+4. No usar imágenes pre-hechas, sino construirlas tú mismo.
+
+--- 
+
+¿Quieres un ejemplo concreto de cómo se vería un Dockerfile y un docker-compose.yml para uno de los servicios?
+
+
+
+Contenedor dedicado: Cada servicio (nginx, wordpress, mariadb) va en su propio contenedor, no mezclados.
+Volúmenes: Los datos importantes (base de datos y archivos de WordPress) se guardan fuera de los contenedores, para que no se pierdan si los contenedores se eliminan.
+Red interna: Los contenedores pueden comunicarse entre sí, pero solo NGINX está expuesto al exterior.
+Reinicio automático: Si un contenedor falla, Docker lo reinicia solo.
+
++-------------------+         +-------------------+         +-------------------+
+|     NGINX        | <-----> |   WordPress+PHP   | <-----> |     MariaDB       |
+| (TLSv1.2/1.3)    |         |     (php-fpm)     |         |                   |
++-------------------+         +-------------------+         +-------------------+
+        |                            |                              |
+        |                            |                              |
+        |                            |                              |
+        |                            |                              |
+        |                            |                              |
+        +----------------------------+------------------------------+
+                             |
+                  Red interna de Docker
+                             |
+        +--------------------+--------------------+
+        |                                         |
++-------------------+                   +-------------------+
+|   Volumen wp_data |                   |  Volumen db_data  |
++-------------------+                   +-------------------+
+
+
+¿Qué tienes que montar?
+1. Contenedor NGINX con TLSv1.2 o TLSv1.3
+Un contenedor dedicado solo para NGINX (servidor web).
+Debe estar configurado para aceptar conexiones HTTPS usando solo TLSv1.2 o TLSv1.3 (no TLSv1.0 ni TLSv1.1).
+NGINX será el punto de entrada para los usuarios (recibe las peticiones web y las redirige a WordPress).
+
+2. Contenedor WordPress con PHP-FPM
+Un contenedor dedicado solo para WordPress.
+Debe tener instalado y configurado PHP-FPM (FastCGI Process Manager), que es el motor que ejecuta el código PHP de WordPress.
+No debe tener NGINX dentro de este contenedor (NGINX solo está en su propio contenedor).
+WordPress recibirá las peticiones PHP desde NGINX a través de la red interna de Docker.
+
+3. Contenedor MariaDB
+Un contenedor dedicado solo para MariaDB (la base de datos).
+No debe tener NGINX ni ningún otro servicio web.
+MariaDB almacena la base de datos de WordPress.
+
+4. Volumen para la base de datos
+Un volumen de Docker (por ejemplo, db_data) que almacena los archivos de la base de datos de MariaDB.
+Así, si el contenedor MariaDB se borra o reinicia, los datos no se pierden.
+
+5. Volumen para los archivos de WordPress
+Otro volumen de Docker (por ejemplo, wp_data) que almacena los archivos del sitio WordPress (plugins, temas, uploads, etc.).
+Así, si el contenedor WordPress se borra o reinicia, los archivos del sitio no se pierden.
+
+6. Red Docker
+Una red interna de Docker (por ejemplo, inception_network) que conecta los tres contenedores.
+Así, NGINX puede comunicarse con WordPress y WordPress con MariaDB, pero desde fuera solo se puede acceder a NGINX.
+
+7. Reinicio automático
+Todos los contenedores deben estar configurados para reiniciarse automáticamente si fallan.
+
+
+Un contenedor Docker no es una máquina virtual. Por lo tanto, no es recomendable usar parches basados en 'tail -f' y métodos similares al intentar ejecutarlo. Lee sobre cómo funcionan los demonios y si es una buena idea usarlos o no.
+
+Por supuesto, el uso de network: host o --link o links: está prohibido.
+La línea network debe estar presente en tu archivo docker-compose.yml.
+Sus contenedores no deben iniciarse con un comando que ejecute un
+bucle infinito. Por lo tanto, esto también se aplica a cualquier comando utilizado como
+punto de entrada, o utilizado en scripts de punto de entrada. Los siguientes son algunos
+parches prohibidos: tail -f, bash, sleep infinity, while
+true.
+
+En su base de datos de WordPress, debe haber dos usuarios, uno de ellos es el admin-
+istrador. El nombre de usuario del administrador no debe contener 'admin', 'Admin', 'admin-
+istrator', o 'Administrator' (por ejemplo, admin, administrator, Administrator, admin-123,
+etc.)
+
+Sus volúmenes estarán disponibles en la carpeta /home/login/data de la
+máquina anfitriona utilizando Docker. 
+
+Las contraseñas no deben estar presentes en sus Dockerfiles.
+El uso de variables de entorno es obligatorio.
+También se recomienda encarecidamente el uso de un archivo .env para almacenar
+variables de entorno y utilizar los secretos de Docker para almacenar cualquier
+información confidencial.
+Su contenedor NGINX debe ser el único punto de entrada a su
+infraestructura, accesible sólo a través del puerto 443, utilizando el protocolo TLSv1.2
+o TLSv1.3.
+
+VOLUMENES:
+¡Buena pregunta!  
+En Docker Compose, los **volúmenes** se usan para **persistir datos** y para **compartir archivos** entre el host y los contenedores, o entre varios contenedores.
+
+---
+
+### ¿Por qué se usa un volumen para cada servicio?
+
+#### . **Persistencia de datos**
+- Cuando un contenedor se elimina o reinicia, **todo lo que está dentro del contenedor se pierde**.
+- Si usas un volumen, los datos importantes (como la base de datos de MariaDB o los archivos de WordPress) **se guardan fuera del contenedor**, en el sistema de archivos del host.
+- Así, aunque borres o recrees el contenedor, los datos siguen ahí y el servicio puede seguir funcionando con normalidad.
+
+
+IDEAS PRINCIPALES
+
+# ¿Cómo funcionan Docker y Docker Compose?
+- Docker es una herramienta que te permite crear, ejecutar y gestionar contenedores.
+  Un contenedor es como una mini-computadora dentro de tu computadora, con su propio sistema y programas, pero usando pocos recursos y arrancando muy rápido.
+
+- Docker Compose es una herramienta que te permite definir y arrancar varios contenedores    a  la vez usando un solo archivo (docker-compose.yml).
+  Así puedes levantar, por ejemplo, un servidor web, una base de datos y una aplicación, todos conectados entre sí, con un solo comando.
+
+# ¿Cuál es la diferencia entre una imagen de Docker utilizada con Docker Compose y sin él?
+- Sin Docker Compose:
+  Usas comandos manuales como docker build y docker run para crear y arrancar cada contenedor uno por uno.
+  Tú tienes que encargarte de conectarlos y configurarlos.
+
+- Con Docker Compose:
+  Defines todo en un archivo (docker-compose.yml): qué imágenes usar, cómo construirlas, cómo se conectan, qué variables de entorno usan, etc.
+  Luego, con un solo comando (docker-compose up), se crean y arrancan todos los contenedores juntos, ya conectados y configurados.
+
+# ¿Cuál es el beneficio de Docker en comparación con las máquinas virtuales?
+- Docker:
+  Es mucho más rápido y ligero.
+  Usa menos recursos porque comparte el núcleo del sistema operativo.
+  Arranca y apaga contenedores en segundos.
+  Es fácil de copiar, mover y reproducir en cualquier máquina.
+
+- Máquinas virtuales:
+  Son más pesadas y lentas.
+  Cada una tiene su propio sistema operativo completo.
+  Usan más memoria y disco.
+  Tardan más en arrancar y apagar.

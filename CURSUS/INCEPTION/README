@@ -1,0 +1,38 @@
+
+al hacer su root, entra, salgo y al volver a darle no hace nada, cierro la terminal y ya lo hace
+# cuando falla la conexion ssh
+- añadir al usuario druiz-ca como sudoers
+entrar como su rrot:
+
+    visudo:
+        añadir: druiz ALL=(ALL:ALL) ALL
+
+# luago cambiar el puerto donde escucha de 42 a 1142:
+(esto hay que hacerlo haciendo exit antes para salir de su rrot)
+
+    sudo(hay que ponerlo antes) vim /etc/ssh/sshd_config
+    y reinicar el resvicio: sudo systemctl restart ssh
+
+
+este paso: service ssh restart
+service sshd restart
+    - es con sudo delante
+
+# despues de todo hay quereinicar la mv y borrar la clave antigua con:
+ssh-keygen -f "/home/druiz-ca/.ssh/known_hosts" -R "[localhost]:1142"
+
+# en el paso 4 esto hay que hacerlo con sudo...
+vim /etc/sudoers
+
+# en el paso 4 hay que vambiar la primera linea del script a:
+#!/usr/bin/bash
+
+# para el certificado antes tienes que crear las carpetas
+cd ~/certs/inception/
+
+# en nginx falta esta linea en docjerfile antes de que cree el ssl
+RUN mkdir -p /etc/nginx/ssl
+
+# al Aarhivo Dockerfile le falta un corchete al final
+
+# los certifiados n estan en toosl de nginx

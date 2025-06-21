@@ -1,0 +1,68 @@
+
+                        +-------------------------+
+                        |       Makefile          |
+                        | (Comandos: build, up,   |
+                        |   down, clean, etc.)    |
+                        +-----------+-------------+
+                                    │
+                                    │ (make build)
+                                    ▼
+                    +--------------------------------+
+                    |      docker-compose.yml        |
+                    |Define servicios: (contenedores)|
+                    |     • mariadb                  |
+                    |       • build: ./mariadb       |
+                    |     • wordpress                |
+                    |       • build: ./wordpress     |
+                    +----------------+---------------+
+                                    │
+                                    │ (docker-compose build)
+                                    ▼
+    +----------------------------+      +----------------------------+
+    |  Construye la Imagen       |      |  Construye la Imagen       |
+    |  de MariaDB:               |      |  de WordPress:             |
+    |  - Usando Dockerfile en    |      |  - Usando Dockerfile en    |
+    |    ./mariadb/Dockerfile    |      |    ./wordpress/Dockerfile  |
+    +----------------------------+      +----------------------------+
+                        │                        │
+                        └──────────────┬─────────┘
+                                        │
+                            +-----------▼------------------+
+                            |  docker-compose up -d        |
+                            | (Levanta ambos contenedores) |
+                            +-----------+------------------+
+                                        │
+            ┌────────────────────────────┴─────────────────────────────┐
+            │                                                            │
+            ▼                                                            ▼
++-------------------------+                                +-------------------------+
+|   Contenedor:           |                                |   Contenedor:           |
+|   mariadb               |                                |   wordpress             |
+|   (Exponen puerto 3306)  |                                |   (Exponen puerto 80;   |
+|                        |                                |    mapeado a host:8080)  |
++-------------------------+                                +-------------------------+
+            │                                                            │
+            └───────────── Comunicación por red interna (network) ──────┘
+                                        │
+                                        ▼
+                            +-------------------------+
+                            |   Host Machine          |
+                            | (Acceso por localhost:  |
+                            |       8080)             |
+                            +-------------------------+
+
+
+- El contenedor de WordPress se conecta a la base de datos de MariaDB a través de la red interna creada por Docker Compose.
+- El contenedor de WordPress está configurado para escuchar en el puerto 80, que está mapeado al puerto 8080 del host. Esto significa que puedes acceder a WordPress a través de `http://localhost:8080` en tu navegador.
+- El contenedor de MariaDB expone el puerto 3306, que es el puerto estándar para MySQL/MariaDB. Sin embargo, no está mapeado al host en este caso, ya que solo se utiliza internamente entre los contenedores.
+
+IMAGENES
+- una imagen es un archivo de solo lectura que contiene instrucciones para crear un contenedor.
+  la imagen de WordPress incluye todo lo necesario para ejecutar WordPress, como el servidor web, PHP y las dependencias necesarias.
+  y se encuentra en el Docker Hub, un registro público de imágenes de Docker.
+
+
+PARA PROBARLO:
+- make build
+- make up
+http://localhost:8080

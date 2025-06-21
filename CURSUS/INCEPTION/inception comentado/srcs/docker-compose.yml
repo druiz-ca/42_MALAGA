@@ -1,0 +1,274 @@
+# All the docker-compose files that I have seen until now, use the \
+# 'version' directive, but it's obsolete.
+
+services: # This section defines the services in the Docker Compose file.
+# Each service corresponds to a container. 
+  nginx: # The name that identifies the service nginx.
+    container_name: nginx # Static name for the container
+    
+    # Carpeta donde esta el Dockerfile para construir la imagen (build)
+      # Imagen: "receta" donde se especifica todo lo necesario para 
+          # crear un contenedor usando Dockerfile
+      # Contenedor : es el plato ya cocinado con esa receta (up)
+    build: ./requirements/nginx/ 
+
+    # nombre que le das a la imagen creada
+    image: nginx:1.0.0
+    
+    # el único que abre un puerto al exterior (ports, no es expose)
+    ports:
+      - "443:443" 
+    
+    # Specifies an external file that contains environment variables for the container.
+    env_file: .env 
+
+    # Configures the restart policy for the container. POSSIBLE: "no", "on-failure", "unless-stopped", "always"
+    restart: unless-stopped 
+    
+    # Depende de Wordpress(se inicia después de wordpress )
+    depends_on: 
+      - wordpress
+
+    # Especifica en que ruta del host debe montar el volumen de WP
+    volumes: 
+      - WordPress:/var/www/html
+
+    # Se especifica el nombre de la red (para que se pueden contectar entre ellos)
+    networks: 
+      - inception
+  
+  mariadb:
+    container_name: mariadb
+    build: ./requirements/mariadb/ # donde está el Dockerfile
+    image: mariadb:1.0.0  # el nombre que le pones a la imagen que crea
+    expose:
+      - "3306" # puerto interno, no a la red (x eso es expose, no ports)
+    env_file: .env
+    restart: unless-stopped
+    volumes:
+      - DataBase:/var/lib/mysql
+    networks:
+      - inception
+  
+  wordpress:
+    container_name: wordpress
+    build: ./requirements/wordpress/
+    image: wordpress:1.0.0
+    expose:
+      - "9000"
+    env_file: .env
+    restart: unless-stopped
+    depends_on:
+      - mariadb
+    volumes: 
+      # el volumen "Wordpress" móntalo en la ruta : var/www/html dentro
+        # del contenedor ! (no del host). Es como un acceso directo: todo
+        # lo que escriba ahi se guarda una copia en el volumen del host!!
+      - WordPress:/var/www/html
+    networks:
+      - inception
+
+volumes:
+# cada volumen es una carpeta del host (no en contenedor) que Docker usará como 
+# almacenamiento persistente (no se borre si reinicia el contenedor):
+
+  WordPress: # Identifier for the volume.
+    name: WordPress # El nombre real del volumen en Docker.
+    driver: local # Usa el driver local de Docker (el más común).
+    driver_opts: # Opciones adicionales para el driver.
+      type: 'none' # Indica que no es un volumen gestionado por Docker, sino un bind mount.
+      o: 'bind' # Especifica que se va a enlazar (bind) una carpeta del host.
+      
+      # Carpeta del host que se usará como volumen (real).
+      device: ${WORDPRESS_DATA_LOCATION} 
+            # Por ejemplo: /home/$USER/data/wordpress
+
+  # no tiene porqué llamarse igual aquí (mariadb, dbmaria, database, etc)
+  DataBase:
+    name: DataBase
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: ${MARIADB_DATA_LOCATION} # "/home/$USER/data/database" See in the create_env.sh file.
+
+networks:
+  inception:
+    name: inception
+    driver: bridge # tipo de red por defecto de docker
+      # "de tipo puente" que no conecta al exterior, solo entre contenedores
+
+
+
+                ---------------------------------------
+
+
+## **Estructura general**
+
+El archivo  docker-compose.yml define cómo se deben construir,
+configurar y conectar varios contenedores Docker para tu proyecto. 
+Cada **servicio** corresponde a un contenedor (o grupo de 
+contenedores) que cumple una función específica (nginx, mariadb, 
+wordpress, etc.).
+
+---
+
+## **Sección: services**
+
+Aquí defines cada uno de los servicios (contenedores) que formarán
+tu entorno.
+
+---
+
+### **nginx**
+
+```yaml
+nginx:
+  container_name: nginx
+  build: ./requirements/nginx/
+  image: nginx:1.0.0
+  ports:
+    - "443:443"
+    # el único que abre el puerto al exterior
+  env_file: .env
+  restart: unless-stopped
+  depends_on:
+    - wordpress
+  volumes:
+    - WordPress:/var/www/html
+  networks:
+    - inception
+```
+
+- **container_name:** El nombre fijo del contenedor (será "nginx").
+- **build:** Carpeta donde está el Dockerfile para construir la imagen de nginx.
+- **image:** Nombre y versión de la imagen que se construirá.
+- **ports:** Expone el puerto 443 del contenedor al puerto 443 del host (para HTTPS).
+- **env_file:** Usa variables de entorno definidas en el archivo `.env`.
+- **restart:** Si el contenedor falla, Docker lo reiniciará automáticamente.
+- **depends_on:** Nginx solo se inicia después de que WordPress esté listo.
+- **volumes:** Monta el volumen `WordPress` en `/var/www/html` dentro del contenedor (así nginx puede servir los archivos de WordPress).
+- **networks:** Conecta nginx a la red interna llamada `inception`.
+
+---
+
+### **mariadb**
+
+```yaml
+mariadb:
+  container_name: mariadb
+  build: ./requirements/mariadb/
+  image: mariadb:1.0.0
+  expose:
+    - "3306" # puerto entre contenedores
+  env_file: .env
+  restart: unless-stopped
+  volumes:
+    - DataBase:/var/lib/mysql
+  networks:
+    - inception
+```
+
+- **container_name:** Nombre fijo del contenedor (será "mariadb").
+- **build:** Carpeta con el Dockerfile para MariaDB.
+- **image:** Nombre y versión de la imagen.
+- **expose:** Expone el puerto 3306 (solo accesible desde otros contenedores en la red, no desde fuera).!!!!
+- **env_file:** Variables de entorno para la configuración de MariaDB.
+- **restart:** Reinicia automáticamente si falla.
+- **volumes:** Monta el volumen `DataBase` en `/var/lib/mysql` para persistir los datos de la base de datos.
+- **networks:** Conecta MariaDB a la red interna `inception`.
+
+---
+
+### **wordpress**
+
+```yaml
+wordpress:
+  container_name: wordpress
+  build: ./requirements/wordpress/
+  image: wordpress:1.0.0
+  expose:
+    - "9000"
+  env_file: .env
+  restart: unless-stopped
+  depends_on:
+    - mariadb
+  volumes:
+    - WordPress:/var/www/html
+  networks:
+    - inception
+```
+
+- **container_name:** Nombre fijo del contenedor (será "wordpress").
+- **build:** Carpeta con el Dockerfile para WordPress.
+- **image:** Nombre y versión de la imagen.
+- **expose:** Expone el puerto 9000 (usado por PHP-FPM, solo accesible desde la red interna).
+- **env_file:** Variables de entorno para WordPress.
+- **restart:** Reinicia automáticamente si falla.
+- **depends_on:** WordPress solo se inicia después de que MariaDB esté listo.
+- **volumes:** Monta el volumen `WordPress` en `/var/www/html` para persistir los archivos del sitio.
+- **networks:** Conecta WordPress a la red interna `inception`.
+
+---
+
+## **Sección: volumes**
+
+```yaml
+volumes:
+  WordPress:
+    name: WordPress
+    driver: local
+  DataBase:
+    name: DataBase
+    driver: local
+```
+
+- **WordPress:** Volumen para los archivos del sitio WordPress (plugins, uploads, temas, etc.).
+- **DataBase:** Volumen para los datos de la base de datos MariaDB.
+- **driver: local:** Usa el driver local de Docker para almacenar los datos en el host.
+
+---
+
+## **Sección: networks**
+
+```yaml
+networks:
+  inception:
+    driver: bridge
+```
+
+- **inception:** Red interna de Docker (tipo bridge) que conecta todos los servicios entre sí, permitiendo que se comuniquen de forma segura y aislada del exterior.
+
+---
+
+## **Resumen visual**
+
+```plaintext
++-------------------+         +-------------------+         +-------------------+
+|     NGINX        | <-----> |   WordPress+PHP   | <-----> |     MariaDB       |
+| (TLS, HTTPS)     |         |     (php-fpm)     |         |                   |
++-------------------+         +-------------------+         +-------------------+
+        |                            |                              |
+        |                            |                              |
+        +----------------------------+------------------------------+
+                             |
+                  Red interna de Docker (inception)
+                             |
+        +--------------------+--------------------+
+        |                                         |
++-------------------+                   +-------------------+
+|   Volumen WordPress |                 |  Volumen DataBase |
++-------------------+                   +-------------------+
+```
+
+---
+
+## **¿Qué logras con este docker-compose.yml?**
+
+- Cada servicio corre en su propio contenedor, aislado.
+- Los datos importantes (base de datos y archivos del sitio) se guardan en volúmenes persistentes.
+- Los servicios se comunican entre sí por una red interna segura.
+- Los contenedores se reinician automáticamente si fallan.
+- Puedes reconstruir y levantar todo el entorno fácilmente.
+
+---
