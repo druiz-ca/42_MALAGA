@@ -1,0 +1,11 @@
+###   MARIADB CONFIGURATION FILE
+[server]
+[mysqld]
+user                    = mysql
+datadir                 = /var/lib/mysql
+bind-address            = ::
+socket                  = /var/run/mysqld/mysqld.sock
+port                    = 3306
+log-error               = /var/log/mysql/error.log
+general_log             = 1
+general_log_file        = /var/log/mysql/general.log
