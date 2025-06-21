@@ -1,17 +1,17 @@
 
 services: 
   nginx: 
-    container_name: nginx 
+    container_name: nginx  
     build: ./requirements/nginx/ 
     image: nginx:1.0.0
     ports:
-      - "443:443" 
+      - "443:443" # el único que se abre al exterior (ports)
     env_file: .env 
-    restart: unless-stopped 
-    depends_on: 
+    restart: unless-stopped # se reiniciará si pasa cualquier cosa
+    depends_on: # no se ejecuta hasta que no se levante el contenedor WP
       - wordpress
     volumes: 
-      - WordPress:/var/www/html
+      - WordPress:/var/www/html # montará un volumen llamado Wordpress en esa ruta EN EL CONTENEDOR
     networks: 
       - inception
   

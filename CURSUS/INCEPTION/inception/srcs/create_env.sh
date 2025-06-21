@@ -19,8 +19,8 @@ prompt_with_loop()
     echo "$input"
 }
 
-INCEPTION_USER="schamizo"
-NAME_USER="salva"
+INCEPTION_USER="druiz-ca"
+NAME_USER="druiz-ca"
 ENV_FILE=".env"
 read -p "Enter SQL database name: (default: my_database) " SQL_DATABASE
 SQL_DATABASE=${SQL_DATABASE:-my_database}
