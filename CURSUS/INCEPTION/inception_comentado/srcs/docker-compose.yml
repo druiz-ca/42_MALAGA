@@ -20,7 +20,7 @@ services:
     build: ./requirements/mariadb/
     image: mariadb:1.0.0
     expose:
-      - "3306"
+      - "3306" # EXPONE un puerto interno para conectarse entre contenedores
     env_file: .env
     restart: unless-stopped
     volumes:

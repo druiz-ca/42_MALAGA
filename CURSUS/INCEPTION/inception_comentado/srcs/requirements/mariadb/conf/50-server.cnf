@@ -1,11 +1,29 @@
 ###   MARIADB CONFIGURATION FILE
+
+# Indica que las opciones siguientes aplican al servidor mariadb y el demonio mysqld 
 [server]
 [mysqld]
+
+# especidifca que se ejecutará con el usuario mysql
 user                    = mysql
+
+# Define la ruta donde se almacenaran los archivos de la base de datos
 datadir                 = /var/lib/mysql
+
+# Permite que el servidor escuche en todas las interfaces de red (IPv4 e IPv6)
 bind-address            = ::
+
+# Especifica la ubicación del archivo de socjer UNX para conexiones locales
 socket                  = /var/run/mysqld/mysqld.sock
+
+# Indica el puerto en el que Maridb aceptara conexiones TCP
 port                    = 3306
+
+# Define la ruta donde se guardaran los registros de errores del servidor
 log-error               = /var/log/mysql/error.log
+
+# Activa el registro general de todas las consultas y conexiones
 general_log             = 1
+
+# Especifica el archivo donde se guardará el registro general
 general_log_file        = /var/log/mysql/general.log
