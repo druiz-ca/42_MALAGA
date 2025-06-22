@@ -1,0 +1,197 @@
+DEBUG: Parsing config file: config/default.conf
+DEBUG: Parsing server directive: listen = 8080
+DEBUG: Parsing server directive: root = www
+DEBUG: Parsing server directive: index = index.html
+DEBUG: Parsing location directive: methods = GET
+DEBUG: Parsed location: /, root: www, index: index.html, methods: GET , cgi_path: , upload_path: 
+DEBUG: Parsing location directive: methods = POST
+DEBUG: Parsing location directive: upload_path = Uploads
+DEBUG: Parsed location: /Uploads, root: www, index: index.html, methods: POST , cgi_path: , upload_path: Uploads
+DEBUG: Parsing location directive: methods = DELETE
+DEBUG: Parsing location directive: root = www/files
+DEBUG: Parsed location: /files, root: www/files, index: index.html, methods: DELETE , cgi_path: , upload_path: 
+DEBUG: Parsing location directive: methods = GET POST
+DEBUG: Parsing location directive: cgi_path = /usr/bin/php-cgi
+DEBUG: Parsing location directive: root = www/cgi-bin
+DEBUG: Parsed location: /cgi-bin, root: www/cgi-bin, index: index.html, methods: GET POST , cgi_path: /usr/bin/php-cgi, upload_path: 
+DEBUG: Parsed server with port: 8080, root: www, index: index.html
+DEBUG: Server initialized on port 8080
+DEBUG: Started server on port: 8080
+DEBUG: New connection: fd 4
+DEBUG: Received data on fd 4: POST /Uploads/test.txt HTTP/1.1
+Host: localhost:8080
+User-Agent: curl/7.81.0
+Accept: */*
+Connection: keep-alive
+Content-Type: application/octet-stream
+Content-Length: 13
+
+Test content
+
+DEBUG: Default Request constructor called
+DEBUG: Parsing buffer: POST /Uploads/test.txt HTTP/1.1
+Host: localhost:8080
+User-Agent: curl/7.81.0
+Accept: */*
+Connection: keep-alive
+Content-Type: application/octet-stream
+Content-Length: 13
+
+Test content
+
+DEBUG: Parsed method: POST, uri: /Uploads/test.txt, query: , protocol: HTTP/1.1
+DEBUG: Header Host: localhost:8080
+DEBUG: Header User-Agent: curl/7.81.0
+DEBUG: Header Accept: */*
+DEBUG: Header Connection: keep-alive
+DEBUG: Header Content-Type: application/octet-stream
+DEBUG: Header Content-Length: 13
+DEBUG: Body length: 13
+DEBUG: Parsed request successfully
+DEBUG: Parsed request successfully for fd 4
+DEBUG: Response constructor called for method: POST, URI: /Uploads/test.txt
+DEBUG: Finding location for URI: /Uploads/test.txt, normalized: Uploads/test.txt
+DEBUG: Checking location path:  (original: /), methods: GET , root: www, upload_path: , cgi_path: 
+DEBUG: Checking location path: Uploads (original: /Uploads), methods: POST , root: www, upload_path: Uploads, cgi_path: 
+DEBUG: New best match: /Uploads
+DEBUG: Checking location path: files (original: /files), methods: DELETE , root: www/files, upload_path: , cgi_path: 
+DEBUG: Checking location path: cgi-bin (original: /cgi-bin), methods: GET POST , root: www/cgi-bin, upload_path: , cgi_path: /usr/bin/php-cgi
+DEBUG: Selected location: /Uploads, root: www, index: index.html
+DEBUG: Handling request for URI: /Uploads/test.txt
+DEBUG: Handling POST request with upload_path: Uploads
+DEBUG: Uploading file to: Uploads/test.txt
+DEBUG: File uploaded successfully: Uploads/test.txt
+DEBUG: Generated response: HTTP/1.1 201 Created
+Connection: keep-alive
+Content-Length: 20
+Content-Type: text/html
+
+<h1>201 Created</h1>
+DEBUG: Sent response for fd 4
+DEBUG: Keeping connection alive for fd 4
+DEBUG: Received data on fd 4: GET / HTTP/1.1
+Host: localhost:8080
+User-Agent: curl/7.81.0
+Accept: */*
+
+
+DEBUG: Default Request constructor called
+DEBUG: Parsing buffer: GET / HTTP/1.1
+Host: localhost:8080
+User-Agent: curl/7.81.0
+Accept: */*
+
+
+DEBUG: Parsed method: GET, uri: /, query: , protocol: HTTP/1.1
+DEBUG: Header Host: localhost:8080
+DEBUG: Header User-Agent: curl/7.81.0
+DEBUG: Header Accept: */*
+DEBUG: Body length: 0
+DEBUG: Parsed request successfully
+DEBUG: Parsed request successfully for fd 4
+DEBUG: Response constructor called for method: GET, URI: /
+DEBUG: Finding location for URI: /, normalized: 
+DEBUG: Checking location path:  (original: /), methods: GET , root: www, upload_path: , cgi_path: 
+DEBUG: New best match: /
+DEBUG: Checking location path: Uploads (original: /Uploads), methods: POST , root: www, upload_path: Uploads, cgi_path: 
+DEBUG: Checking location path: files (original: /files), methods: DELETE , root: www/files, upload_path: , cgi_path: 
+DEBUG: Checking location path: cgi-bin (original: /cgi-bin), methods: GET POST , root: www/cgi-bin, upload_path: , cgi_path: /usr/bin/php-cgi
+DEBUG: Selected location: /, root: www, index: index.html
+DEBUG: Handling request for URI: /
+DEBUG: Handling GET request for path: www/index.html
+DEBUG: File served successfully: www/index.html
+DEBUG: Generated response: HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 17
+Content-Type: text/html
+
+<h1>Welcome</h1>
+
+DEBUG: Sent response for fd 4
+DEBUG: Keeping connection alive for fd 4
+DEBUG: Received data on fd 4: DELETE /files/test.txt HTTP/1.1
+Host: localhost:8080
+User-Agent: curl/7.81.0
+Accept: */*
+
+
+DEBUG: Default Request constructor called
+DEBUG: Parsing buffer: DELETE /files/test.txt HTTP/1.1
+Host: localhost:8080
+User-Agent: curl/7.81.0
+Accept: */*
+
+
+DEBUG: Parsed method: DELETE, uri: /files/test.txt, query: , protocol: HTTP/1.1
+DEBUG: Header Host: localhost:8080
+DEBUG: Header User-Agent: curl/7.81.0
+DEBUG: Header Accept: */*
+DEBUG: Body length: 0
+DEBUG: Parsed request successfully
+DEBUG: Parsed request successfully for fd 4
+DEBUG: Response constructor called for method: DELETE, URI: /files/test.txt
+DEBUG: Finding location for URI: /files/test.txt, normalized: files/test.txt
+DEBUG: Checking location path:  (original: /), methods: GET , root: www, upload_path: , cgi_path: 
+DEBUG: Checking location path: Uploads (original: /Uploads), methods: POST , root: www, upload_path: Uploads, cgi_path: 
+DEBUG: Checking location path: files (original: /files), methods: DELETE , root: www/files, upload_path: , cgi_path: 
+DEBUG: New best match: /files
+DEBUG: Checking location path: cgi-bin (original: /cgi-bin), methods: GET POST , root: www/cgi-bin, upload_path: , cgi_path: /usr/bin/php-cgi
+DEBUG: Selected location: /files, root: www/files, index: index.html
+DEBUG: Handling request for URI: /files/test.txt
+DEBUG: Handling DELETE request for path: www/files/test.txt
+DEBUG: File deleted successfully: www/files/test.txt
+DEBUG: Generated response: HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 29
+Content-Type: text/html
+
+<h1>200 OK: File Deleted</h1>
+DEBUG: Sent response for fd 4
+DEBUG: Keeping connection alive for fd 4
+DEBUG: Received data on fd 4: GET /cgi-bin/test.php?name=value HTTP/1.1
+Host: localhost:8080
+User-Agent: curl/7.81.0
+Accept: */*
+
+
+DEBUG: Default Request constructor called
+DEBUG: Parsing buffer: GET /cgi-bin/test.php?name=value HTTP/1.1
+Host: localhost:8080
+User-Agent: curl/7.81.0
+Accept: */*
+
+
+DEBUG: Parsed method: GET, uri: /cgi-bin/test.php, query: name=value, protocol: HTTP/1.1
+DEBUG: Header Host: localhost:8080
+DEBUG: Header User-Agent: curl/7.81.0
+DEBUG: Header Accept: */*
+DEBUG: Body length: 0
+DEBUG: Parsed request successfully
+DEBUG: Parsed request successfully for fd 4
+DEBUG: Response constructor called for method: GET, URI: /cgi-bin/test.php
+DEBUG: Finding location for URI: /cgi-bin/test.php, normalized: cgi-bin/test.php
+DEBUG: Checking location path:  (original: /), methods: GET , root: www, upload_path: , cgi_path: 
+DEBUG: Checking location path: Uploads (original: /Uploads), methods: POST , root: www, upload_path: Uploads, cgi_path: 
+DEBUG: Checking location path: files (original: /files), methods: DELETE , root: www/files, upload_path: , cgi_path: 
+DEBUG: Checking location path: cgi-bin (original: /cgi-bin), methods: GET POST , root: www/cgi-bin, upload_path: , cgi_path: /usr/bin/php-cgi
+DEBUG: New best match: /cgi-bin
+DEBUG: Selected location: /cgi-bin, root: www/cgi-bin, index: index.html
+DEBUG: Handling request for URI: /cgi-bin/test.php
+DEBUG: Checking allowed methods for GET
+DEBUG: Method GET
+DEBUG: Executing CGI with cgi_path: /usr/bin/php-cgi
+DEBUG: CGI constructor called for URI: /cgi-bin/test.php, cgi_path: /usr/bin/php-cgi
+DEBUG: Executing CGI with script: /home/sternero/Desktop/MyGitHub/42_malaga/webserv/www/cgi-bin/test.php, cgi_path: /usr/bin/php-cgi
+DEBUG: CGI output length: 60
+DEBUG: CGI executed successfully
+DEBUG: Generated response: HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 60
+Content-Type: text/html
+
+Content-type: text/html; charset=UTF-8
+
+Hello from PHP CGI
+DEBUG: Sent response for fd 4
+DEBUG: Keeping connection alive for fd 4
+DEBUG: Connection closed by client: fd 4
