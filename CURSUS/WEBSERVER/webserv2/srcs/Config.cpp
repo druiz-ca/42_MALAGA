@@ -88,10 +88,12 @@ void Config::parseServer(std::ifstream& file, std::string& line, ServerConfig& s
             LocationConfig location;
             std::istringstream iss(line);
             std::string token, path;
-            iss >> token >> path;
+            iss >> token >> path; // Ej: token: location, path: /imagenes
             location.path = trim(path);
             location.root = server.root; // Valor por defecto
             location.index = server.index; // Valor por defecto
+
+            // método para parsear lo que contiene el bloque location
             parseLocation(file, line, location);
 
             // Añade el objeto location al vector locations del servidor
@@ -104,7 +106,7 @@ void Config::parseServer(std::ifstream& file, std::string& line, ServerConfig& s
             std::cerr << ", cgi_path: " << location.cgi_path << ", upload_path: " << location.upload_path << std::endl;
             std::cerr.flush();
 
-            // Para pasar a la siguiente linea
+            // Para q el while salte a la siguiente linea
             continue;
         }
 
@@ -166,7 +168,7 @@ void Config::parseLocation(std::ifstream& file, std::string& line, LocationConfi
         std::istringstream iss(line);
         std::string key, value;
         iss >> key;
-        std::getline(iss, value);
+        std::getline(iss, value); // no se puede iss >> key >> value ??
         value = trim(value);
 
         std::cerr << "DEBUG: Parsing location directive: " << key << " = " << value << std::endl;
@@ -175,6 +177,8 @@ void Config::parseLocation(std::ifstream& file, std::string& line, LocationConfi
         {
             std::istringstream value_iss(value);
             std::string method;
+
+            // Ej: methods GET POST DELETE
             while (value_iss >> method) 
                 location.methods.push_back(trim(method));
         }
