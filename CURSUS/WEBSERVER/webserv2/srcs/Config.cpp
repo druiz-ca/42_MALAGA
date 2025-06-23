@@ -44,13 +44,13 @@ void Config::parse(const std::string& filename) {
         // ignora linear vacias o comentarios
         if (line.empty() || line[0] == '#') continue;
 
-        // Comprueba cuando empieza el inicio de un bloque de servidor
+        // Cuando encuentra el inicio de un bloque de servidor
         if (line.find("server") == 0 && line.find('{') != std::string::npos) 
         {
             // crea un objeto serverConfig
             ServerConfig server;
 
-            // Lee todas las opciones de ese servidor
+            // Parsea el bloque server (desde esa linea en adelante hasta que acaba el bloque)
             parseServer(file, line, server);
 
             // Añade ese servidor al vector servers
@@ -66,13 +66,19 @@ void Config::parse(const std::string& filename) {
     file.close();
 }
 
-void Config::parseServer(std::ifstream& file, std::string& line, ServerConfig& server) {
+/* Lee un archivo de conf de servidor y asigna los valores correspondientes al objeto server. Si encuentra un bloque location
+ usa parseLocation para procesarlo y añadirlo a la lista de locations del servidor */
+void Config::parseServer(std::ifstream& file, std::string& line, ServerConfig& server) 
+{
+    // Asigno valores x defecto al objeto server
     server.root = "./www";
     server.index = "index.html";
     server.max_body_size = 1048576;
     server.port = 8080;
 
-    while (std::getline(file, line)) {
+    // lee el archivo línea a línea
+    while (std::getline(file, line)) 
+    {
         line = trim(line);
         if (line.empty() || line[0] == '#') continue;
         if (line == "}") break;
@@ -96,24 +102,45 @@ void Config::parseServer(std::ifstream& file, std::string& line, ServerConfig& s
             continue;
         }
 
+        // convierte line en stringstream para separar clave-valor
         std::istringstream iss(line);
+
+        // Crea strings clave valor
         std::string key, value;
+
+        // Extrae la clave del stringstream y la asigna a key
         iss >> key;
+
+        // Extrae del stringstream el valor y lo asigna a valor
         std::getline(iss, value);
+
+        // limpia de espacios el valor (al inicio y final)
         value = trim(value);
 
+        // Imprime la directiva (clave - valor)
         std::cerr << "DEBUG: Parsing server directive: " << key << " = " << value << std::endl;
+
+        // Lo imprime en el acto para no dejarlo en el buffer
         std::cerr.flush();
+
+        // Si la clave es "listen" convierte el valor a int y lo asigna a port
         if (key == "listen") server.port = std::atoi(value.c_str());
         else if (key == "host") server.host = value;
         else if (key == "server_name") server.server_name = value;
         else if (key == "root") server.root = value;
         else if (key == "index") server.index = value;
-        else if (key == "error_page") {
+        else if (key == "error_page") 
+        {
+            // convierte el valor en stringstream
             std::istringstream value_iss(value);
             int code;
             std::string path;
+
+            // separa el valor en code(404) y la ruta
             value_iss >> code >> path;
+
+            // Guarda el error en la página de errores
+                // limpiando de espacios la ruta
             server.error_pages[code] = trim(path);
         }
         else if (key == "max_body_size") server.max_body_size = std::atoi(value.c_str());
