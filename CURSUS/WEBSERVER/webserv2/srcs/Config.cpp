@@ -83,7 +83,8 @@ void Config::parseServer(std::ifstream& file, std::string& line, ServerConfig& s
         if (line.empty() || line[0] == '#') continue;
         if (line == "}") break;
 
-        if (line.find("location") == 0 && line.find('{') != std::string::npos) {
+        if (line.find("location") == 0 && line.find('{') != std::string::npos) 
+        {
             LocationConfig location;
             std::istringstream iss(line);
             std::string token, path;
@@ -92,13 +93,18 @@ void Config::parseServer(std::ifstream& file, std::string& line, ServerConfig& s
             location.root = server.root; // Valor por defecto
             location.index = server.index; // Valor por defecto
             parseLocation(file, line, location);
+
+            // Añade el objeto location al vector locations del servidor
             server.locations.push_back(location);
+
+            // Imprimo toda la información sobre location, rutas, etc
             std::cerr << "DEBUG: Parsed location: " << location.path << ", root: " << location.root << ", index: " << location.index << ", methods: ";
-            for (size_t i = 0; i < location.methods.size(); ++i) {
+            for (size_t i = 0; i < location.methods.size(); ++i)
                 std::cerr << location.methods[i] << " ";
-            }
             std::cerr << ", cgi_path: " << location.cgi_path << ", upload_path: " << location.upload_path << std::endl;
             std::cerr.flush();
+
+            // Para pasar a la siguiente linea
             continue;
         }
 
@@ -112,6 +118,7 @@ void Config::parseServer(std::ifstream& file, std::string& line, ServerConfig& s
         iss >> key;
 
         // Extrae del stringstream el valor y lo asigna a valor
+            // no podria hacer iss >> key >> value ?
         std::getline(iss, value);
 
         // limpia de espacios el valor (al inicio y final)
@@ -143,12 +150,15 @@ void Config::parseServer(std::ifstream& file, std::string& line, ServerConfig& s
                 // limpiando de espacios la ruta
             server.error_pages[code] = trim(path);
         }
+        // si la clave es max... convierte el valor a int y lo asigna a max....
         else if (key == "max_body_size") server.max_body_size = std::atoi(value.c_str());
     }
 }
 
-void Config::parseLocation(std::ifstream& file, std::string& line, LocationConfig& location) {
-    while (std::getline(file, line)) {
+void Config::parseLocation(std::ifstream& file, std::string& line, LocationConfig& location) 
+{
+    while (std::getline(file, line)) 
+    {
         line = trim(line);
         if (line.empty() || line[0] == '#') continue;
         if (line == "}") break;
@@ -161,12 +171,12 @@ void Config::parseLocation(std::ifstream& file, std::string& line, LocationConfi
 
         std::cerr << "DEBUG: Parsing location directive: " << key << " = " << value << std::endl;
         std::cerr.flush();
-        if (key == "methods") {
+        if (key == "methods") 
+        {
             std::istringstream value_iss(value);
             std::string method;
-            while (value_iss >> method) {
+            while (value_iss >> method) 
                 location.methods.push_back(trim(method));
-            }
         }
         else if (key == "root") location.root = value;
         else if (key == "index") location.index = value;
@@ -175,3 +185,35 @@ void Config::parseLocation(std::ifstream& file, std::string& line, LocationConfi
         else if (key == "redirect") location.redirect = value;
     }
 }
+
+/* EJEMPLO DE ARCHIVO DE CONF
+# Archivo de configuración de ejemplo
+
+server {
+    listen 8080
+    host 127.0.0.1
+    server_name mi_servidor
+    root /var/www/html
+    index index.html
+    error_page 404 /errors/404.html
+    max_body_size 2097152
+
+    location / {
+        root /var/www/html
+        index index.html
+        methods GET POST
+    }
+
+    location /imagenes {
+        root /var/www/imagenes
+        index index.png
+        methods GET
+        upload_path /uploads
+    }
+
+    location /cgi-bin {
+        cgi_path /usr/bin/python3
+        methods GET POST
+    }
+}
+*/
