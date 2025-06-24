@@ -10,6 +10,7 @@ Config::Config(const std::string& filename) {
     parse(filename);
 }
 
+// solo para consultar la lista de servidores configurados
 const std::vector<ServerConfig>& Config::getServers() const {
     return servers;
 }

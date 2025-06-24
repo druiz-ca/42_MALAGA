@@ -6,23 +6,27 @@
 #include <map>
 #include <fstream>
 
+/* ESTRUCTURA PARA LA CONF DE UNA RUTA ESPECIFICA*/
 struct LocationConfig {
-    std::string path;
-    std::vector<std::string> methods;
-    std::string root;
-    std::string index;
-    std::string upload_path;
-    std::string cgi_path;
+    std::string path; // /images, /api
+
+    // para métodos HTTP para la ruta (GET, POST, etc)
+    std::vector<std::string> methods; // 
+    std::string root; // raiz del sistema de archivos
+    std::string index; // index.html
+    std::string upload_path; // donde se guardan archivos subidos
+    std::string cgi_path; // ruta para el ejecutable CGI
     std::string redirect;
 };
 
+/* ESTRUCTURA GENERAL DE LA CONF DEL SERVIDOR */
 struct ServerConfig {
-    int port;
-    std::string host;
+    int port; // puerto donde el servidor escucha
+    std::string host; // IP o nombre del host donde escucha
     std::string server_name;
     std::string root;
     std::string index;
-    size_t max_body_size;
+    size_t max_body_size;// para limitar tamaño d archivos subidos
     std::map<int, std::string> error_pages;
     std::vector<LocationConfig> locations;
 };
