@@ -34,12 +34,12 @@ struct Server_config
 class Config
 {
     public:
-        Config(const string& filename);
+        Config(const string&);
         const vector<Server_config>& getServers() const;
 
     private:
         vector<Server_config> servers;
-        void parse(string& filename);
+        void parse(const string&);
         void parseServer(ifstream& file, string& line, Server_config& server);
         void parseLocation(ifstream& file, string& line, Location_config& location);
         string trim(const string& str);

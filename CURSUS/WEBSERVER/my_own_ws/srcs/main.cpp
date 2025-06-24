@@ -18,7 +18,6 @@ int main(int argc, char** argv)
         else
             config_path = argv[1];
         Config config_obj(config_path);
-
     }
     else
     {
