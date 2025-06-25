@@ -52,12 +52,17 @@ void Config::parse(const string& filepath)
             parseServer(file, line, server);
         }
         else
-            throw runtime_error("Error: file not contains server bloque");
+            throw runtime_error("Error: file not contains server bloq");
     }
     file.close();
 }
 
 void Config::parseServer(ifstream &file, string &line, Server_config& server)
 {
+    server.root = "./www";
+    server.index = "index.html";
+    server.max_body_size = 1048576;
+    server.port = 8080;
 
+    
 }
