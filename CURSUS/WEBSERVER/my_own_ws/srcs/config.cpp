@@ -50,24 +50,24 @@ void Config::parse(const string& filepath)
             Server_config server;
             parseServer(file, line, server);
             servers.push_back(server);
-            cerr << "Root of server: " << server.root << endl;
-            cerr << "Index of server: " << server.index << endl;
-            cerr << "Max body of server: " << server.max_body_size << endl;
-            cerr << "Port of server: " << server.port << endl;
-
         }
-        else
-            throw runtime_error("Error: file not contains server bloq");
     }
     file.close();
 }
 
 void Config::parseServer(ifstream &file, string &line, Server_config& server)
 {
+    // ------------- ASIGN PREDETERMINATE DIRECTIVES ----------------
     server.root = "./www";
     server.index = "index.html";
     server.max_body_size = 1048576;
     server.port = 8080;
+
+    cerr << "Asign predeterminate directives :"<< endl;
+    cerr << "- Root of server: " << server.root << endl;
+    cerr << "- Index of server: " << server.index << endl;
+    cerr << "- Max body of server: " << server.max_body_size << endl;
+    cerr << "- Port of server: " << server.port << endl;
 
     while (getline(file, line))
     {
@@ -76,6 +76,40 @@ void Config::parseServer(ifstream &file, string &line, Server_config& server)
             continue;
         if (line == "}")
             break;
+
+        // ------------------ MINIPARSEO DE DIRECTIVAS ---------------------
+        istringstream iss(line);
+        string key, value;
+        iss >> key >> value; // vuelvo a usar >> en vez de getline 
+        value = trim(value);
+
+        // ------------------ IMPRESION DE DIRECTIVAS ---------------------
+        cerr << "Parsing server directives: " << key << " = " << value << endl;
+        
+        // ------------------- ASIGNACIÓN DE DIRECTIVAS -------------------
+        if (key == "listen ")
+            server.port = atoi(value.c_str());
+        else if (key == "host")
+            server.host = value;
+        else if (key == "server_name")
+            server.server_name = value;
+        else if (key == "root")
+            server.root = value;
+        else if (key == "index")
+            server.index = value;
+        else if (key == "max_body_size")
+            server.max_body_size = atoi(value.c_str());
+        else if (key == "error_page")
+        {
+            istringstream value_iss(value);
+            int code;
+            string path;
+
+            value_iss >> code >> path;
+            server.error_page[code] = trim(path);
+        }
+
+        // ---------------------- BLOQUE LOCATION -----------------------
         if (line.find("location") == 0 && line.find('{') != string::npos)
         {
             
