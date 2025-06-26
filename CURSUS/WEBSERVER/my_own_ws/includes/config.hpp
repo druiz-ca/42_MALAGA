@@ -9,6 +9,7 @@ using namespace std;
 
 struct Location_config
 {
+    string path;
     vector<string> methods;
     string root;
     string index;

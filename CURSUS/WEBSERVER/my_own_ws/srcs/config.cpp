@@ -71,6 +71,7 @@ void Config::parseServer(ifstream &file, string &line, Server_config& server)
 
     while (getline(file, line))
     {
+        // ========================== DIRECTIVAS =========================
         line = trim(line);
         if (line.empty() || line[0] == '#')
             continue;
@@ -109,10 +110,32 @@ void Config::parseServer(ifstream &file, string &line, Server_config& server)
             server.error_page[code] = trim(path);
         }
 
-        // ---------------------- BLOQUE LOCATION -----------------------
+        // ===================== BLOQUE LOCATION =======================
         if (line.find("location") == 0 && line.find('{') != string::npos)
         {
-            
+            Location_config location; //x cada location crea un objeto
+            istringstream iss(line);
+            string token, path;
+
+            iss >> token >> path;
+            location.path = trim(path);
+
+            // ----------- Asigno valores x defecto del servidor
+            location.root = server.root;
+            location.index = server.index;
+
+            parseLocation(file, line, location);
+
+            server.locations.push_back(location);
+
+            cerr << "Parsed location: " << endl;
+            cerr << "path: " << location.path << endl;
+            cerr << "root: " << location.root << endl;
         }
     }
+}
+
+void Config::parseLocation(ifstream &file, string& line, Location_config& location)
+{
+
 }
