@@ -2,7 +2,7 @@
 
 Config::Config(const string& filepath)
 {
-    cerr << filepath << endl;
+    cerr << "Parsing filepath: " << filepath << endl;
     // tengo que llamar a parse desde aquí porque es un método privado
     parse(filepath);
 }
@@ -41,15 +41,20 @@ void Config::parse(const string& filepath)
     string line;
     while (getline(file, line))
     {   // me limpia el string de espacios
+        
         line = trim(line);
-        if (line == "")
-            throw runtime_error("Error in filepath: not cointains a path");
-        if (line.empty() || line[0] == '#')
+        if (line.empty() || line[0] == '#' || line == "}")
             continue;
         if (line.find("server") == 0 && line.find('{') != string::npos)
         {
             Server_config server;
             parseServer(file, line, server);
+            servers.push_back(server);
+            cerr << "Root of server: " << server.root << endl;
+            cerr << "Index of server: " << server.index << endl;
+            cerr << "Max body of server: " << server.max_body_size << endl;
+            cerr << "Port of server: " << server.port << endl;
+
         }
         else
             throw runtime_error("Error: file not contains server bloq");
@@ -64,5 +69,16 @@ void Config::parseServer(ifstream &file, string &line, Server_config& server)
     server.max_body_size = 1048576;
     server.port = 8080;
 
-    
+    while (getline(file, line))
+    {
+        line = trim(line);
+        if (line.empty() || line[0] == '#')
+            continue;
+        if (line == "}")
+            break;
+        if (line.find("location") == 0 && line.find('{') != string::npos)
+        {
+            
+        }
+    }
 }

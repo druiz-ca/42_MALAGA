@@ -38,7 +38,7 @@ class Config
         const vector<Server_config>& getServers() const;
 
     private:
-        vector<Server_config> servers;
+        vector<Server_config> servers; // contempla varios servidores...
         void parse(const string&);
         void parseServer(ifstream& file, string& line, Server_config& server);
         void parseLocation(ifstream& file, string& line, Location_config& location);
