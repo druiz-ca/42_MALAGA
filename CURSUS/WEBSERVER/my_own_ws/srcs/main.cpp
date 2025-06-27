@@ -1,5 +1,6 @@
 #include <iostream>
-#include "../includes/config.hpp"
+#include "../includes/Config.hpp"
+#include "../includes/Server.hpp"
 
 #define RED "\033[31m"
 #define GREEN "\033[32m"
@@ -21,6 +22,8 @@ int main(int argc, char** argv)
             else
                 config_path = argv[1];
             Config config_obj(config_path);
+
+            Server server(config_obj.getServers());
         }
         catch(const exception& e) {
             cerr << e.what() << endl;

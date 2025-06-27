@@ -1,4 +1,4 @@
-#include "../includes/config.hpp"
+#include "../includes/Config.hpp"
 
 Config::Config(const string& filepath)
 {
@@ -6,6 +6,12 @@ Config::Config(const string& filepath)
     // tengo que llamar a parse desde aquí porque es un método privado
     parse(filepath);
 }
+
+const vector<Server_config>& Config::getServers() const
+{
+    return servers;
+}
+
 
 /* Limpia:
     - espacios y saltos de línea al cominezo y final
@@ -41,7 +47,6 @@ void Config::parse(const string& filepath)
     string line;
     while (getline(file, line))
     {   // me limpia el string de espacios
-        
         line = trim(line);
         if (line.empty() || line[0] == '#')
             continue;
