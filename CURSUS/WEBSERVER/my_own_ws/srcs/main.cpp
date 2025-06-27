@@ -23,7 +23,9 @@ int main(int argc, char** argv)
                 config_path = argv[1];
             Config config_obj(config_path);
 
-            Server server(config_obj.getServers());
+            // crea objeto servidor con el 1er servidor configurado
+            Server server(config_obj.getServers()[0]);
+            server.run();
         }
         catch(const exception& e) {
             cerr << e.what() << endl;
