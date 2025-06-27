@@ -43,7 +43,7 @@ void Config::parse(const string& filepath)
     {   // me limpia el string de espacios
         
         line = trim(line);
-        if (line.empty() || line[0] == '#' || line == "}")
+        if (line.empty() || line[0] == '#')
             continue;
         if (line.find("server") == 0 && line.find('{') != string::npos)
         {
@@ -67,26 +67,52 @@ void Config::parseServer(ifstream &file, string &line, Server_config& server)
     cerr << "- Root of server: " << server.root << endl;
     cerr << "- Index of server: " << server.index << endl;
     cerr << "- Max body of server: " << server.max_body_size << endl;
-    cerr << "- Port of server: " << server.port << endl;
+    cerr << "- Port of server: " << server.port << endl << endl;
 
     while (getline(file, line))
     {
-        // ========================== DIRECTIVAS =========================
         line = trim(line);
         if (line.empty() || line[0] == '#')
-            continue;
+        continue;
         if (line == "}")
             break;
+        if (line.find("location") == 0 && line.find('{') != string::npos)
+        {
+            Location_config location; //x cada location crea un objeto
+            istringstream iss(line);
+            string token, path;
+            
+            iss >> token >> path;
+            location.path = trim(path); // asigno la ruta location
+            
+            // ----------- Asigno valores x defecto del servidor
+            location.root = server.root;
+            location.index = server.index;
 
+            parseLocation(file, line, location);
+            
+            server.locations.push_back(location);
+            
+            cerr << "ServerParsed location: " << endl;
+            cerr << "- path: " << location.path << endl;
+            cerr << "- root: " << location.root << endl;
+            cerr << "- index: " << location.index << endl;
+            cerr << "- cgi_path: " << location.cgi_path << endl;
+            cerr << "- upload_path: " << location.upload_path << endl;
+            cerr << "- methods: ";
+            for (size_t i = 0; i < location.methods.size(); i++)
+                cerr << location.methods[i] << " ";
+            cerr << endl << endl;
+        }
         // ------------------ MINIPARSEO DE DIRECTIVAS ---------------------
         istringstream iss(line);
         string key, value;
         iss >> key >> value; // vuelvo a usar >> en vez de getline 
         value = trim(value);
-
+            
+        // ========================== DIRECTIVAS =========================
         // ------------------ IMPRESION DE DIRECTIVAS ---------------------
-        cerr << "Parsing server directives: " << key << " = " << value << endl;
-        
+        cerr << GREEN << "SERVER PARSING DIRECTIVES: " << key << " = " << value << RESET << endl;
         // ------------------- ASIGNACIÓN DE DIRECTIVAS -------------------
         if (key == "listen ")
             server.port = atoi(value.c_str());
@@ -111,31 +137,46 @@ void Config::parseServer(ifstream &file, string &line, Server_config& server)
         }
 
         // ===================== BLOQUE LOCATION =======================
-        if (line.find("location") == 0 && line.find('{') != string::npos)
-        {
-            Location_config location; //x cada location crea un objeto
-            istringstream iss(line);
-            string token, path;
-
-            iss >> token >> path;
-            location.path = trim(path);
-
-            // ----------- Asigno valores x defecto del servidor
-            location.root = server.root;
-            location.index = server.index;
-
-            parseLocation(file, line, location);
-
-            server.locations.push_back(location);
-
-            cerr << "Parsed location: " << endl;
-            cerr << "path: " << location.path << endl;
-            cerr << "root: " << location.root << endl;
-        }
     }
 }
 
 void Config::parseLocation(ifstream &file, string& line, Location_config& location)
 {
+    while (getline(file, line))
+    {
+        line = trim(line);
+        if (line.empty() || line[0] == '#')
+            continue;
+        if (line == "}")
+            break;
+        istringstream iss_location(line);
+        string key, value;
+        iss_location >> key >> value;
+        value = trim(value);
 
+        // ------------- IMPRIMO DIRECTIVAS LOCATION PARSEO ----------------
+        cerr << "Location Parse Directives: " << endl;
+        cerr << "- key: " << key << " - value: " << value << endl;
+
+        // ------------ VOY ASIGNANDO 1A1 LAS DIRECTIVAS LOCATION ------------
+        if (key == "root")
+            location.root = value;
+        else if (key == "index")
+            location.index = value;
+        else if (key == "upload_path")
+            location.upload_path = value;
+        else if (key == "cgi_path")
+            location.cgi_path = value;
+        else if (key == "redirect")
+            location.redirect = value;
+        else if (key == "methods")
+        {
+            istringstream iss_value(value);
+            string method;
+
+            while (iss_value >> method)
+                location.methods.push_back(trim(method));
+        }
+    }
+    cerr << endl;
 }
