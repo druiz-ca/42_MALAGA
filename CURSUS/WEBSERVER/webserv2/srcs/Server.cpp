@@ -90,6 +90,12 @@ Server::Server(const ServerConfig& conf) : sockfd(-1), config(conf), clients() {
     std::cerr.flush();
 }
 
+/* Es el "motor" del servidor:  
+    - Acepta nuevas conexiones,
+    - Atiende a varios clientes a la vez,
+    - Lee y responde a las peticiones HTTP,
+    - Cierra conexiones inactivas o problemáticas,
+    - Y mantiene el servidor funcionando de forma eficiente y continua. */
 void Server::run() {
     fd_set read_fds;
     int max_fd = sockfd;
@@ -97,23 +103,34 @@ void Server::run() {
     std::cerr << "DEBUG: Started server on port: " << config.port << "\n";
     std::cerr.flush();
 
-    while (true) {
+    // todo se desarrolla en un bucle infinito
+    while (true) 
+    {
         FD_ZERO(&read_fds); // Limpiar read_fds
         FD_SET(sockfd, &read_fds); // Añadir socket del servidor
         max_fd = sockfd; // Resetear max_fd
 
-        // Añadir descriptores de clientes y verificar timeout
-        for (size_t i = 0; i < clients.size(); ) {
-            int client_fd = clients[i].fd;
-            FD_SET(client_fd, &read_fds);
-            if (client_fd > max_fd) {
+        /* GESTIONA TODOS LOS CLIENTES CONECTADOS AL SERVIDOR
+            - se asegura que ningun cliente se queda demasiado tiempo inactivo-
+            - prepara todo para poder lleer datos de los clientes
+            - si un cliente está inactivo mucho tiempo lo desconecta */
+        for (size_t i = 0; i < clients.size(); ) 
+        {
+            int client_fd = clients[i].fd; // extrae el fd del cliente
+            FD_SET(client_fd, &read_fds); // añande el fd del cliente al conjunto read_fds para vigilar si tiene datos para leer
+            
+            // si el fd es mayor al actual lo actualiza para saber el fd más alto que tiene que vigilar
+            if (client_fd > max_fd)
                 max_fd = client_fd;
-            }
 
             // Verificar timeout
             time_t now;
-            time(&now);
-            if (difftime(now, clients[i].last_activity) > KEEP_ALIVE_TIMEOUT) {
+            time(&now); // asigna tiempo actual
+
+            // Calcula la dif entre hora actual y la última actividad del cliente
+                // Comprueba si lleva más tiempo esperando del máximo
+            if (difftime(now, clients[i].last_activity) > KEEP_ALIVE_TIMEOUT) 
+            {
                 std::cerr << "DEBUG: Timeout for client fd " << client_fd << "\n";
                 std::cerr.flush();
                 FD_CLR(client_fd, &read_fds); // Eliminar fd de read_fds
@@ -124,19 +141,21 @@ void Server::run() {
             ++i;
         }
 
+
         struct timeval timeout;
-        timeout.tv_sec = 1;
+        timeout.tv_sec = 1;// tiempo de espera de 1 segundo
         timeout.tv_usec = 0;
 
         int activity = select(max_fd + 1, &read_fds, NULL, NULL, &timeout);
+
+
         if (activity < 0 && errno != EINTR) {
             std::cerr << "ERROR: select() failed: " << std::strerror(errno) << "\n";
             std::cerr.flush();
             return; // Salida en caso de error grave
         }
-        if (activity == 0) {
+        if (activity == 0)
             continue; // Sin actividad
-        }
 
         // Nueva conexión
         if (FD_ISSET(sockfd, &read_fds)) {
