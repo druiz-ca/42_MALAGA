@@ -11,8 +11,17 @@
 #include <sys/types.h>
 #include <sys/select.h>
 
-Server::Server(const ServerConfig& conf) : sockfd(-1), config(conf), clients() {
+// establece el sock_fd a -1 para especificar que aún no se ha creado
+Server::Server(const ServerConfig& conf) : sockfd(-1), config(conf), clients() { 
+    
+    // CREACION DEL SOCKET
+    //  - crea como un "enchufe por donde el servidor podrá comunicarse con los cliente"
+    //  - AF_NET : el socker usará direcciones  IPv4
+    //  - SOCK_STREAM : sockert de tipo stream (conexión TCP)
+    //  - 0 : define protocolo por defecto (TCP)
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
+
+    // SI DA ERROR AL CREAR EL SOCKET
     if (sockfd < 0) {
         std::cerr    << "Error creating socket: " << std::strerror(errno) << std::endl;
         std::cerr.flush();
@@ -20,7 +29,11 @@ Server::Server(const ServerConfig& conf) : sockfd(-1), config(conf), clients() {
     }
 
     int opt = 1;
-    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+
+    // COMPRUEBA SI SE HA PODIDO ESTABLECER SO_REUSEADDR
+    //  - sirve para evitar errores por reutilizar el puerto al reiniciar servidor
+    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) 
+    {
         std::cerr << "Error setting socket options: " << std::strerror(errno) << std::endl;
         std::cerr.flush();
         close(sockfd);
@@ -28,6 +41,9 @@ Server::Server(const ServerConfig& conf) : sockfd(-1), config(conf), clients() {
         return;
     }
 
+    // COMPRUEBA SI HA PODIDO CONFIGURAR EL SOCKET COMO NO BLOQUEANTE
+    //  - evita que el progrma se quede esperando indefinidadmente si no hay
+    //  enteradas o salidas de datos, sino que el programa puede antender otros clientes
     if (fcntl(sockfd, F_SETFL, O_NONBLOCK) < 0) {
         std::cerr << "Error setting socket to non-blocking: " << std::strerror(errno) << std::endl;
         std::cerr.flush();
@@ -36,13 +52,23 @@ Server::Server(const ServerConfig& conf) : sockfd(-1), config(conf), clients() {
         return;
     }
 
+    // CREA UNA ESTRUCTURA DE TIPO SOCKADDR_IN
+    //  - Para almacenar la info de dirección y puerto de los servidores que
+    //  va a escuchar
     struct sockaddr_in addr;
-    std::memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = INADDR_ANY;
-    addr.sin_port = htons(config.port);
 
-    if (bind(sockfd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+    // rellena toda la estructura de 0
+    std::memset(&addr, 0, sizeof(addr));
+    
+    // CONFIGURACIÓN DE LA ESTRUCTURA ADDR (prepara la dirección y el puerto)
+    //  - se necesita hacer esto antes de llamar a bind ya que éste usará el addr
+    addr.sin_family = AF_INET; // IPv4
+    addr.sin_addr.s_addr = INADDR_ANY; // para escuchar en todas las interfaces
+    addr.sin_port = htons(config.port); // asigna el puerto donde escuchará
+
+    // ENLAZA EL SOCKET A UNA DIR IP Y PUERTO CONCRETO
+    if (bind(sockfd, (struct sockaddr*)&addr, sizeof(addr)) < 0)
+    {
         std::cerr << "Error binding socket: " << std::strerror(errno) << std::endl;
         std::cerr.flush();
         close(sockfd);
@@ -50,6 +76,8 @@ Server::Server(const ServerConfig& conf) : sockfd(-1), config(conf), clients() {
         return;
     }
 
+    // COMPRUEBA SI EL SOCKET PUEDE PONERSE EN MODO ESCUCHA
+    //  - el 10 es el tamañode la cola de espera (cuantos clientes pueden esperar)
     if (listen(sockfd, 10) < 0) {
         std::cerr << "Error listening on socket: " << std::strerror(errno) << std::endl;
         std::cerr.flush();

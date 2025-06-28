@@ -15,9 +15,11 @@ const std::vector<ServerConfig>& Config::getServers() const {
     return servers;
 }
 
-std::string Config::trim(const std::string& str) {
+std::string Config::trim(const std::string& str) 
+{
     size_t first = str.find_first_not_of(" \t\n\r");
-    if (first == std::string::npos) return "";
+    if (first == std::string::npos) 
+        return "";
     size_t last = str.find_last_not_of(" \t\n\r;");
     return str.substr(first, last - first + 1);
 }
@@ -58,7 +60,10 @@ void Config::parse(const std::string& filename) {
             servers.push_back(server);
 
             //Muestra toda la info del servidor que ha leído
-            std::cerr << "DEBUG: Parsed server with port: " << server.port << ", root: " << server.root << ", index: " << server.index << std::endl;
+            std::cerr << "DEBUG: Parsed server with port: " << server.port << \
+                ", root: " << server.root << \
+                ", index: " << server.index \
+                << std::endl;
             std::cerr.flush();
         }
     }
@@ -71,7 +76,7 @@ void Config::parse(const std::string& filename) {
  usa parseLocation para procesarlo y añadirlo a la lista de locations del servidor */
 void Config::parseServer(std::ifstream& file, std::string& line, ServerConfig& server) 
 {
-    // Asigno valores x defecto al objeto server
+    // Asigno valores x defecto al objeto server sino se especifican otros
     server.root = "./www";
     server.index = "index.html";
     server.max_body_size = 1048576;
@@ -101,10 +106,16 @@ void Config::parseServer(std::ifstream& file, std::string& line, ServerConfig& s
             server.locations.push_back(location);
 
             // Imprimo toda la información sobre location, rutas, etc
-            std::cerr << "DEBUG: Parsed location: " << location.path << ", root: " << location.root << ", index: " << location.index << ", methods: ";
+            std::cerr << \
+            "DEBUG: Parsed location: " << location.path << \
+            ", root: " << location.root << \
+            ", index: " << location.index << \
+            ", cgi_path: " << location.cgi_path << \
+            ", upload_path: " << location.upload_path << \
+            ", methods: " << std::endl;
+            // pueden haber más de un método (GET POST DELETE....)
             for (size_t i = 0; i < location.methods.size(); ++i)
                 std::cerr << location.methods[i] << " ";
-            std::cerr << ", cgi_path: " << location.cgi_path << ", upload_path: " << location.upload_path << std::endl;
             std::cerr.flush();
 
             // Para q el while salte a la siguiente linea
