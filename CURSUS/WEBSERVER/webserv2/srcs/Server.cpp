@@ -146,10 +146,13 @@ void Server::run() {
         timeout.tv_sec = 1;// tiempo de espera de 1 segundo
         timeout.tv_usec = 0;
 
+        //select espera a que haya actividad en algún fd en reads_fds o que pase el tiempo (timeout)
+            // devuelve el nº de fds listos si hay actividad
         int activity = select(max_fd + 1, &read_fds, NULL, NULL, &timeout);
 
-
-        if (activity < 0 && errno != EINTR) {
+        // Comprueba errores (activity = -1)
+        if (activity < 0 && errno != EINTR)
+        {
             std::cerr << "ERROR: select() failed: " << std::strerror(errno) << "\n";
             std::cerr.flush();
             return; // Salida en caso de error grave
@@ -157,11 +160,17 @@ void Server::run() {
         if (activity == 0)
             continue; // Sin actividad
 
-        // Nueva conexión
-        if (FD_ISSET(sockfd, &read_fds)) {
+        // Comprueba si el socket del servidor tiene actividad (nueva conexión entrante)
+        if (FD_ISSET(sockfd, &read_fds)) 
+        {
+            // Acepta la conexión y ontiene un fd
             int client_fd = accept(sockfd, NULL, NULL);
-            if (client_fd < 0) {
-                if (errno != EAGAIN && errno != EWOULDBLOCK) {
+
+            // Comprueba errores en el fd
+            if (client_fd < 0) 
+            {
+                if (errno != EAGAIN && errno != EWOULDBLOCK) 
+                {
                     std::cerr << "ERROR: accept() failed: " << std::strerror(errno) << "\n";
                     std::cerr.flush();
                 }
@@ -169,7 +178,8 @@ void Server::run() {
             }
 
             // Configurar socket no bloqueante
-            if (fcntl(client_fd, F_SETFL, O_NONBLOCK) < 0) {
+            if (fcntl(client_fd, F_SETFL, O_NONBLOCK) < 0) 
+            {
                 std::cerr << "ERROR: Failed to set client socket to non-blocking: " << std::strerror(errno) << "\n";
                 std::cerr.flush();
                 close(client_fd);
@@ -178,33 +188,58 @@ void Server::run() {
 
             std::cerr << "DEBUG: New connection: fd " << client_fd << "\n";
             std::cerr.flush();
+
+            // Crea estructura para el nuevo cliente con:
+                // fd
+                // buffer vacío
+                // tiempo de última actividad
             Client client = {client_fd, "", time(NULL)};
+
+            // Añade el cliente a la lista de clientes conectados
             clients.push_back(client);
         }
 
-        // Manejar datos de clientes
-        for (size_t i = 0; i < clients.size(); ) {
+        // Lee, procesa y responda a las peticiones de los clientes contectados
+            // elimina clientes que se desconecten, tengan errores o no cumplan las reglas
+        for (size_t i = 0; i < clients.size(); ) 
+        {
+            // extrae fd del cliente
             int client_fd = clients[i].fd;
-            if (!FD_ISSET(client_fd, &read_fds)) {
+
+            // Comprueba si hay datos para leer del cliente 
+            if (!FD_ISSET(client_fd, &read_fds)) 
+            {
                 ++i;
                 continue;
             }
 
+            // Declara buffer de hasta 1024 bytes para leer del cliente
             char buffer[1024] = {0};
+
+            // Lee hasta 1024 bytes y devuelve cantidad de bytes leída
             ssize_t bytes_read = read(client_fd, buffer, sizeof(buffer) - 1);
-            if (bytes_read < 0) {
-                if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            
+            // Si error
+            if (bytes_read < 0) 
+            {
+                if (errno == EAGAIN || errno == EWOULDBLOCK) 
+                {
                     ++i;
                     continue;
                 }
                 std::cerr << "DEBUG: Error reading from fd " << client_fd << ": " << std::strerror(errno) << "\n";
                 std::cerr.flush();
+
+                // elimina el cliente
                 FD_CLR(client_fd, &read_fds);
                 close(client_fd);
                 clients.erase(clients.begin() + i);
                 continue;
             }
-            if (bytes_read == 0) {
+
+            // Si no ha leído nada
+            if (bytes_read == 0) 
+            {
                 std::cerr << "DEBUG: Connection closed by client: fd " << client_fd << "\n";
                 std::cerr.flush();
                 FD_CLR(client_fd, &read_fds);
@@ -213,13 +248,17 @@ void Server::run() {
                 continue;
             }
 
+            
             clients[i].buffer += std::string(buffer, bytes_read);
             clients[i].last_activity = time(NULL);
             std::cerr << "DEBUG: Received data on fd " << client_fd << ": " << clients[i].buffer << "\n";
             std::cerr.flush();
 
             bool keep_alive = true;
-            while (!clients[i].buffer.empty() && keep_alive) {
+
+
+            while (!clients[i].buffer.empty() && keep_alive) 
+            {
                 Request request;
                 if (!request.parse(clients[i].buffer)) {
                     std::cerr << "DEBUG: Incomplete or invalid request for fd " << client_fd << "\n";
@@ -242,9 +281,8 @@ void Server::run() {
                 std::string response_str = response.generate();
                 ssize_t bytes_written = write(client_fd, response_str.c_str(), response_str.length());
                 if (bytes_written < 0) {
-                    if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                    if (errno == EAGAIN || errno == EWOULDBLOCK) 
                         break;
-                    }
                     std::cerr << "DEBUG: Error writing to fd " << client_fd << ": " << std::strerror(errno) << "\n";
                     std::cerr.flush();
                     FD_CLR(client_fd, &read_fds);
@@ -257,7 +295,8 @@ void Server::run() {
                 std::cerr << "DEBUG: Sent response for fd " << client_fd << "\n";
                 std::cerr.flush();
                 keep_alive = request.isKeepAlive();
-                if (!keep_alive) {
+                if (!keep_alive) 
+                {
                     std::cerr << "DEBUG: Closing connection for fd " << client_fd << "\n";
                     std::cerr.flush();
                     FD_CLR(client_fd, &read_fds);
@@ -268,9 +307,8 @@ void Server::run() {
                 std::cerr << "DEBUG: Keeping connection alive for fd " << client_fd << "\n";
                 std::cerr.flush();
             }
-            if (keep_alive) {
+            if (keep_alive)
                 ++i;
-            }
         }
     }
 }
