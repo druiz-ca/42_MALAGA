@@ -1,15 +1,15 @@
 #include "Server.hpp"
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <iostream>
-#include <errno.h>
-#include <sys/time.h>
-#include <cerrno>
-#include <cstring>
-#include <sys/types.h>
-#include <sys/select.h>
+#include <sys/socket.h> // para crear y manipular sockets
+#include <netinet/in.h> // para trabajar con direcciones de red
+#include <unistd.h> // close(), read(), write()
+#include <fcntl.h> // para controlar fds : fcntl()
+#include <iostream> // cout, cerr
+#include <errno.h> // Define la var global errno y los códigos de error del sistema
+#include <cerrno> // para usar errno
+#include <sys/time.h> // 
+#include <cstring> // Para manipular cadenas
+#include <sys/types.h> // para size_t
+#include <sys/select.h> // Para fucniones y madros de fds (FD_ZERO, FD_SET, select)
 
 // establece el sock_fd a -1 para especificar que aún no se ha creado
 Server::Server(const ServerConfig& conf) : sockfd(-1), config(conf), clients() { 
@@ -96,7 +96,8 @@ Server::Server(const ServerConfig& conf) : sockfd(-1), config(conf), clients() {
     - Lee y responde a las peticiones HTTP,
     - Cierra conexiones inactivas o problemáticas,
     - Y mantiene el servidor funcionando de forma eficiente y continua. */
-void Server::run() {
+void Server::run()
+{
     fd_set read_fds;
     int max_fd = sockfd;
 
@@ -140,7 +141,6 @@ void Server::run() {
             }
             ++i;
         }
-
 
         struct timeval timeout;
         timeout.tv_sec = 1;// tiempo de espera de 1 segundo
@@ -196,7 +196,7 @@ void Server::run() {
             Client client = {client_fd, "", time(NULL)};
 
             // Añade el cliente a la lista de clientes conectados
-            clients.push_back(client);
+            clients.push_back(client) ;
         }
 
         // Lee, procesa y responda a las peticiones de los clientes contectados
