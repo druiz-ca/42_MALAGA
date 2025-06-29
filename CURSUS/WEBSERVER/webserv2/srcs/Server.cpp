@@ -201,7 +201,7 @@ void Server::run()
 
         // Lee, procesa y responda a las peticiones de los clientes contectados
             // elimina clientes que se desconecten, tengan errores o no cumplan las reglas
-        for (size_t i = 0; i < clients.size(); ) 
+        for (size_t i = 0; i < clients.size(); )  //VOY X AQUI EN EXCALIDRAW
         {
             // extrae fd del cliente
             int client_fd = clients[i].fd;
