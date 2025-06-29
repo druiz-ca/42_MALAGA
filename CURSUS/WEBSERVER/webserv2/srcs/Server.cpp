@@ -248,22 +248,38 @@ void Server::run() {
                 continue;
             }
 
+             // si ha leído entonces:
             
+            // Añade los datos del buffer leído al buffer de clientes
             clients[i].buffer += std::string(buffer, bytes_read);
+
+            // Actualiza la hora de la última actividad de ese cliente
             clients[i].last_activity = time(NULL);
             std::cerr << "DEBUG: Received data on fd " << client_fd << ": " << clients[i].buffer << "\n";
             std::cerr.flush();
 
             bool keep_alive = true;
 
-
+            // el servidor va a procesar las peticiones del cliente mientras que:
+                // - haya datos en el buffer del cliente
+                // - y la conexión siga activa
             while (!clients[i].buffer.empty() && keep_alive) 
             {
+                // Crea objeto request:
+                    // - Almacena y maneja la petición HTTP
                 Request request;
-                if (!request.parse(clients[i].buffer)) {
+
+                // Parsea el buffer del cliente buscando petición Http
+                if (!request.parse(clients[i].buffer)) 
+                {
                     std::cerr << "DEBUG: Incomplete or invalid request for fd " << client_fd << "\n";
                     std::cerr.flush();
-                    if (clients[i].buffer.length() > 1024 * 1024) { // Prevenir DoS
+
+                    // Si el buffer es mayor a 1MB  cierra el cliente
+                        // para Prevenir DoS (cliente malicioso) que quiera
+                        // agotar la memoria del servidor con datos muy grandes
+                    if (clients[i].buffer.length() > 1024 * 1024) 
+                    { 
                         std::cerr << "DEBUG: Buffer too large, closing fd " << client_fd << "\n";
                         std::cerr.flush();
                         FD_CLR(client_fd, &read_fds);
@@ -276,11 +292,28 @@ void Server::run() {
 
                 std::cerr << "DEBUG: Parsed request successfully for fd " << client_fd << "\n";
                 std::cerr.flush();
+
+                // Crea objeto con:
+                    // - la petición HTTP parseada
+                    // - la configuración del servidor
                 Response response(request, config);
+
+                // Procesa la petición:
+                    // - Prepara la respuesta
+                    // - Decide que respuesta dar
                 response.handleRequest();
+
+                // Construye la respuesta HTTP completa en texto
+                    // Asigna el texto a response_str
                 std::string response_str = response.generate();
+
+                // Envía la respuesta al fd del cliente
+                    // Devuelve la cantidad de bytes escritos
                 ssize_t bytes_written = write(client_fd, response_str.c_str(), response_str.length());
-                if (bytes_written < 0) {
+                
+                // si no ha escrito ningún byte
+                if (bytes_written < 0) 
+                {
                     if (errno == EAGAIN || errno == EWOULDBLOCK) 
                         break;
                     std::cerr << "DEBUG: Error writing to fd " << client_fd << ": " << std::strerror(errno) << "\n";
@@ -294,7 +327,11 @@ void Server::run() {
 
                 std::cerr << "DEBUG: Sent response for fd " << client_fd << "\n";
                 std::cerr.flush();
+
+                // Comprueba si la petición del cliente tiene que seguir activa
                 keep_alive = request.isKeepAlive();
+
+                // Si no tiene seguir activa: 
                 if (!keep_alive) 
                 {
                     std::cerr << "DEBUG: Closing connection for fd " << client_fd << "\n";
@@ -307,17 +344,20 @@ void Server::run() {
                 std::cerr << "DEBUG: Keeping connection alive for fd " << client_fd << "\n";
                 std::cerr.flush();
             }
+            // Si tiene que seguir activa aumenta i (siguiente cliente)
             if (keep_alive)
                 ++i;
         }
     }
 }
 
-Server::~Server() {
-    if (sockfd >= 0) {
+Server::~Server() 
+{
+    // Si el fd del socket es válido lo cierra
+    if (sockfd >= 0)
         close(sockfd);
-    }
-    for (size_t i = 0; i < clients.size(); ++i) {
+
+    // Cierra el fd de cada cliente conectado
+    for (size_t i = 0; i < clients.size(); ++i)
         close(clients[i].fd);
-    }
 }
