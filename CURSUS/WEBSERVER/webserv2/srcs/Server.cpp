@@ -242,6 +242,7 @@ void Server::run()
             {
                 std::cerr << "DEBUG: Connection closed by client: fd " << client_fd << "\n";
                 std::cerr.flush();
+
                 FD_CLR(client_fd, &read_fds);
                 close(client_fd);
                 clients.erase(clients.begin() + i);
@@ -255,6 +256,8 @@ void Server::run()
 
             // Actualiza la hora de la última actividad de ese cliente
             clients[i].last_activity = time(NULL);
+
+
             std::cerr << "DEBUG: Received data on fd " << client_fd << ": " << clients[i].buffer << "\n";
             std::cerr.flush();
 
@@ -282,6 +285,7 @@ void Server::run()
                     { 
                         std::cerr << "DEBUG: Buffer too large, closing fd " << client_fd << "\n";
                         std::cerr.flush();
+
                         FD_CLR(client_fd, &read_fds);
                         close(client_fd);
                         clients.erase(clients.begin() + i);
@@ -339,7 +343,7 @@ void Server::run()
                     FD_CLR(client_fd, &read_fds);
                     close(client_fd);
                     clients.erase(clients.begin() + i);
-                    break;
+                    break; 
                 }
                 std::cerr << "DEBUG: Keeping connection alive for fd " << client_fd << "\n";
                 std::cerr.flush();
