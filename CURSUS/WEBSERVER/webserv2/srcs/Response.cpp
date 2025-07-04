@@ -8,6 +8,8 @@
 #include <cstdlib>
 #include <string.h>
 
+
+
 Response::Response(const Request& req, const ServerConfig& conf)
     : status_code(200), status_message("OK"), request(req), server_config(conf) {
     std::cerr << "DEBUG: Response constructor called for method: " << req.getMethod() << ", URI: " << req.getUri() << std::endl;
