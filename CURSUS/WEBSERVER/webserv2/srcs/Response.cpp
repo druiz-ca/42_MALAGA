@@ -8,10 +8,59 @@
 #include <cstdlib>
 #include <string.h>
 
+/*
+Este archivo implementa toda la lógica para analizar la petición HTTP, 
+decidir la respuesta adecuada (archivo, CGI, error, etc.), 
+construir la respuesta HTTP y devolverla al cliente, 
+gestionando correctamente los distintos métodos y posibles errores.
 
+---
 
+### 1. **Construcción de la respuesta HTTP**
+- La clase `Response` se encarga de crear la respuesta HTTP que el servidor enviará al cliente,
+ usando la petición recibida (`Request`) y la configuración del servidor (`ServerConfig`).
+
+### 2. **Procesamiento de la petición**
+- El método `handleRequest()` decide cómo responder según la petición:
+  - Busca la configuración (`LocationConfig`) adecuada para la URI solicitada.
+  - Si no encuentra una ubicación válida, responde con un **404 Not Found**.
+  - Si hay una redirección configurada, responde con un **301 Moved Permanently**.
+  - Según el método HTTP (`GET`, `POST`, `DELETE`), llama al manejador correspondiente:
+    - **GET**: Lee y devuelve archivos.
+    - **POST**: Guarda archivos subidos.
+    - **DELETE**: Borra archivos.
+    - Si hay CGI configurado, ejecuta el CGI.
+    - Si el método no está permitido, responde con **405 Method Not Allowed**.
+
+### 3. **Manejo de archivos**
+- Usa funciones del sistema para comprobar si los archivos existen, leerlos, 
+escribirlos o borrarlos según el método HTTP.
+
+### 4. **Cabeceras y cuerpo de la respuesta**
+- Añade cabeceras como `Content-Type`, `Content-Length` y `Connection` según la petición 
+y el resultado.
+- El cuerpo de la respuesta puede ser el contenido de un archivo, un mensaje de error, 
+o la salida de un CGI.
+
+### 5. **Generación de la respuesta final**
+- El método `generate()` construye la respuesta HTTP completa (cabeceras + cuerpo) 
+en formato texto listo para enviar al cliente.
+
+### 6. **Soporte para CGI**
+- Si la petición requiere ejecutar un CGI, lo hace y usa la salida como cuerpo de la respuesta.
+
+### 7. **Gestión de errores**
+- Devuelve mensajes y códigos de error apropiados (404, 403, 405, 500, etc.) según el caso.
+
+### 8. **Depuración**
+- Imprime mensajes de depuración en consola para seguir el flujo de ejecución y detectar problemas.
+
+---
+
+*/
 Response::Response(const Request& req, const ServerConfig& conf)
-    : status_code(200), status_message("OK"), request(req), server_config(conf) {
+    : status_code(200), status_message("OK"), request(req), server_config(conf) 
+{
     std::cerr << "DEBUG: Response constructor called for method: " << req.getMethod() << ", URI: " << req.getUri() << std::endl;
     std::cerr.flush();
 }
