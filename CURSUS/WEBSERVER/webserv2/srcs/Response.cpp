@@ -60,46 +60,71 @@ en formato texto listo para enviar al cliente.
 */
 Response::Response(const Request& req, const ServerConfig& conf)
     : status_code(200), status_message("OK"), request(req), server_config(conf) 
-{
+{   // 200 (petición exitosa), 
+    // inicializa el atributo request con req(request)-> la petición
+    // 
     std::cerr << "DEBUG: Response constructor called for method: " << req.getMethod() << ", URI: " << req.getUri() << std::endl;
     std::cerr.flush();
 }
 
-void Response::handleRequest() {
+/* Esta línea busca la configuración de ubicación más adecuada para la URI solicitada 
+por el cliente.  
+
+Primero, obtiene la URI de la petición HTTP usando `request.getUri()`. 
+Luego, llama al método `findLocation`, que recorre todas las ubicaciones (`LocationConfig`) 
+definidas en la configuración del servidor y selecciona la que mejor coincide con esa URI.  
+El resultado es un puntero a la configuración de ubicación encontrada, que se usará 
+para decidir cómo responder a la petición (por ejemplo, qué archivo servir, 
+si hay que redirigir, si se permite el método, etc.).
+
+En resumen, esta línea determina qué reglas y recursos del servidor se aplican a la 
+petición del cliente según la ruta solicitada.*/
+
+void Response::handleRequest() 
+{
+    // 
     const LocationConfig* location = findLocation(request.getUri());
+
     std::cerr << "DEBUG: Handling request for URI: " << request.getUri() << std::endl;
     std::cerr.flush();
 
-    if (!location) {
+    if (!location) 
+    {
         status_code = 404;
         status_message = "Not Found";
+
+
         setBody("<h1>404 Not Found</h1>");
         setHeader("Content-Type", "text/html");
         setHeader("Connection", request.isKeepAlive() ? "keep-alive" : "close");
+        
+        
         std::cerr << "DEBUG: No location found, returning 404" << std::endl;
         std::cerr.flush();
         return;
     }
 
-    if (!location->redirect.empty()) {
+    if (!location->redirect.empty()) 
+    {
         status_code = 301;
         status_message = "Moved Permanently";
+        
         setHeader("Location", location->redirect);
         setHeader("Connection", request.isKeepAlive() ? "keep-alive" : "close");
         return;
     }
 
-    if (request.getMethod() == "GET" && !location->cgi_path.empty()) {
+    if (request.getMethod() == "GET" && !location->cgi_path.empty()) 
         handleCgiRequest(*location);
-    } else if (request.getMethod() == "POST" && !location->cgi_path.empty()) {
+    else if (request.getMethod() == "POST" && !location->cgi_path.empty())
         handleCgiRequest(*location);
-    } else if (request.getMethod() == "GET") {
+    else if (request.getMethod() == "GET")
         handleGetRequest(*location);
-    } else if (request.getMethod() == "POST") {
+    else if (request.getMethod() == "POST")
         handlePostRequest(*location);
-    } else if (request.getMethod() == "DELETE") {
+    else if (request.getMethod() == "DELETE")
         handleDeleteRequest(*location);
-    } else {
+    else {
         status_code = 405;
         status_message = "Method Not Allowed";
         setBody("<h1>405 Method Not Allowed</h1>");
@@ -110,7 +135,8 @@ void Response::handleRequest() {
     }
 }
 
-void Response::handleGetRequest(const LocationConfig& location) {
+void Response::handleGetRequest(const LocationConfig& location) 
+{
     std::string path = cleanPath(location.root + "/" + (request.getUri() == "/" ? location.index : request.getUri().substr(location.path.length())));
     std::cerr << "DEBUG: Handling GET request for path: " << path << std::endl;
     std::cerr.flush();
