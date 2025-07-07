@@ -13,7 +13,7 @@ wp config create --allow-root   --dbname=$SQL_DATABASE \
                                 --dbuser=$SQL_USER \
                                 --dbpass=$SQL_PASSWORD \
                                 --dbhost=mariadb:3306 \
-				--url=$WP_URL \
+				                        --url=$WP_URL \
                                 --path='/var/www/html/wordpress'
 
 wp core install --allow-root    --url=$WP_URL \
@@ -23,7 +23,7 @@ wp core install --allow-root    --url=$WP_URL \
                                 --admin_email=$WP_ADMIN_EMAIL \
                                 --skip-email \
                                 --locale=es_ES \
-			        --path='/var/www/html/wordpress'
+			                          --path='/var/www/html/wordpress'
 
 if ! wp user get "$WP_USR" --allow-root > /dev/null 2>&1; then
   wp user create "$WP_USR" "$WP_EMAIL" \
