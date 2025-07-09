@@ -31,7 +31,8 @@ int main()
     listen(server_fd, 10);
         // 10 -> el máx de num de conexiones pendientes que acepta
 
-    cout << "el servidor esta escuchando en el puerto 1024" << endl;
+    cout << "el servidor esta escuchando en el puerto 8080" << endl;
+        // en el 1024 no va!?
 
     while (1)
     {
