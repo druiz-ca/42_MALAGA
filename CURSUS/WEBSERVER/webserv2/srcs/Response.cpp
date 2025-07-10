@@ -148,11 +148,18 @@ void Response::handleRequest()
 
 void Response::handleGetRequest(const LocationConfig& location) 
 {
-    std::string path = cleanPath(location.root + "/" + (request.getUri() == "/" ? location.index : request.getUri().substr(location.path.length())));
+    // Construye la ruta completa del archivo solicitado por el cliente
+    // (he cambiado el formato de este if else...)
+    std::string path;
+    if (request.getUri() == "/") // si solicita la raiz
+        path = cleanPath(location.root + "/" + location.index);
+    else // sino, se elimina la parte de la uri que coincide con la ruta ya configurada...
+        path = cleanPath(location.root + "/" + request.getUri().substr(location.path.length()));
     std::cerr << "DEBUG: Handling GET request for path: " << path << std::endl;
     std::cerr.flush();
 
     struct stat st;
+    // Compruba si el archivo existe y q no sea un directorio
     if (stat(path.c_str(), &st) != 0 || !S_ISREG(st.st_mode)) 
     {
         status_code = 404;
@@ -166,6 +173,8 @@ void Response::handleGetRequest(const LocationConfig& location)
     }
 
     std::ifstream file(path.c_str());
+
+    // si no se puede abrir
     if (!file.is_open()) 
     {
         status_code = 403;
@@ -178,8 +187,11 @@ void Response::handleGetRequest(const LocationConfig& location)
         return;
     }
 
+    // Vuelca en buffer todo el contenido del archivo solicitado
     std::stringstream buffer;
     buffer << file.rdbuf();
+
+    // muestra el contenido
     setBody(buffer.str());
     setHeader("Content-Type", getContentType(path));
     setHeader("Connection", request.isKeepAlive() ? "keep-alive" : "close");
@@ -187,10 +199,15 @@ void Response::handleGetRequest(const LocationConfig& location)
     std::cerr.flush();
 }
 
-void Response::handlePostRequest(const LocationConfig& location) {
+void Response::handlePostRequest(const LocationConfig& location) 
+{
     std::cerr << "DEBUG: Handling POST request with upload_path: " << location.upload_path << std::endl;
     std::cerr.flush();
-    if (location.upload_path.empty()) {
+
+    // Comprueba que esté definido un directorio para subir archivos antes de
+    // procesar la petición
+    if (location.upload_path.empty()) 
+    {
         status_code = 403;
         status_message = "Forbidden";
         setBody("<h1>403 Forbidden</h1>");
@@ -201,8 +218,12 @@ void Response::handlePostRequest(const LocationConfig& location) {
         return;
     }
 
+    // Extrae el nombre del archivo q el cliente desea subir o procesar
     std::string filename = request.getUri().substr(request.getUri().find_last_of('/') + 1);
-    if (filename.empty()) {
+    
+    // Si el nombre del archivo termina en  / o está vacío
+    if (filename.empty()) 
+    {
         status_code = 400;
         status_message = "Bad Request";
         setBody("<h1>400 Bad Request</h1>");
@@ -213,11 +234,17 @@ void Response::handlePostRequest(const LocationConfig& location) {
         return;
     }
 
+    // Construye la ruta completa donde el cliente quiere guardar el archivo
     std::string path = cleanPath(location.upload_path + "/" + filename);
     std::cerr << "DEBUG: Uploading file to: " << path << std::endl;
     std::cerr.flush();
+
+    // convierte la ruta a ofstream
     std::ofstream file(path.c_str());
-    if (!file.is_open()) {
+
+    // Sino la puede abrir
+    if (!file.is_open()) 
+    {
         status_code = 403;
         status_message = "Forbidden";
         setBody("<h1>403 Forbidden</h1>");
