@@ -115,19 +115,26 @@ void Response::handleRequest()
         setHeader("Connection", request.isKeepAlive() ? "keep-alive" : "close");
         return;
     }
-    // GET -> CGI el cliente solicita ejecutar un script
+
+    // GET + ruta del CGI(/usr/bin/php) el cliente solicita ejecutar un script
+        // (solo hay GET (con o sin cgi), POST (con o sin cgi) y DELETE)
+        // GET -> para pedir datos al servidor
     if (request.getMethod() == "GET" && !location->cgi_path.empty()) 
         handleCgiRequest(*location);
-    // POST con GCI -> Ejecutar un script con los datos enviados
+    // POST con ruta del GCI -> Ejecutar un script con los datos enviados
+        // POST -> para enviar datos al servidor
     else if (request.getMethod() == "POST" && !location->cgi_path.empty())
         handleCgiRequest(*location);
-    
+    // GET sin ruta CGI -> solicita archivo estático
     else if (request.getMethod() == "GET")
         handleGetRequest(*location);
+    // POST sin ruta CGI -> guarda archivo o datos enviados x el cliente
     else if (request.getMethod() == "POST")
         handlePostRequest(*location);
+    // Elimina un archivo del servidor
     else if (request.getMethod() == "DELETE")
         handleDeleteRequest(*location);
+    // Método no encontrado
     else {
         status_code = 405;
         status_message = "Method Not Allowed";
@@ -146,7 +153,8 @@ void Response::handleGetRequest(const LocationConfig& location)
     std::cerr.flush();
 
     struct stat st;
-    if (stat(path.c_str(), &st) != 0 || !S_ISREG(st.st_mode)) {
+    if (stat(path.c_str(), &st) != 0 || !S_ISREG(st.st_mode)) 
+    {
         status_code = 404;
         status_message = "Not Found";
         setBody("<h1>404 Not Found</h1>");
@@ -158,7 +166,8 @@ void Response::handleGetRequest(const LocationConfig& location)
     }
 
     std::ifstream file(path.c_str());
-    if (!file.is_open()) {
+    if (!file.is_open()) 
+    {
         status_code = 403;
         status_message = "Forbidden";
         setBody("<h1>403 Forbidden</h1>");
@@ -269,22 +278,28 @@ void Response::handleDeleteRequest(const LocationConfig& location) {
 
 void Response::handleCgiRequest(const LocationConfig& location) 
 {
-    if (!location.methods.empty()) 
+    if (!location.methods.empty())  // vuelve a comprobar q haya metodo..
     {
         bool method_allowed = false;
         std::cerr << "DEBUG: Checking allowed methods for " << request.getMethod() << std::endl;
         std::cerr.flush();
+
+        // Recorre todos los métodos definidos para check si está permitido
         for (size_t i = 0; i < location.methods.size(); ++i) 
         {
             std::string method = cleanMethod(location.methods[i]);
             std::cerr << "DEBUG: Method " << method << std::endl;
             std::cerr.flush();
+
+            // si coincide con un método permitido
             if (method == request.getMethod()) 
             {
                 method_allowed = true;
                 break;
             }
         }
+
+        // Si no está permitido
         if (!method_allowed) 
         {
             status_code = 405;
@@ -300,9 +315,16 @@ void Response::handleCgiRequest(const LocationConfig& location)
 
     std::cerr << "DEBUG: Executing CGI with cgi_path: " << cleanPath(location.cgi_path) << std::endl;
     std::cerr.flush();
+
+    // como el cliente solicitó GET + cgi (ruta)
+        // creo objeto cgi
     CGI cgi(request, location);
+
+    // Ejecuta el script CGI y devuelve su salida
     std::string output = cgi.execute();
-    if (output.empty()) 
+    
+    // Si no devuelve nada
+    if (output.empty())
     {
         std::cerr << "DEBUG: CGI output is empty" << std::endl;
         std::cerr.flush();
@@ -314,6 +336,7 @@ void Response::handleCgiRequest(const LocationConfig& location)
         return;
     }
 
+    // Imprime la salida del script CGI
     setBody(output);
     setHeader("Content-Type", "text/html");
     setHeader("Connection", request.isKeepAlive() ? "keep-alive" : "close");
