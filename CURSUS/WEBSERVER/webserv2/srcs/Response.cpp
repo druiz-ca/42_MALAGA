@@ -82,13 +82,15 @@ petición del cliente según la ruta solicitada.*/
 
 void Response::handleRequest() 
 {
-    // 
+    // URI -> Uniform Resource Identifier
+    // localiza le (index.html dentro de ....localhost:8080/....)
+    // busca la mejor coincidencia encontrada con la ruta solicitada
     const LocationConfig* location = findLocation(request.getUri());
 
     std::cerr << "DEBUG: Handling request for URI: " << request.getUri() << std::endl;
     std::cerr.flush();
 
-    if (!location) 
+    if (!location) // si no encuentra ninguna coincidencia
     {
         status_code = 404;
         status_message = "Not Found";
@@ -104,7 +106,7 @@ void Response::handleRequest()
         return;
     }
 
-    if (!location->redirect.empty()) 
+    if (!location->redirect.empty()) // si contiene una redirección
     {
         status_code = 301;
         status_message = "Moved Permanently";
@@ -113,11 +115,13 @@ void Response::handleRequest()
         setHeader("Connection", request.isKeepAlive() ? "keep-alive" : "close");
         return;
     }
-
+    // GET -> CGI el cliente solicita ejecutar un script
     if (request.getMethod() == "GET" && !location->cgi_path.empty()) 
         handleCgiRequest(*location);
+    // POST con GCI -> Ejecutar un script con los datos enviados
     else if (request.getMethod() == "POST" && !location->cgi_path.empty())
         handleCgiRequest(*location);
+    
     else if (request.getMethod() == "GET")
         handleGetRequest(*location);
     else if (request.getMethod() == "POST")
@@ -263,21 +267,26 @@ void Response::handleDeleteRequest(const LocationConfig& location) {
     std::cerr.flush();
 }
 
-void Response::handleCgiRequest(const LocationConfig& location) {
-    if (!location.methods.empty()) {
+void Response::handleCgiRequest(const LocationConfig& location) 
+{
+    if (!location.methods.empty()) 
+    {
         bool method_allowed = false;
         std::cerr << "DEBUG: Checking allowed methods for " << request.getMethod() << std::endl;
         std::cerr.flush();
-        for (size_t i = 0; i < location.methods.size(); ++i) {
+        for (size_t i = 0; i < location.methods.size(); ++i) 
+        {
             std::string method = cleanMethod(location.methods[i]);
             std::cerr << "DEBUG: Method " << method << std::endl;
             std::cerr.flush();
-            if (method == request.getMethod()) {
+            if (method == request.getMethod()) 
+            {
                 method_allowed = true;
                 break;
             }
         }
-        if (!method_allowed) {
+        if (!method_allowed) 
+        {
             status_code = 405;
             status_message = "Method Not Allowed";
             setBody("<h1>405 Method Not Allowed</h1>");
@@ -293,7 +302,8 @@ void Response::handleCgiRequest(const LocationConfig& location) {
     std::cerr.flush();
     CGI cgi(request, location);
     std::string output = cgi.execute();
-    if (output.empty()) {
+    if (output.empty()) 
+    {
         std::cerr << "DEBUG: CGI output is empty" << std::endl;
         std::cerr.flush();
         status_code = 500;
@@ -311,39 +321,53 @@ void Response::handleCgiRequest(const LocationConfig& location) {
     std::cerr.flush();
 }
 
-const LocationConfig* Response::findLocation(const std::string& uri) const {
+
+
+const LocationConfig* Response::findLocation(const std::string& uri) const 
+{
     const std::vector<LocationConfig>& locations = server_config.locations;
     const LocationConfig* best_match = NULL;
     size_t longest_match = 0;
 
+    // NORMALIZA LA URI (elimina el "/")
     std::string normalized_uri = uri;
-    if (!normalized_uri.empty() && normalized_uri[0] == '/') {
+    if (!normalized_uri.empty() && normalized_uri[0] == '/')
         normalized_uri = normalized_uri.substr(1);
-    }
 
     std::cerr << "DEBUG: Finding location for URI: " << uri << ", normalized: " << normalized_uri << std::endl;
     std::cerr.flush();
-    for (size_t i = 0; i < locations.size(); ++i) {
+
+
+    for (size_t i = 0; i < locations.size(); ++i) 
+    {
         std::string path = cleanPath(locations[i].path);
-        if (path[0] == '/') {
+        if (path[0] == '/') // si la ruta empieza por "/" la borra
             path = path.substr(1);
-        }
+
+        // Imprime la ruta y todos los metodos...
         std::cerr << "DEBUG: Checking location path: " << path << " (original: " << locations[i].path << "), methods: ";
-        for (size_t j = 0; j < locations[i].methods.size(); ++j) {
+        for (size_t j = 0; j < locations[i].methods.size(); ++j)
             std::cerr << locations[i].methods[j] << " ";
-        }
         std::cerr << ", root: " << locations[i].root << ", upload_path: " << locations[i].upload_path << ", cgi_path: " << locations[i].cgi_path << std::endl;
         std::cerr.flush();
 
-        // Check if the normalized URI starts with the location path
-        if (path.empty() || normalized_uri.find(path) == 0) {
-            // Ensure the match is either exact or followed by a slash or end of string
+        // Comprueba si la ruta contiene algo y la pos. de la ruta dentro de la URI
+        if (path.empty() || normalized_uri.find(path) == 0) 
+        {
+            // Comprueba:
+            //  - si la long de la URI normalizada es = a la de la ruta
+            //  - si justo después de la ruta hay "/"
+            //  - si termina con \0
             if (normalized_uri.length() == path.length() || 
                 normalized_uri[path.length()] == '/' || 
-                normalized_uri[path.length()] == '\0') {
-                if (path.length() >= longest_match) {
+                normalized_uri[path.length()] == '\0') 
+                {
+                // busca la coincidencia más exacta con la ruta
+                if (path.length() >= longest_match) 
+                {
                     longest_match = path.length();
-                    best_match = &locations[i];
+                    best_match = &locations[i]; // guarda la mejor coincidencia
+
                     std::cerr << "DEBUG: New best match: " << locations[i].path << std::endl;
                     std::cerr.flush();
                 }
@@ -351,15 +375,18 @@ const LocationConfig* Response::findLocation(const std::string& uri) const {
         }
     }
     
-    if (best_match) {
+    if (best_match)  // si encuentra una coincidencia la imprime
+    {
         std::cerr << "DEBUG: Selected location: " << best_match->path << ", root: " << cleanPath(best_match->root) << ", index: " << cleanPath(best_match->index) << std::endl;
         std::cerr.flush();
     } else {
         std::cerr << "DEBUG: No location found for URI: " << uri << "\n";
         std::cerr.flush();
     }
-    return best_match;
+    return best_match; // devuelve la mejor coincidencia encontrada
 }
+
+
 
 std::string Response::cleanPath(const std::string& path) const {
     std::string result = path;
@@ -381,6 +408,8 @@ std::string Response::cleanMethod(const std::string& method) const {
     return result;
 }
 
+
+
 void Response::setHeader(const std::string& key, const std::string& value) {
     headers[key] = value;
 }
@@ -391,6 +420,8 @@ void Response::setBody(const std::string& b) {
     oss << body.length();
     setHeader("Content-Length", oss.str());
 }
+
+
 
 std::string Response::generate() {
     std::ostringstream response;
