@@ -21,6 +21,7 @@ std::string CGI::execute()
     pid_t pid;
     std::string output;
 
+    // Si la creación de pipes da error
     if (pipe(pipe_in) == -1 || pipe(pipe_out) == -1) 
     {
         std::cerr << "DEBUG: Failed to create pipes: " << strerror(errno) << std::endl;
@@ -29,6 +30,7 @@ std::string CGI::execute()
     }
 
     pid = fork();
+    // Si el fork da error
     if (pid == -1) 
     {
         std::cerr << "DEBUG: Failed to fork: " << strerror(errno) << std::endl;
@@ -50,6 +52,7 @@ std::string CGI::execute()
 
         std::string script_path = request.getUri();
         size_t pos = script_path.find_last_of('/');
+        
         if (pos != std::string::npos)
             script_path = script_path.substr(pos + 1);
         std::string full_path = location.root + "/" + script_path;
