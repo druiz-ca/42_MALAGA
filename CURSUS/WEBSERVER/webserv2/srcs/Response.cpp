@@ -116,8 +116,9 @@ void Response::handleRequest()
         return;
     }
 
+    // solo hay GET (con o sin cgi), POST (con o sin cgi) y DELETE
+
     // GET + ruta del CGI(/usr/bin/php) el cliente solicita ejecutar un script
-        // (solo hay GET (con o sin cgi), POST (con o sin cgi) y DELETE)
         // GET -> para pedir datos al servidor
     if (request.getMethod() == "GET" && !location->cgi_path.empty()) 
         handleCgiRequest(*location);
@@ -125,7 +126,7 @@ void Response::handleRequest()
         // POST -> para enviar datos al servidor
     else if (request.getMethod() == "POST" && !location->cgi_path.empty())
         handleCgiRequest(*location);
-    // GET sin ruta CGI -> solicita archivo estático
+    // GET sin ruta CGI -> solicita archivo estático (html, css, etc)
     else if (request.getMethod() == "GET")
         handleGetRequest(*location);
     // POST sin ruta CGI -> guarda archivo o datos enviados x el cliente
@@ -255,8 +256,12 @@ void Response::handlePostRequest(const LocationConfig& location)
         return;
     }
 
+    // Escribe el contenido del cuerpo de la solicitud HTTP en el archivo
     file << request.getBody();
+
+    // Cuando acaba de escribir en el archivo lo cierra
     file.close();
+
     status_code = 201;
     status_message = "Created";
     setBody("<h1>201 Created</h1>");
@@ -266,13 +271,17 @@ void Response::handlePostRequest(const LocationConfig& location)
     std::cerr.flush();
 }
 
-void Response::handleDeleteRequest(const LocationConfig& location) {
+void Response::handleDeleteRequest(const LocationConfig& location) 
+{
+    // Construye la ruta completa del archivo que desea eliminar del servidor
     std::string path = cleanPath(location.root + "/" + request.getUri().substr(location.path.length()));
     std::cerr << "DEBUG: Handling DELETE request for path: " << path << std::endl;
     std::cerr.flush();
 
+    // Verifica si el archivo existe y si es regular (no un directorio)
     struct stat st;
-    if (stat(path.c_str(), &st) != 0 || !S_ISREG(st.st_mode)) {
+    if (stat(path.c_str(), &st) != 0 || !S_ISREG(st.st_mode)) 
+    {
         status_code = 404;
         status_message = "Not Found";
         setBody("<h1>404 Not Found</h1>");
@@ -283,7 +292,9 @@ void Response::handleDeleteRequest(const LocationConfig& location) {
         return;
     }
 
-    if (unlink(path.c_str()) != 0) {
+    // Comprueba si la eliminación del archivo falló
+    if (unlink(path.c_str()) != 0)
+    {
         status_code = 403;
         status_message = "Forbidden";
         setBody("<h1>403 Forbidden</h1>");
@@ -437,34 +448,37 @@ const LocationConfig* Response::findLocation(const std::string& uri) const
 }
 
 
-
-std::string Response::cleanPath(const std::string& path) const {
+/* simplemente elimina las barras que sobran si hay más de 1 */
+std::string Response::cleanPath(const std::string& path) const 
+{
     std::string result = path;
-    while (result.find("//") != std::string::npos) {
+    while (result.find("//") != std::string::npos)
         result.replace(result.find("//"), 2, "/");
-    }
-    if (!result.empty() && result[result.length() - 1] == '/') {
+
+    if (!result.empty() && result[result.length() - 1] == '/')
         result = result.substr(0, result.length() - 1);
-    }
     return result;
 }
 
-std::string Response::cleanMethod(const std::string& method) const {
+/*elimina los \t\n\r o espacios */
+std::string Response::cleanMethod(const std::string& method) const 
+{
     std::string result = method;
     size_t pos = result.find_first_of(" \t\n\r");
-    if (pos != std::string::npos) {
+    if (pos != std::string::npos)
         result = result.substr(0, pos);
-    }
     return result;
 }
 
 
 
-void Response::setHeader(const std::string& key, const std::string& value) {
+void Response::setHeader(const std::string& key, const std::string& value) 
+{
     headers[key] = value;
 }
 
-void Response::setBody(const std::string& b) {
+void Response::setBody(const std::string& b) 
+{
     body = b;
     std::ostringstream oss;
     oss << body.length();
@@ -472,25 +486,35 @@ void Response::setBody(const std::string& b) {
 }
 
 
-
-std::string Response::generate() {
+/* Ensambla en una sola cadena todo el mensaje HTTP que se enviará al cliente*/
+std::string Response::generate() 
+{
     std::ostringstream response;
     response << "HTTP/1.1 " << status_code << " " << status_message << "\r\n";
-    for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it) {
+    for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
         response << it->first << ": " << it->second << "\r\n";
-    }
     response << "\r\n" << body;
+
     std::cerr << "DEBUG: Generated response: " << response.str() << std::endl;
     std::cerr.flush();
     return response.str();
 }
 
-std::string Response::getContentType(const std::string& path) {
-    if (path.rfind(".html") != std::string::npos) return "text/html";
-    if (path.rfind(".css") != std::string::npos) return "text/css";
-    if (path.rfind(".js") != std::string::npos) return "application/javascript";
-    if (path.rfind(".jpg") != std::string::npos || path.rfind(".jpeg") != std::string::npos) return "image/jpeg";
-    if (path.rfind(".png") != std::string::npos) return "image/png";
-    if (path.rfind(".php") != std::string::npos) return "text/html";
+std::string Response::getContentType(const std::string& path) 
+{
+    // rfind devuelve un índice a la posición donde encuentra .html
+    // Comprueba que es posición no sea el final de la cadena (no se ha encontrado)
+    if (path.rfind(".html") != std::string::npos) 
+        return "text/html";
+    if (path.rfind(".css") != std::string::npos) 
+        return "text/css";
+    if (path.rfind(".js") != std::string::npos) 
+        return "application/javascript";
+    if (path.rfind(".jpg") != std::string::npos || path.rfind(".jpeg") != std::string::npos) 
+        return "image/jpeg";
+    if (path.rfind(".png") != std::string::npos) 
+        return "image/png";
+    if (path.rfind(".php") != std::string::npos) 
+        return "text/html";
     return "text/plain";
 }

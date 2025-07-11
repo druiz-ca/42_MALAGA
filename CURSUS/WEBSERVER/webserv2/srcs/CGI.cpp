@@ -9,24 +9,28 @@
 #include <limits.h>
 
 CGI::CGI(const Request& req, const LocationConfig& loc)
-    : request(req), location(loc) {
+    : request(req), location(loc) 
+{
     std::cerr << "DEBUG: CGI constructor called for URI: " << req.getUri() << ", cgi_path: " << loc.cgi_path << std::endl;
     std::cerr.flush();
 }
 
-std::string CGI::execute() {
+std::string CGI::execute() 
+{
     int pipe_in[2], pipe_out[2];
     pid_t pid;
     std::string output;
 
-    if (pipe(pipe_in) == -1 || pipe(pipe_out) == -1) {
+    if (pipe(pipe_in) == -1 || pipe(pipe_out) == -1) 
+    {
         std::cerr << "DEBUG: Failed to create pipes: " << strerror(errno) << std::endl;
         std::cerr.flush();
         return "";
     }
 
     pid = fork();
-    if (pid == -1) {
+    if (pid == -1) 
+    {
         std::cerr << "DEBUG: Failed to fork: " << strerror(errno) << std::endl;
         std::cerr.flush();
         close(pipe_in[0]); close(pipe_in[1]);
@@ -34,7 +38,8 @@ std::string CGI::execute() {
         return "";
     }
 
-    if (pid == 0) { // Child process
+    if (pid == 0) 
+    { // Child process
         close(pipe_in[1]);
         close(pipe_out[0]);
 
@@ -45,12 +50,12 @@ std::string CGI::execute() {
 
         std::string script_path = request.getUri();
         size_t pos = script_path.find_last_of('/');
-        if (pos != std::string::npos) {
+        if (pos != std::string::npos)
             script_path = script_path.substr(pos + 1);
-        }
         std::string full_path = location.root + "/" + script_path;
         char abs_path[PATH_MAX];
-        if (realpath(full_path.c_str(), abs_path) == NULL) {
+        if (realpath(full_path.c_str(), abs_path) == NULL) 
+        {
             std::cerr << "DEBUG: Failed to resolve script path: " << full_path << " (errno: " << strerror(errno) << ")" << std::endl;
             std::cerr.flush();
             exit(1);
@@ -97,7 +102,8 @@ std::string CGI::execute() {
         std::cerr << "DEBUG: Failed to execute CGI: " << strerror(errno) << std::endl;
         std::cerr.flush();
         exit(1);
-    } else { // Parent process
+    } 
+    else { // Parent process
         close(pipe_in[0]);
         close(pipe_out[1]);
 
@@ -106,7 +112,8 @@ std::string CGI::execute() {
 
         char buffer[1024];
         ssize_t bytes;
-        while ((bytes = read(pipe_out[0], buffer, sizeof(buffer) - 1)) > 0) {
+        while ((bytes = read(pipe_out[0], buffer, sizeof(buffer) - 1)) > 0) 
+        {
             buffer[bytes] = '\0';
             output += buffer;
         }
@@ -114,7 +121,8 @@ std::string CGI::execute() {
 
         int status;
         waitpid(pid, &status, 0);
-        if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
+        if (WIFEXITED(status) && WEXITSTATUS(status) != 0) 
+        {
             std::cerr << "DEBUG: CGI process exited with status: " << WEXITSTATUS(status) << std::endl;
             std::cerr.flush();
             return "";
