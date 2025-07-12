@@ -15,6 +15,9 @@ Request::Request(const std::string& raw_request)
     parseRequest(raw_request);
 }
 
+
+/* Método que extrae los datos relevantes de la solicitud HTTP y los
+almacena en los atributos de la propia clase Request*/
 bool Request::parse(std::string& buffer) 
 {
     std::cerr << "DEBUG: Parsing buffer: " << buffer << "\n";
@@ -96,6 +99,7 @@ bool Request::parse(std::string& buffer)
 
 void Request::parseRequest(const std::string& raw_request) 
 {
+    // convierte el string const a string normal para poder trabajar sobre él
     std::string buffer = raw_request;
     parse(buffer);
 }

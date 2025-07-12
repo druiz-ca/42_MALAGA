@@ -19,6 +19,10 @@ CGI::CGI(const Request& req, const LocationConfig& loc)
     std::cerr.flush();
 }
 
+
+/* Este método ejecuta el script solicitado por el cliente dentro de un proceso hijo mientras
+el servidor sigue activo y recibiendo solicitudes (en el proceso padre), y una vez terminado, 
+devuelve al proceso padre el resultado para poder devolverlo al cliente */
 std::string CGI::execute() 
 {
     int pipe_in[2], pipe_out[2];
@@ -124,8 +128,10 @@ std::string CGI::execute()
         // array de punteros a cadenas para contener 
         //los argumentos necesarios para ejecutar el script:
         /*  EJEMPLO:
-                location.cgi_path = "/usr/bin/php"
-                abs_path = "/var/www/cgi-bin/hello.php"
+                location.cgi_path = "/usr/bin/php" (ruta (del SO) para seleccionar el programa que ejecutará el script)
+                    // bin -> donde suelen estar los ejecutables de los programas
+                    // php -> antes, se debe haber descargado PHP en el servidor (apt-get install php)
+                abs_path = "/var/www/cgi-bin/hello.php" (script a ejecutar)
 
                 array:
                     args[0] = "/usr/bin/php";   // Intérprete CGI
