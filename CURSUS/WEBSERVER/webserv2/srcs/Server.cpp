@@ -311,7 +311,7 @@ void Server::run()
                     // Asigna el texto a response_str
                 std::string response_str = response.generate();
 
-                // Envía la respuesta al fd del cliente
+                // Envía la respuesta al fd del cliente (LO MUESTRA EN PANTALLA)
                     // Devuelve la cantidad de bytes escritos
                 ssize_t bytes_written = write(client_fd, response_str.c_str(), response_str.length());
                 

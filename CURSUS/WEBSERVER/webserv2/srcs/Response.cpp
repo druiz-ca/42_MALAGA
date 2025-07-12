@@ -489,11 +489,15 @@ void Response::setBody(const std::string& b)
 /* Ensambla en una sola cadena todo el mensaje HTTP que se enviará al cliente*/
 std::string Response::generate() 
 {
-    std::ostringstream response;
+    std::ostringstream response; // ouput string stream ( para escribir datos)
+
+    // Guarda en response el protocolo, el codigo de estado (200) y el mensaje de estado (OK)
     response << "HTTP/1.1 " << status_code << " " << status_message << "\r\n";
+
+    // Añade las cabeceras configuradas anteriormente
     for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
         response << it->first << ": " << it->second << "\r\n";
-    response << "\r\n" << body;
+    response << "\r\n" << body; // <h1>Hello, juan<h1>
 
     std::cerr << "DEBUG: Generated response: " << response.str() << std::endl;
     std::cerr.flush();
