@@ -14,7 +14,7 @@
 // establece el sock_fd a -1 para especificar que aún no se ha creado
 Server::Server(const ServerConfig& conf) : sockfd(-1), config(conf), clients() { 
     
-    // CREACION DEL SOCKET
+    // CREACION DEL SOCKET (enchufe)
     //  - crea como un "enchufe por donde el servidor podrá comunicarse con los cliente"
     //  - AF_NET : el socker usará direcciones  IPv4
     //  - SOCK_STREAM : sockert de tipo stream (conexión TCP)
@@ -63,7 +63,13 @@ Server::Server(const ServerConfig& conf) : sockfd(-1), config(conf), clients() {
     // CONFIGURACIÓN DE LA ESTRUCTURA ADDR (prepara la dirección y el puerto)
     //  - se necesita hacer esto antes de llamar a bind ya que éste usará el addr
     addr.sin_family = AF_INET; // IPv4
-    addr.sin_addr.s_addr = INADDR_ANY; // para escuchar en todas las interfaces
+    
+    // para escuchar en todas las interfaces
+    //Esto incluye:
+        //localhost (127.0.0.1), que es la dirección de loopback para la máquina local.
+        //La dirección IP pública de la máquina (si tiene una).
+        //Cualquier otra dirección IP configurada en la máquina.
+    addr.sin_addr.s_addr = INADDR_ANY; 
     addr.sin_port = htons(config.port); // asigna el puerto donde escuchará
 
     // ENLAZA EL SOCKET A UNA DIR IP Y PUERTO CONCRETO

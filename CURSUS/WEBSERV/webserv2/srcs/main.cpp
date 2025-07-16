@@ -9,7 +9,7 @@ int main(int argc, char** argv) {
 
     try {
         // PARSEO Y CONFIGURACIÓN DEL SERVIDOR
-        Config config(argv[1]);
+        Config config(argv[1]); // argv[1] -> archivo de configuración
 
         // COMPROBAR QUE HAY UN SERVIDOR CONFIGURADO
         if (config.getServers().empty()) {
@@ -18,6 +18,7 @@ int main(int argc, char** argv) {
         }
 
         // CARGA EL SERVIDOR CONFIGURADO
+            // aunque permite + de 1 servidor, se delimita a solo el 1º
         Server server(config.getServers()[0]);
 
         // ARRANCA EL SERVIDOR 

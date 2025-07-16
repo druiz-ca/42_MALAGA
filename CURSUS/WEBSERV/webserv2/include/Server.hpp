@@ -16,26 +16,26 @@ class Server {
 	// It uses the Config class to read configuration settings from a file.
 	// The server listens for incoming connections and handles them using select.
 	// It supports persistent connections and is designed to be efficient and scalable.
-public:
-    Server(const ServerConfig& conf);
-	// Constructor that takes a ServerConfig object to initialize the server.
-    ~Server();
-	// Destructor to clean up resources when the server is no longer needed.
-    void run();
-	// Starts the server and begins listening for incoming connections.
+	public:
+		Server(const ServerConfig& conf);
+		// Constructor that takes a ServerConfig object to initialize the server.
+		~Server();
+		// Destructor to clean up resources when the server is no longer needed.
+		void run();
+		// Starts the server and begins listening for incoming connections.
 
-private:
-	static const int KEEP_ALIVE_TIMEOUT = 30; 
-	// Timeout in 30 seconds for keep-alive connections
-    struct Client {
-		// This struct represents a client connected to the server.
-        int fd;
-		// The file descriptor for the client socket.
-        std::string buffer;
-		// A buffer to store incoming data from the client.
-		time_t last_activity;
-		// The last time the client was active.
-    };
+	private:
+		static const int KEEP_ALIVE_TIMEOUT = 30; 
+		// Timeout in 30 seconds for keep-alive connections
+		struct Client {
+			// This struct represents a client connected to the server.
+			int fd;
+			// The file descriptor for the client socket.
+			std::string buffer;
+			// A buffer to store incoming data from the client.
+			time_t last_activity;
+			// The last time the client was active.
+		};
 
     int sockfd;
 	// The file descriptor for the server socket.
