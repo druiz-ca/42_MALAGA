@@ -11,9 +11,12 @@
 #include <sys/types.h> // para size_t
 #include <sys/select.h> // Para fucniones y madros de fds (FD_ZERO, FD_SET, select)
 
-// establece el sock_fd a -1 para especificar que aún no se ha creado
-Server::Server(const ServerConfig& conf) : sockfd(-1), config(conf), clients() { 
-    
+
+Server::Server(const ServerConfig& conf) 
+{ 
+    sockfd = -1;          // Inicializa sockfd en -1
+    config = conf;        // Asigna conf a config
+    clients.clear();      // Limpia el vector de clientes (opcional, ya que se inicializa vacío)    
     // CREACION DEL SOCKET (enchufe)
     //  - crea como un "enchufe por donde el servidor podrá comunicarse con los cliente"
     //  - AF_NET : el socker usará direcciones  IPv4
@@ -114,8 +117,8 @@ void Server::run()
     while (true) 
     {
         FD_ZERO(&read_fds); // Limpiar read_fds
-        FD_SET(sockfd, &read_fds); // Añadir socket del servidor
-        max_fd = sockfd; // Resetear max_fd
+        FD_SET(sockfd, &read_fds); // Añadir socket del servidor a la lista read_fds
+        max_fd = sockfd; // Resetear max_fd (controla un max de conexiones)
 
         /* GESTIONA TODOS LOS CLIENTES CONECTADOS AL SERVIDOR
             - se asegura que ningun cliente se queda demasiado tiempo inactivo-
@@ -154,6 +157,8 @@ void Server::run()
 
         //select espera a que haya actividad en algún fd en reads_fds o que pase el tiempo (timeout)
             // devuelve el nº de fds listos si hay actividad
+            // si el cliente hace (ej: localhost:8080) solo se ha conectado, pero no ha solicitado nada
+            // x lo que no se considera que haya actividad
         int activity = select(max_fd + 1, &read_fds, NULL, NULL, &timeout);
 
         // Comprueba errores (activity = -1)
