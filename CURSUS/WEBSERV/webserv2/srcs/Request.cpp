@@ -29,14 +29,14 @@ bool Request::parse(std::string& buffer)
     std::cerr << "DEBUG: Parsing buffer: " << buffer << "\n";
     std::cerr.flush();
 
-    // Busca la pos donde empieza \r\n\r.... EJ:
+    // Busca la pos donde empieza \r\n\r....(el delimitador) EJ:
         // POST /cgi-bin/hello.php HTTP/1.1\r\n
         //Host: localhost\r\n
         //Content-Type: application/x-www-form-urlencoded\r\n
         //Content-Length: 17\r\n
         //Connection: keep-alive\r\n
         //\r\n <----
-        //name=Juan&age=30
+        //name=Juan&age=30 --> el body de la solicitud
     size_t header_end = buffer.find("\r\n\r\n");
     
     // Sino la encuentra
@@ -47,17 +47,20 @@ bool Request::parse(std::string& buffer)
         return false;
     }
 
-    // Extrae la cabecera (todo el contenido hasta los \r\n...)
+    // Extrae la cabecera 
+        // (todo el contenido hasta los \r\n...(el delimitador))
     std::string header = buffer.substr(0, header_end);
 
     // lo convierte a istringstream
+        // para detectar cada \n como nueva linea para el getline!!
     std::istringstream iss(header);
     std::string line;
     bool first_line = true;
+
     // Recorre las cabeceras linea a linea
     while (std::getline(iss, line)) 
     {
-        // salta lineas vacias o con \r
+        // salta lineas vacias o solo con \r salta a la sig. linea
         if (line.empty() || line == "\r") 
             continue;
         
@@ -80,8 +83,9 @@ bool Request::parse(std::string& buffer)
                 return false;
             }
             
-            // Busca la pos de ? en la cadena ej:
+            // Busca la pos de ? en la URI ej:
                 // uri = "/cgi-bin/hello.php?name=Juan&age=30";
+                    // URI -> ruta + consulta (separada por ?)
                 //query_pos = 16; // posición del carácter '?'
             size_t query_pos = uri.find('?');
 
@@ -125,6 +129,7 @@ bool Request::parse(std::string& buffer)
 
 
     // Extre la longitud del contenido si existe
+        // el navegador es el q calcula la longitud de la request
     size_t content_length = 0;
     if (headers.find("Content-Length") != headers.end()) 
         content_length = std::atoi(headers["Content-Length"].c_str());
@@ -137,19 +142,23 @@ bool Request::parse(std::string& buffer)
     if (buffer.length() >= header_end + 4 + content_length) 
     {
          /*// extrae el contenido del cuerpo de la solicitud ej:
-         
             POST /cgi-bin/hello.php HTTP/1.1                    <--- LINEA DE SOLICITUD
             Host: localhost                                     <--- CABECERA
             Content-Type: application/x-www-form-urlencoded     <--- CABECERA
             Content-Length: 17                                  <--- CABECERA
-
+            // BODY:
             name=Juan&age=30                                    <--- BODY   */
         body = buffer.substr(header_end + 4, content_length);
         
-        // actualiza el buffer para eliminar las partes procesadas
+        // actualiza el buffer 
+            // elimina las partes procesadas y solo guarda el body
         buffer = buffer.substr(header_end + 4 + content_length);
         std::cerr << "DEBUG: Parsed request successfully\n";
         std::cerr.flush();
+
+        // Como la solicitud esta completa:
+            // cabeceras + cuerpo
+            // devuelve true
         return true;
     }
 

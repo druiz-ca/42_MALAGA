@@ -120,7 +120,7 @@ void Server::run()
         FD_SET(sockfd, &read_fds); // Añadir socket del servidor a la lista read_fds
         max_fd = sockfd; // Resetear max_fd (controla un max de conexiones)
 
-        /* GESTIONA TODOS LOS CLIENTES CONECTADOS AL SERVIDOR ANTES DE SEGUIR
+        /* GESTIONA TODOS LOS CLIENTES Q ESTÉN CONECTADOS AL SERVIDOR ANTES DE SEGUIR
             - se asegura que ningun cliente se queda demasiado tiempo inactivo-
             - prepara todo para poder leer datos de los clientes
             - si un cliente está inactivo mucho tiempo lo desconecta */
@@ -195,7 +195,7 @@ void Server::run()
                 continue;
             }
 
-            // Configurar socket no bloqueante
+            // Configurar socket no bloqueante (para atender varios clientes a la vez)
             if (fcntl(client_fd, F_SETFL, O_NONBLOCK) < 0) 
             {
                 std::cerr << "ERROR: Failed to set client socket to non-blocking: " << std::strerror(errno) << "\n";
@@ -209,7 +209,7 @@ void Server::run()
 
             // Crea estructura para el nuevo cliente con:
                 // fd
-                // buffer vacío
+                // buffer vacío (pq los datos los lee mas adelante)
                 // tiempo de última actividad
             Client client = {client_fd, "", time(NULL)};
 
@@ -219,7 +219,7 @@ void Server::run()
 
         // Lee, procesa y responda a las peticiones de los clientes contectados
             // elimina clientes que se desconecten, tengan errores o no cumplan las reglas
-        for (size_t i = 0; i < clients.size(); )  //VOY X AQUI EN EXCALIDRAW
+        for (size_t i = 0; i < clients.size(); ) 
         {
             // extrae fd del cliente
             int client_fd = clients[i].fd;
@@ -240,6 +240,7 @@ void Server::run()
             // Si error
             if (bytes_read < 0) 
             {
+                // si el error es uno de estos pasa al siguiente cliente
                 if (errno == EAGAIN || errno == EWOULDBLOCK) 
                 {
                     ++i;
@@ -267,9 +268,11 @@ void Server::run()
                 continue;
             }
 
-             // si ha leído entonces:
+            // si ha leído entonces:
             
-            // Añade los datos del buffer leído al buffer de clientes
+            // CONCATENA los datos del buffer leído al contenido actual del buffer del cliente
+                // seguira concatenando nuevo contenido hasta que en la solicitud del cliente
+                // no haya contenido en el buffer (pq la sol. puede enviarse en varias partes)
             clients[i].buffer += std::string(buffer, bytes_read);
 
             // Actualiza la hora de la última actividad de ese cliente
@@ -286,12 +289,12 @@ void Server::run()
                 // - y la conexión siga activa
             while (!clients[i].buffer.empty() && keep_alive) 
             {
-                // Crea objeto request:
-                    // - Almacena y maneja la petición HTTP
+                // Crea objeto request (solicitud):
                 Request request;
 
                 // Parsea el buffer del cliente buscando petición Http
-                if (!request.parse(clients[i].buffer)) 
+                    // Si la solicitud está incompleta o inválida...
+                if (request.parse(clients[i].buffer) != true)  
                 {
                     std::cerr << "DEBUG: Incomplete or invalid request for fd " << client_fd << "\n";
                     std::cerr.flush();
@@ -315,12 +318,12 @@ void Server::run()
                 std::cerr << "DEBUG: Parsed request successfully for fd " << client_fd << "\n";
                 std::cerr.flush();
 
-                // Crea objeto con:
-                    // - la petición HTTP parseada
+                // Crea objeto response con:
+                    // - la petición HTTP parseada (REQUEST)
                     // - la configuración del servidor
                 Response response(request, config);
 
-                // Procesa la petición:
+                // Procesa la request para dar la response:
                     // - Prepara la respuesta
                     // - Decide que respuesta dar
                 response.handleRequest();
