@@ -62,10 +62,11 @@ Response::Response(const Request& req, const ServerConfig& conf)
     : status_code(200), status_message("OK"), request(req), server_config(conf) 
 {   // 200 (petición exitosa), 
     // inicializa el atributo request con req(request)-> la petición
-    // 
+    
     std::cerr << "DEBUG: Response constructor called for method: " << req.getMethod() << ", URI: " << req.getUri() << std::endl;
     std::cerr.flush();
 }
+
 
 /* Esta línea busca la configuración de ubicación más adecuada para la URI solicitada 
 por el cliente.  
@@ -79,12 +80,13 @@ si hay que redirigir, si se permite el método, etc.).
 
 En resumen, esta línea determina qué reglas y recursos del servidor se aplican a la 
 petición del cliente según la ruta solicitada.*/
-
 void Response::handleRequest() 
 {
     // URI -> Uniform Resource Identifier
     // localiza le (index.html dentro de ....localhost:8080/....)
     // busca la mejor coincidencia encontrada con la ruta solicitada
+        // usa el método getUri para acceder a la var URI privada
+        // esto se llama encapsulación (para proteger datos privados)
     const LocationConfig* location = findLocation(request.getUri());
 
     std::cerr << "DEBUG: Handling request for URI: " << request.getUri() << std::endl;
