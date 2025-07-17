@@ -120,14 +120,17 @@ void Server::run()
         FD_SET(sockfd, &read_fds); // Añadir socket del servidor a la lista read_fds
         max_fd = sockfd; // Resetear max_fd (controla un max de conexiones)
 
-        /* GESTIONA TODOS LOS CLIENTES CONECTADOS AL SERVIDOR
+        /* GESTIONA TODOS LOS CLIENTES CONECTADOS AL SERVIDOR ANTES DE SEGUIR
             - se asegura que ningun cliente se queda demasiado tiempo inactivo-
-            - prepara todo para poder lleer datos de los clientes
+            - prepara todo para poder leer datos de los clientes
             - si un cliente está inactivo mucho tiempo lo desconecta */
         for (size_t i = 0; i < clients.size(); ) 
         {
             int client_fd = clients[i].fd; // extrae el fd del cliente
-            FD_SET(client_fd, &read_fds); // añande el fd del cliente al conjunto read_fds para vigilar si tiene datos para leer
+            
+            // añande el fd del cliente al conjunto read_fds para vigilar si tiene datos para leer
+                // Almacena todos los fd de clientes conectados y el fd del socket servidor
+            FD_SET(client_fd, &read_fds); 
             
             // si el fd es mayor al actual lo actualiza para saber el fd más alto que tiene que vigilar
             if (client_fd > max_fd)
@@ -146,7 +149,11 @@ void Server::run()
                 FD_CLR(client_fd, &read_fds); // Eliminar fd de read_fds
                 close(client_fd); // Cerrar conexión
                 clients.erase(clients.begin() + i); // Eliminar cliente
-                continue; // No incrementar i
+                
+                // Salta el resto de código (No incrementa i)
+                    // (al borrarlo, el resto de clientes suben una posición x eso en la misma pos de
+                    // i ahora está el siguiente cliente )
+                continue; 
             }
             ++i;
         }
@@ -174,7 +181,7 @@ void Server::run()
         // Comprueba si el socket del servidor tiene actividad (nueva conexión entrante)
         if (FD_ISSET(sockfd, &read_fds)) 
         {
-            // Acepta la conexión y ontiene un fd
+            // Acepta la conexión y contiene un fd
             int client_fd = accept(sockfd, NULL, NULL);
 
             // Comprueba errores en el fd
