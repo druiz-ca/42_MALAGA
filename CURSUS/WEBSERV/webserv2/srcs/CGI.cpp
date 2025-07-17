@@ -48,7 +48,7 @@ std::string CGI::execute()
         return "";
     }
 
-    if (pid == 0) 
+    if (pid == 0) //Proceso hijo 
     { 
         // ============================ CONFIGURACIÓN DE PIPES ==================================
 
@@ -170,7 +170,7 @@ std::string CGI::execute()
         exit(1);
         // LO que devuelva EXECVE lo recibe el proceso padre
     } 
-    else { // Parent process
+    else { // Proceso padre
         close(pipe_in[0]);
         close(pipe_out[1]);
 

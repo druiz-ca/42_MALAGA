@@ -324,7 +324,7 @@ void Response::handleCgiRequest(const LocationConfig& location)
         std::cerr << "DEBUG: Checking allowed methods for " << request.getMethod() << std::endl;
         std::cerr.flush();
 
-        // Recorre todos los métodos definidos para check si está permitido
+        // Recorre todos los métodos definidos para ver si está permitido
         for (size_t i = 0; i < location.methods.size(); ++i) 
         {
             std::string method = cleanMethod(location.methods[i]);
@@ -392,7 +392,7 @@ const LocationConfig* Response::findLocation(const std::string& uri) const
     const LocationConfig* best_match = NULL;
     size_t longest_match = 0;
 
-    // NORMALIZA LA URI (elimina el "/")
+    // NORMALIZA LA URI (elimina el primer "/")
     std::string normalized_uri = uri;
     if (!normalized_uri.empty() && normalized_uri[0] == '/')
         normalized_uri = normalized_uri.substr(1);
@@ -400,27 +400,29 @@ const LocationConfig* Response::findLocation(const std::string& uri) const
     std::cerr << "DEBUG: Finding location for URI: " << uri << ", normalized: " << normalized_uri << std::endl;
     std::cerr.flush();
 
-
+    // Recorre todas las rutas
     for (size_t i = 0; i < locations.size(); ++i) 
     {
+        // ELimina las / si hay más de 1
         std::string path = cleanPath(locations[i].path);
         if (path[0] == '/') // si la ruta empieza por "/" la borra
             path = path.substr(1);
 
-        // Imprime la ruta y todos los metodos...
+        // SOLO Imprime la ruta y todos los metodos...
         std::cerr << "DEBUG: Checking location path: " << path << " (original: " << locations[i].path << "), methods: ";
         for (size_t j = 0; j < locations[i].methods.size(); ++j)
             std::cerr << locations[i].methods[j] << " ";
         std::cerr << ", root: " << locations[i].root << ", upload_path: " << locations[i].upload_path << ", cgi_path: " << locations[i].cgi_path << std::endl;
         std::cerr.flush();
 
-        // Comprueba si la ruta contiene algo y la pos. de la ruta dentro de la URI
+        // Comprueba que la ruta contiene algo y 
+        // si la ruta comienza igual que la uri normaizada
         if (path.empty() || normalized_uri.find(path) == 0) 
         {
             // Comprueba:
             //  - si la long de la URI normalizada es = a la de la ruta
-            //  - si justo después de la ruta hay "/"
-            //  - si termina con \0
+            //  - o, si justo después de la ruta hay "/" (un directorio más)
+            //  - o, si termina con \0 (termina )
             if (normalized_uri.length() == path.length() || 
                 normalized_uri[path.length()] == '/' || 
                 normalized_uri[path.length()] == '\0') 
@@ -448,7 +450,6 @@ const LocationConfig* Response::findLocation(const std::string& uri) const
     }
     return best_match; // devuelve la mejor coincidencia encontrada
 }
-
 
 /* simplemente elimina las barras que sobran si hay más de 1 */
 std::string Response::cleanPath(const std::string& path) const 
