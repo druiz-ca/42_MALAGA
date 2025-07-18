@@ -29,9 +29,11 @@ std::string Config::trim(const std::string& str) {
 // Evaluation point: must support multiple server blocks with different ports
 // Evaluation point: location blocks with CGI, upload, and method restrictions
 // Evaluation point: proper error handling and validation of all parameters
-void Config::load(const std::string& filename) {
+void Config::load(const std::string& filename) 
+{
     std::ifstream file(filename.c_str());
-    if (!file.is_open()) {
+    if (!file.is_open()) 
+    {
         std::cerr << "ERROR: Failed to open config file: " << filename 
                   << ", errno: " << errno << " (" << strerror(errno) << ")" << std::endl;
         throw std::runtime_error("Failed to open config file: " + filename);
@@ -48,7 +50,8 @@ void Config::load(const std::string& filename) {
 
     // Parse configuration file line by line
     // Evaluation point: robust parsing with proper error handling
-    while (std::getline(file, line)) {
+    while (std::getline(file, line)) 
+    {
         line = trim(line);
         if (line.empty() || line[0] == '#') continue; // Skip empty lines and comments
 
@@ -60,8 +63,10 @@ void Config::load(const std::string& filename) {
 
         // Handle server block start
         // Evaluation point: multiple server blocks support
-        if (key == "server" && line.find("{") != std::string::npos) {
-            if (in_server_block) {
+        if (key == "server" && line.find("{") != std::string::npos) 
+        {
+            if (in_server_block) 
+            {
                 std::cerr << "ERROR: Nested server block detected" << std::endl;
                 throw std::runtime_error("Nested server blocks are not allowed");
             }
@@ -73,13 +78,17 @@ void Config::load(const std::string& filename) {
 
         // Handle block closing
         // Evaluation point: proper validation before closing blocks
-        if (in_server_block && line == "}") {
-            if (in_location_block) {
+        if (in_server_block && line == "}") 
+        {
+            if (in_location_block) 
+            {
                 // Validate CGI interpreters before adding location
                 // Evaluation point: CGI interpreter validation is critical
                 for (std::map<std::string, std::string>::iterator it = current_location.cgi_paths.begin();
-                     it != current_location.cgi_paths.end(); ++it) {
-                    if (access(it->second.c_str(), X_OK) != 0) {
+                     it != current_location.cgi_paths.end(); ++it) 
+                    {
+                    if (access(it->second.c_str(), X_OK) != 0) 
+                    {
                         std::cerr << "ERROR: CGI interpreter not found or not executable: " << it->second 
                                   << " for extension " << it->first 
                                   << ", errno: " << errno << " (" << strerror(errno) << ")" << std::endl;
@@ -93,17 +102,20 @@ void Config::load(const std::string& filename) {
             } else {
                 // Validate server configuration before adding
                 // Evaluation point: server must have at least one port defined
-                if (current_server.ports.empty()) {
+                if (current_server.ports.empty()) 
+                {
                     std::cerr << "ERROR: No ports defined for server block" << std::endl;
                     throw std::runtime_error("No ports defined for server block");
                 }
                 // Validate root directory accessibility
                 // Evaluation point: root directory must be accessible for static file serving
-                if (current_server.root.empty()) {
+                if (current_server.root.empty()) 
+                {
                     std::cerr << "WARNING: No root defined for server block, using default '/var/www/html'" << std::endl;
                     current_server.root = "/var/www/html";
                 }
-                if (access(current_server.root.c_str(), R_OK) != 0) {
+                if (access(current_server.root.c_str(), R_OK) != 0) 
+                {
                     std::cerr << "ERROR: Root directory not accessible: " << current_server.root 
                               << ", errno: " << errno << " (" << strerror(errno) << ")" << std::endl;
                     throw std::runtime_error("Root directory not accessible: " + current_server.root);
@@ -111,9 +123,8 @@ void Config::load(const std::string& filename) {
                 servers.push_back(current_server);
                 in_server_block = false;
                 std::cerr << "DEBUG: Added server block with ports: ";
-                for (size_t i = 0; i < current_server.ports.size(); ++i) {
+                for (size_t i = 0; i < current_server.ports.size(); ++i) 
                     std::cerr << current_server.ports[i] << " ";
-                }
                 std::cerr << std::endl;
             }
             continue;
@@ -304,8 +315,10 @@ void Config::load(const std::string& filename) {
 
     // Handle unclosed blocks at end of file
     // Evaluation point: configuration file must be syntactically complete
-    if (in_server_block) {
-        if (in_location_block) {
+    if (in_server_block) 
+    {
+        if (in_location_block) 
+        {
             // Validate and close final location block
             // Evaluation point: CGI interpreter validation must occur before accepting config
             for (std::map<std::string, std::string>::iterator it = current_location.cgi_paths.begin();

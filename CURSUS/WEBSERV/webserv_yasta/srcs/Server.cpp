@@ -35,10 +35,12 @@ Server::Server(const Config& cfg) : config(cfg) {
     std::cerr << "DEBUG: Number of server configurations: " << config.getServers().size() << std::endl << std::flush;
 
     std::map<int, std::vector<size_t> > port_map;
-    for (size_t i = 0; i < config.getServers().size(); ++i) {
+    for (size_t i = 0; i < config.getServers().size(); ++i) 
+    {
         const ServerConfig& server_config = config.getServers()[i];
         std::cerr << "DEBUG: Processing server " << i << " with " << server_config.ports.size() << " ports" << std::endl << std::flush;
-        for (size_t p = 0; p < server_config.ports.size(); ++p) {
+        for (size_t p = 0; p < server_config.ports.size(); ++p) 
+        {
             int port = server_config.ports[p];
             port_map[port].push_back(i);
             std::cerr << "DEBUG: Server " << i << " listens on port " << port << std::endl << std::flush;
