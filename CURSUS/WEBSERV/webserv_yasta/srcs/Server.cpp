@@ -189,7 +189,7 @@ bool Server::isRequestComplete(const Client& client) const {
 // Evaluation point: client request reading and response writing
 // Evaluation point: error handling and client disconnection management
 // Evaluation point: integration with Request and Response classes
-void Server::run() 
+void Server::run()
 {
     fd_set read_fds, write_fds;
     int max_fd = 0;
@@ -420,14 +420,16 @@ void Server::run()
             // Evaluation point: proper connection management after response completion
             
             // Comprueba si el fd del cliente esta listo para escritura 
-            // y si hay respuesta pendiente de enviar al cliente
+            // y si hay respuesta pendiente de enviar al cliente1
             if (FD_ISSET(client_fd, &write_fds) && !client.response.empty()) {
                 std::cerr << "DEBUG: Sending response for fd " << client_fd << " on port " << client.port << std::endl << std::flush;
                 
                 // Solo un send() por cliente por select() - cumplir regla de evaluación
+                    // Envia datos al cliente a través del socket
                 ssize_t bytes_sent = send(client_fd, client.response.c_str() + client.bytes_sent, 
                                         client.response.length() - client.bytes_sent, 0);
-                if (bytes_sent < 0) {
+                if (bytes_sent < 0) 
+                {
                     // No usar errno - solo verificar return value
                     std::cerr << "ERROR: Send failed for fd " << client_fd << ", removing client" << std::endl << std::flush;
                     clients_to_remove.push_back(client_fd);
@@ -438,7 +440,9 @@ void Server::run()
                     client.bytes_sent += bytes_sent;
                     std::cerr << "DEBUG: Sent " << bytes_sent << " bytes for fd " << client_fd << ", total sent: " << client.bytes_sent << std::endl << std::flush;
                     
-                    if (client.bytes_sent >= client.response.length()) {
+                    // Si se excede de datos
+                    if (client.bytes_sent >= client.response.length()) 
+                    {
                         std::cerr << "DEBUG: Response fully sent for fd " << client_fd << std::endl << std::flush;
                         client.response.clear();
                         client.bytes_sent = 0;
