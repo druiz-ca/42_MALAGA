@@ -133,7 +133,8 @@ void Config::load(const std::string& filename)
         // Handle location block start
         // Evaluation point: location blocks for specific path handling
         if (in_server_block && key == "location" && line.find("{") != std::string::npos) {
-            if (in_location_block) {
+            if (in_location_block) // controla que no hayan location anidados
+            {
                 std::cerr << "ERROR: Nested location block detected" << std::endl;
                 throw std::runtime_error("Nested location blocks are not allowed");
             }
@@ -152,17 +153,20 @@ void Config::load(const std::string& filename)
             continue;
         }
 
-        if (in_location_block && line == "}") {
+        if (in_location_block && line == "}") 
+        {
             // Validate CGI interpreters before closing location block
             // Evaluation point: CGI interpreter validation is critical for functionality
             for (std::map<std::string, std::string>::iterator it = current_location.cgi_paths.begin();
-                 it != current_location.cgi_paths.end(); ++it) {
-                if (access(it->second.c_str(), X_OK) != 0) {
-                    std::cerr << "ERROR: CGI interpreter not found or not executable: " << it->second 
-                              << " for extension " << it->first 
-                              << ", errno: " << errno << " (" << strerror(errno) << ")" << std::endl;
-                    throw std::runtime_error("Invalid CGI interpreter: " + it->second);
-                }
+                it != current_location.cgi_paths.end(); ++it) 
+                {   // verifica los permisos de acceso
+                    if (access(it->second.c_str(), X_OK) != 0) 
+                    {
+                        std::cerr << "ERROR: CGI interpreter not found or not executable: " << it->second 
+                                << " for extension " << it->first 
+                                << ", errno: " << errno << " (" << strerror(errno) << ")" << std::endl;
+                        throw std::runtime_error("Invalid CGI interpreter: " + it->second);
+                    }
                 std::cerr << "DEBUG: Validated CGI interpreter: " << it->second << " for extension " << it->first << std::endl;
             }
             current_server.locations.push_back(current_location);
@@ -173,20 +177,27 @@ void Config::load(const std::string& filename)
 
         // Parse location-specific directives
         // Evaluation point: location blocks must support all required features
-        if (in_location_block) {
-            if (key == "root") {
+        if (in_location_block) 
+        {
+            if (key == "root") 
+            {
                 // Set root directory for this location
                 current_location.root = trim(iss.str().substr(iss.tellg()));
                 std::cerr << "DEBUG: Set location root: " << current_location.root << std::endl;
-            } else if (key == "index") {
+            } 
+            else if (key == "index") 
+            {
                 // Set index file for directory requests
                 current_location.index = trim(iss.str().substr(iss.tellg()));
                 std::cerr << "DEBUG: Set location index: " << current_location.index << std::endl;
-            } else if (key == "cgi_path") {
+            } 
+            else if (key == "cgi_path") 
+            {
                 // Parse CGI interpreter mappings (extension=interpreter format)
                 // Evaluation point: CGI support is mandatory for dynamic content
                 std::string token;
-                while (iss >> token) {
+                while (iss >> token) 
+                {
                     // Each token must have format: extension=interpreter
                     // Evaluation point: proper CGI configuration syntax validation
                     size_t equals_pos = token.find('=');
@@ -196,7 +207,8 @@ void Config::load(const std::string& filename)
                     }
                     std::string extension = token.substr(0, equals_pos);
                     std::string interpreter = token.substr(equals_pos + 1);
-                    if (extension.empty() || interpreter.empty()) {
+                    if (extension.empty() || interpreter.empty()) 
+                    {
                         std::cerr << "ERROR: Empty extension or interpreter in cgi_path: " << token << std::endl;
                         throw std::runtime_error("Invalid cgi_path syntax: " + token);
                     }
@@ -207,19 +219,24 @@ void Config::load(const std::string& filename)
                     std::cerr << "ERROR: No valid cgi_path entries found in: " << line << std::endl;
                     throw std::runtime_error("No valid cgi_path entries");
                 }
-            } else if (key == "upload_path") {
+            } else if (key == "upload_path") 
+            {
                 // Set upload directory for POST file uploads
                 // Evaluation point: file upload support is required
                 current_location.upload_path = trim(iss.str().substr(iss.tellg()));
                 std::cerr << "DEBUG: Set upload_path: " << current_location.upload_path << std::endl;
-            } else if (key == "directory_listing") {
+            } 
+            else if (key == "directory_listing") 
+            {
                 // Enable/disable directory listing for this location
                 // Evaluation point: directory listing must be configurable
                 std::string value;
                 iss >> value;
                 current_location.directory_listing = (value == "on");
                 std::cerr << "DEBUG: Set directory_listing: " << (current_location.directory_listing ? "on" : "off") << std::endl;
-            } else if (key == "client_max_body_size") {
+            } 
+            else if (key == "client_max_body_size") 
+            {
                 // Set maximum request body size for uploads
                 // Evaluation point: body size limits are critical for security
                 std::string value;

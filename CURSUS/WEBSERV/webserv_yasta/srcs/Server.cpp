@@ -30,12 +30,13 @@
 // Evaluation point: proper integration with configuration system
 // Evaluation point: multi-server setup with port mapping
 // Evaluation point: socket creation and binding for multiple ports
-Server::Server(const Config& cfg) : config(cfg) {
+Server::Server(const Config& cfg) : config(cfg) 
+{
     std::cerr << "DEBUG: Starting Server constructor" << std::endl << std::flush;
     std::cerr << "DEBUG: Number of server configurations: " << config.getServers().size() << std::endl << std::flush;
 
     std::map<int, std::vector<size_t> > port_map;
-    for (size_t i = 0; i < config.getServers().size(); ++i) 
+    for (size_t i = 0; i < config.getServers().size(); ++i)
     {
         const ServerConfig& server_config = config.getServers()[i];
         std::cerr << "DEBUG: Processing server " << i << " with " << server_config.ports.size() << " ports" << std::endl << std::flush;
@@ -47,11 +48,13 @@ Server::Server(const Config& cfg) : config(cfg) {
         }
     }
 
-    for (std::map<int, std::vector<size_t> >::iterator it = port_map.begin(); it != port_map.end(); ++it) {
+    for (std::map<int, std::vector<size_t> >::iterator it = port_map.begin(); it != port_map.end(); ++it) 
+    {
         int port = it->first;
         std::cerr << "DEBUG: Setting up socket for port " << port << std::endl << std::flush;
         int fd = socket(AF_INET, SOCK_STREAM, 0);
-        if (fd < 0) {
+        if (fd < 0) 
+        {
             std::stringstream ss;
             ss << port;
             std::cerr << "ERROR: Failed to create socket for port " << port << ", errno: " << errno << " (" << strerror(errno) << ")" << std::endl << std::flush;
@@ -60,7 +63,8 @@ Server::Server(const Config& cfg) : config(cfg) {
         std::cerr << "DEBUG: Created socket, server_fd: " << fd << " for port " << port << std::endl << std::flush;
 
         int opt = 1;
-        if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) 
+        {
             std::stringstream ss;
             ss << port;
             std::cerr << "ERROR: Failed to set SO_REUSEADDR for server_fd: " << fd << ", errno: " << errno << " (" << strerror(errno) << ")" << std::endl << std::flush;
@@ -75,7 +79,8 @@ Server::Server(const Config& cfg) : config(cfg) {
         server_addr.sin_addr.s_addr = INADDR_ANY;
         server_addr.sin_port = htons(port);
 
-        if (bind(fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
+        if (bind(fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) 
+        {
             std::stringstream ss;
             ss << port;
             std::cerr << "ERROR: Failed to bind socket for port " << port << ", errno: " << errno << " (" << strerror(errno) << ")" << std::endl << std::flush;
@@ -84,7 +89,8 @@ Server::Server(const Config& cfg) : config(cfg) {
         }
         std::cerr << "DEBUG: Bound socket, server_fd: " << fd << " to port " << port << std::endl << std::flush;
 
-        if (listen(fd, 10) < 0) {
+        if (listen(fd, 10) < 0) 
+        {
             std::stringstream ss;
             ss << port;
             std::cerr << "ERROR: Failed to listen on socket for port " << port << ", errno: " << errno << " (" << strerror(errno) << ")" << std::endl << std::flush;
@@ -93,7 +99,8 @@ Server::Server(const Config& cfg) : config(cfg) {
         }
         std::cerr << "DEBUG: Server listening on server_fd: " << fd << ", port: " << port << std::endl << std::flush;
 
-        if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0) {
+        if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0) 
+        {
             std::stringstream ss;
             ss << port;
             std::cerr << "ERROR: Failed to set non-blocking for server_fd: " << fd << ", errno: " << errno << " (" << strerror(errno) << ")" << std::endl << std::flush;
@@ -105,9 +112,8 @@ Server::Server(const Config& cfg) : config(cfg) {
         server_fds.push_back(fd);
         port_to_server_indices[port] = it->second;
         std::cerr << "DEBUG: Added server_fd " << fd << " for port " << port << " with server_indices: ";
-        for (size_t i = 0; i < it->second.size(); ++i) {
+        for (size_t i = 0; i < it->second.size(); ++i) 
             std::cerr << it->second[i] << " ";
-        }
         std::cerr << std::endl << std::flush;
     }
     std::cerr << "DEBUG: Server initialized with " << server_fds.size() << " sockets" << std::endl << std::flush;
