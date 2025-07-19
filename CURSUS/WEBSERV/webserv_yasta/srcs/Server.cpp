@@ -362,11 +362,16 @@ void Server::run()
                         std::string host = client.request->getHeader("Host");
                         if (!host.empty()) 
                         {
+                            // Extrae el puerto (example.com)
                             size_t colon_pos = host.find(':');
                             if (colon_pos != std::string::npos) 
                                 host = host.substr(0, colon_pos);
+                            
+                            // Obtiene el índice del servidor q maneja el puerto del cliente
                             const std::vector<size_t>& indices = port_to_server_indices[client.port];
                             bool matched = false;
+                            
+                            // Busca el servidor q coincida con el nombre del host
                             for (size_t i = 0; i < indices.size(); ++i) 
                             {
                                 const ServerConfig& cfg = config.getServers()[indices[i]];
@@ -378,16 +383,22 @@ void Server::run()
                                     break;
                                 }
                             }
-                            if (!matched) 
+                            if (!matched) // sino lo encuentra
                                 std::cerr << "DEBUG: No server_name matched for Host: " << host << ", using default server_index " << server_index << std::endl << std::flush;
                         } 
                         else 
                         {
                             std::cerr << "DEBUG: Empty Host header, using default server_index " << server_index << std::endl << std::flush;
                         }
+                        
+                        
                         const ServerConfig& server_config = config.getServers()[server_index];
+                        
+                        // Genera una respuesta
                         Response response(*client.request, server_config, client.port);
                         client.response = response.handleRequest();
+                        
+                        // Limpia los recursos
                         client.buffer.clear();
                         delete client.request;
                         client.request = NULL;
@@ -407,6 +418,9 @@ void Server::run()
             // Evaluation point: non-blocking response writing with send()
             // Evaluation point: partial send handling for large responses  
             // Evaluation point: proper connection management after response completion
+            
+            // Comprueba si el fd del cliente esta listo para escritura 
+            // y si hay respuesta pendiente de enviar al cliente
             if (FD_ISSET(client_fd, &write_fds) && !client.response.empty()) {
                 std::cerr << "DEBUG: Sending response for fd " << client_fd << " on port " << client.port << std::endl << std::flush;
                 
