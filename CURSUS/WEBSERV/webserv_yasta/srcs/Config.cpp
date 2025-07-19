@@ -190,7 +190,7 @@ void Config::load(const std::string& filename)
                 // Set index file for directory requests
                 current_location.index = trim(iss.str().substr(iss.tellg()));
                 std::cerr << "DEBUG: Set location index: " << current_location.index << std::endl;
-            } 
+            }
             else if (key == "cgi_path") 
             {
                 // Parse CGI interpreter mappings (extension=interpreter format)
@@ -363,16 +363,16 @@ void Config::load(const std::string& filename)
             std::cerr << "WARNING: No root defined for final server block, using default '/var/www/html'" << std::endl;
             current_server.root = "/var/www/html";
         }
-        if (access(current_server.root.c_str(), R_OK) != 0) {
+        if (access(current_server.root.c_str(), R_OK) != 0) 
+		{
             std::cerr << "ERROR: Root directory not accessible: " << current_server.root 
                       << ", errno: " << errno << " (" << strerror(errno) << ")" << std::endl;
             throw std::runtime_error("Root directory not accessible: " + current_server.root);
         }
         servers.push_back(current_server);
         std::cerr << "DEBUG: Added final server block with ports: ";
-        for (size_t i = 0; i < current_server.ports.size(); ++i) {
+        for (size_t i = 0; i < current_server.ports.size(); ++i) 
             std::cerr << current_server.ports[i] << " ";
-        }
         std::cerr << std::endl;
     }
 

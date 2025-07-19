@@ -36,6 +36,7 @@ Server::Server(const Config& cfg) : config(cfg)
     std::cerr << "DEBUG: Number of server configurations: " << config.getServers().size() << std::endl << std::flush;
 
     std::map<int, std::vector<size_t> > port_map;
+    // Almacena en un mapa cada puerto con el nº de servidor al q corresponde
     for (size_t i = 0; i < config.getServers().size(); ++i)
     {
         const ServerConfig& server_config = config.getServers()[i];
@@ -48,6 +49,7 @@ Server::Server(const Config& cfg) : config(cfg)
         }
     }
 
+    // Creación y configuración del socket
     for (std::map<int, std::vector<size_t> >::iterator it = port_map.begin(); it != port_map.end(); ++it) 
     {
         int port = it->first;
@@ -187,25 +189,32 @@ bool Server::isRequestComplete(const Client& client) const {
 // Evaluation point: client request reading and response writing
 // Evaluation point: error handling and client disconnection management
 // Evaluation point: integration with Request and Response classes
-void Server::run() {
+void Server::run() 
+{
     fd_set read_fds, write_fds;
     int max_fd = 0;
-    for (size_t i = 0; i < server_fds.size(); ++i) {
-        if (server_fds[i] > max_fd) max_fd = server_fds[i];
+    // Compruebo el nº de clientes conectados simultaneamente
+    for (size_t i = 0; i < server_fds.size(); ++i) 
+    {
+        if (server_fds[i] > max_fd) 
+            max_fd = server_fds[i];
     }
 
-    while (true) {
+    while (true) 
+    {
         FD_ZERO(&read_fds);
         FD_ZERO(&write_fds);
-        for (size_t i = 0; i < server_fds.size(); ++i) {
+        // Establece un fd a cada cliente conectado
+        for (size_t i = 0; i < server_fds.size(); ++i) 
             FD_SET(server_fds[i], &read_fds);
-        }
 
+        // añade cada fd de clientes al conjunto read_fds
         for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); ++it) {
             FD_SET(it->first, &read_fds);
-            if (!it->second.response.empty()) {
+            // si hay una respuesta pendiente, añade el fd del cliente a write_fds
+            if (!it->second.response.empty()) 
                 FD_SET(it->first, &write_fds);
-            }
+            // Actualiza el valor de max_fd
             if (it->first > max_fd) max_fd = it->first;
         }
 
@@ -213,35 +222,38 @@ void Server::run() {
         timeout.tv_sec = 5;
         timeout.tv_usec = 0;
 
+        // Select para monitorear los clientes a la vez (sin usar hilos ni hijos)
+            // activity -> el nº de fds listos para realizar operaciones
         int activity = select(max_fd + 1, &read_fds, &write_fds, NULL, &timeout);
-        if (activity < 0) {
+        if (activity < 0) 
+        {
             // Para select(), se permite verificar EINTR según las buenas prácticas
-            if (errno != EINTR) {
+            if (errno != EINTR) 
                 std::cerr << "ERROR: Select error" << std::endl << std::flush;
-            }
             continue;
         }
-        if (activity == 0) {
+        if (activity == 0) 
+        {
             std::cerr << "DEBUG: Select timeout" << std::endl << std::flush;
             continue;
         }
 
-        // Handle new incoming connections on server sockets
-        // Evaluation point: new client connection acceptance
-        // Evaluation point: non-blocking socket setup for clients
-        // Evaluation point: server port resolution and client mapping
-        // Evaluation point: proper socket address handling
-        for (size_t i = 0; i < server_fds.size(); ++i) {
-            if (FD_ISSET(server_fds[i], &read_fds)) {
+        // Maneja nuevas conexiones entrantes en los socket de escucha
+        for (size_t i = 0; i < server_fds.size(); ++i) 
+        {
+            if (FD_ISSET(server_fds[i], &read_fds)) 
+            {
                 struct sockaddr_in client_addr;
                 memset(&client_addr, 0, sizeof(client_addr));
                 socklen_t client_len = sizeof(client_addr);
                 int client_fd = accept(server_fds[i], (struct sockaddr*)&client_addr, &client_len);
-                if (client_fd < 0) {
+                if (client_fd < 0) 
+                {
                     std::cerr << "ERROR: Accept failed for server_fd " << server_fds[i] << std::endl << std::flush;
                     continue;
                 }
-                if (fcntl(client_fd, F_SETFL, O_NONBLOCK) < 0) {
+                if (fcntl(client_fd, F_SETFL, O_NONBLOCK) < 0) 
+                {
                     std::cerr << "ERROR: Failed to set client_fd " << client_fd << " to non-blocking" << std::endl << std::flush;
                     close(client_fd);
                     continue;
@@ -273,66 +285,71 @@ void Server::run() {
             Client& client = it->second;
 
             // Leer datos
-            if (FD_ISSET(client_fd, &read_fds)) {
+            if (FD_ISSET(client_fd, &read_fds)) 
+            {
                 char buffer[8192] = {0};
                 ssize_t bytes_read = recv(client_fd, buffer, sizeof(buffer), 0);
-                if (bytes_read <= 0) {
+                if (bytes_read <= 0) 
+                {
                     // No usar errno - solo verificar return value
-                    if (bytes_read < 0) {
+                    if (bytes_read < 0) 
                         std::cerr << "ERROR: Failed to read from fd " << client_fd << std::endl << std::flush;
-                    } else {
+                    else
                         std::cerr << "DEBUG: Connection closed on fd " << client_fd << ", bytes_read: " << bytes_read << std::endl << std::flush;
-                    }
                     clients_to_remove.push_back(client_fd);
                     continue;
                 }
                 std::cerr << "DEBUG: Received " << bytes_read << " bytes on fd " << client_fd << " on port " << client.port << std::endl << std::flush;
                 std::cerr << "DEBUG: Received data (string): [" << std::string(buffer, bytes_read).substr(0, 100) << (bytes_read > 100 ? "..." : "") << "]" << std::endl << std::flush;
                 std::cerr << "DEBUG: Received data (hex): ";
-                for (ssize_t i = 0; i < bytes_read; ++i) {
+                for (ssize_t i = 0; i < bytes_read; ++i)
                     std::cerr << std::hex << std::setw(2) << std::setfill('0') << (int)(unsigned char)buffer[i] << " ";
-                }
                 std::cerr << std::dec << std::endl << std::flush;
                 client.buffer.append(buffer, bytes_read);
                 std::cerr << "DEBUG: Appended to client.buffer, new length: " << client.buffer.length() << std::endl << std::flush;
                 std::cerr << "DEBUG: client.buffer content (hex): ";
-                for (size_t i = 0; i < client.buffer.length(); ++i) {
+                for (size_t i = 0; i < client.buffer.length(); ++i)
                     std::cerr << std::hex << std::setw(2) << std::setfill('0') << (int)(unsigned char)client.buffer[i] << " ";
-                }
                 std::cerr << std::dec << std::endl << std::flush;
 
                 try {
-                    if (!client.request && isRequestComplete(client)) {
+                    if (!client.request && isRequestComplete(client)) 
+                    {
                         std::cerr << "DEBUG: Creating new Request with client.buffer length: " << client.buffer.length() << std::endl << std::flush;
                         client.request = new Request(client_fd, client.buffer);
-                    } else if (client.request) {
+                    } 
+                    else if (client.request) 
+                    {
                         std::cerr << "DEBUG: Appending to existing Request, data length: " << bytes_read << std::endl << std::flush;
                         client.request->appendBody(std::string(buffer, bytes_read));
                     }
-                    if (client.request && client.request->isComplete()) {
+                    if (client.request && client.request->isComplete()) 
+                    {
                         std::cerr << "DEBUG: Parsed request successfully for fd " << client_fd << " on port " << client.port << std::endl << std::flush;
                         size_t server_index = client.server_index;
                         std::string host = client.request->getHeader("Host");
-                        if (!host.empty()) {
+                        if (!host.empty()) 
+                        {
                             size_t colon_pos = host.find(':');
-                            if (colon_pos != std::string::npos) {
+                            if (colon_pos != std::string::npos) 
                                 host = host.substr(0, colon_pos);
-                            }
                             const std::vector<size_t>& indices = port_to_server_indices[client.port];
                             bool matched = false;
-                            for (size_t i = 0; i < indices.size(); ++i) {
+                            for (size_t i = 0; i < indices.size(); ++i) 
+                            {
                                 const ServerConfig& cfg = config.getServers()[indices[i]];
-                                if (cfg.server_name == host) {
+                                if (cfg.server_name == host) 
+                                {
                                     server_index = indices[i];
                                     std::cerr << "DEBUG: Matched Host header '" << host << "' to server_index " << server_index << std::endl << std::flush;
                                     matched = true;
                                     break;
                                 }
                             }
-                            if (!matched) {
+                            if (!matched) 
                                 std::cerr << "DEBUG: No server_name matched for Host: " << host << ", using default server_index " << server_index << std::endl << std::flush;
-                            }
-                        } else {
+                        } else 
+                        {
                             std::cerr << "DEBUG: Empty Host header, using default server_index " << server_index << std::endl << std::flush;
                         }
                         const ServerConfig& server_config = config.getServers()[server_index];
