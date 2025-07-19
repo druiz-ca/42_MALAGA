@@ -241,17 +241,22 @@ void Server::run()
         // Maneja nuevas conexiones entrantes en los socket de escucha
         for (size_t i = 0; i < server_fds.size(); ++i) 
         {
-            if (FD_ISSET(server_fds[i], &read_fds)) 
+            // checkea si ese fd tiene una conexión entrante
+            if (FD_ISSET(server_fds[i], &read_fds))
             {
                 struct sockaddr_in client_addr;
                 memset(&client_addr, 0, sizeof(client_addr));
                 socklen_t client_len = sizeof(client_addr);
+
+                // Acepta una nueva conexión entrante
                 int client_fd = accept(server_fds[i], (struct sockaddr*)&client_addr, &client_len);
                 if (client_fd < 0) 
                 {
                     std::cerr << "ERROR: Accept failed for server_fd " << server_fds[i] << std::endl << std::flush;
                     continue;
                 }
+                
+                // Establece el socket del cliente en no bloqueante
                 if (fcntl(client_fd, F_SETFL, O_NONBLOCK) < 0) 
                 {
                     std::cerr << "ERROR: Failed to set client_fd " << client_fd << " to non-blocking" << std::endl << std::flush;
@@ -261,13 +266,22 @@ void Server::run()
                 struct sockaddr_in server_addr;
                 memset(&server_addr, 0, sizeof(server_addr));
                 socklen_t server_len = sizeof(server_addr);
+
+                // Extrae el puerto en el que está escuchando el socket
                 if (getsockname(server_fds[i], (struct sockaddr*)&server_addr, &server_len) < 0) {
                     std::cerr << "ERROR: Failed to get server port for server_fd " << server_fds[i] << std::endl << std::flush;
                     close(client_fd);
                     continue;
                 }
+                
+                // convierte el puerto del socket a formato legible
                 int server_port = ntohs(server_addr.sin_port);
+                
+                // busca el indice del servidor q maneja la conexión
                 size_t server_index = port_to_server_indices[server_port][0];
+                
+                // Registra un nuevo cliente en el mapa clients
+                    // ASocia su fd con el objeto q contiene la info de la conexión
                 clients.insert(std::pair<int, Client>(client_fd, Client(server_port, server_index)));
                 std::cerr << "DEBUG: New connection: fd " << client_fd << " on port " << server_port << " with server_index " << server_index << std::endl << std::flush;
             }
@@ -280,7 +294,10 @@ void Server::run()
         // Evaluation point: Host header processing for virtual server selection
         // Evaluation point: progressive HTTP request building and completion detection
         std::vector<int> clients_to_remove;
-        for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); ++it) {
+
+        // Bucle para leer datos, procesar solicitudes, respoder... a cada cliente
+        for (std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); ++it) 
+        {
             int client_fd = it->first;
             Client& client = it->second;
 
@@ -288,6 +305,8 @@ void Server::run()
             if (FD_ISSET(client_fd, &read_fds)) 
             {
                 char buffer[8192] = {0};
+
+                // Lee los dato enviados x el cliente y los amacena en el buffer
                 ssize_t bytes_read = recv(client_fd, buffer, sizeof(buffer), 0);
                 if (bytes_read <= 0) 
                 {
@@ -305,6 +324,8 @@ void Server::run()
                 for (ssize_t i = 0; i < bytes_read; ++i)
                     std::cerr << std::hex << std::setw(2) << std::setfill('0') << (int)(unsigned char)buffer[i] << " ";
                 std::cerr << std::dec << std::endl << std::flush;
+
+                // Traspasa datos del buffer provisional al buffer de la struct del cliente
                 client.buffer.append(buffer, bytes_read);
                 std::cerr << "DEBUG: Appended to client.buffer, new length: " << client.buffer.length() << std::endl << std::flush;
                 std::cerr << "DEBUG: client.buffer content (hex): ";
@@ -313,20 +334,31 @@ void Server::run()
                 std::cerr << std::dec << std::endl << std::flush;
 
                 try {
+                    // check si no tiene request asociado y si la request está completa
                     if (!client.request && isRequestComplete(client)) 
                     {
                         std::cerr << "DEBUG: Creating new Request with client.buffer length: " << client.buffer.length() << std::endl << std::flush;
+                        
+                        // Crea nuevo obj. Request para procesar la solicitud
                         client.request = new Request(client_fd, client.buffer);
                     } 
+                    
+                    // si ya tiene solicitud HTTP (request) en proceso y no está completa
                     else if (client.request) 
                     {
                         std::cerr << "DEBUG: Appending to existing Request, data length: " << bytes_read << std::endl << std::flush;
+                        
+                        // Agrega datos al cuerpo de la solicitud
                         client.request->appendBody(std::string(buffer, bytes_read));
                     }
+                    
+                    // Si ya tiene una solicitud en proceso y si está completa
                     if (client.request && client.request->isComplete()) 
                     {
                         std::cerr << "DEBUG: Parsed request successfully for fd " << client_fd << " on port " << client.port << std::endl << std::flush;
                         size_t server_index = client.server_index;
+                        
+                        // Extrae el nombre del host (example.com:8080)
                         std::string host = client.request->getHeader("Host");
                         if (!host.empty()) 
                         {
@@ -348,7 +380,8 @@ void Server::run()
                             }
                             if (!matched) 
                                 std::cerr << "DEBUG: No server_name matched for Host: " << host << ", using default server_index " << server_index << std::endl << std::flush;
-                        } else 
+                        } 
+                        else 
                         {
                             std::cerr << "DEBUG: Empty Host header, using default server_index " << server_index << std::endl << std::flush;
                         }
@@ -360,7 +393,9 @@ void Server::run()
                         client.request = NULL;
                         std::cerr << "DEBUG: Generated response for fd " << client_fd << " on port " << client.port << ", response length: " << client.response.length() << std::endl << std::flush;
                     }
-                } catch (const std::exception& e) {
+                } 
+                catch (const std::exception& e) 
+                {
                     std::cerr << "ERROR: Exception handling request for fd " << client_fd << ": " << e.what() << std::endl << std::flush;
                     client.response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\nContent-Length: 71\r\nConnection: close\r\n\r\n<html><body><h1>400 Bad Request - Invalid Request</h1></body></html>";
                     delete client.request;
@@ -402,7 +437,8 @@ void Server::run()
         // Clean up disconnected or completed client connections
         // Evaluation point: proper memory management and resource cleanup
         // Evaluation point: Request object cleanup to prevent memory leaks
-        for (size_t i = 0; i < clients_to_remove.size(); ++i) {
+        for (size_t i = 0; i < clients_to_remove.size(); ++i) 
+        {
             int client_fd = clients_to_remove[i];
             std::cerr << "DEBUG: Closing connection for fd " << client_fd << std::endl << std::flush;
             std::map<int, Client>::iterator it = clients.find(client_fd);
