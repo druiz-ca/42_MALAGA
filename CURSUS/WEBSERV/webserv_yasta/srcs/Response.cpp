@@ -298,7 +298,7 @@ std::string Response::handleUpload(const std::string& upload_path) {  // Handle 
         return response.str();
     }
 
-    // Obtener el nombre del archivo
+    // Obtener el nombre del archivo que solicita
     std::string filename = request.getHeader("X-Filename");
     if (filename.empty() && request.getUri().find("/Uploads/") == 0 && request.getUri().length() > 9) {
         filename = request.getUri().substr(9);
