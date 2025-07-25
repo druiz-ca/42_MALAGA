@@ -162,9 +162,9 @@ int main(int ac, char **av)
 				else // si el fd es del cliente
 				{
 					// recibe los datos enviados x el cliente (recovery)
-					int ret = recv(fd, recv_buffer, MAX_MSG_SIZE, 0);
+					int bytes_recv = recv(fd, recv_buffer, MAX_MSG_SIZE, 0);
 					 
-					if (ret <= 0) // cliente desconectado
+					if (bytes_recv <= 0) // cliente desconectado
 					{
 						sprintf(send_buffer, "server: client %d just left\n", clients[fd].id);
 						
@@ -177,17 +177,30 @@ int main(int ac, char **av)
 						// Cierro el fd
 						close(fd);
 					}
-					else
+					else // cliente conectado
 					{
-						for (int i = 0, j = strlen(clients[fd].msg); i < ret; i++, j++)
+						// Recorre todos los bytes recibidos
+						for (int i = 0, j = strlen(clients[fd].msg); i < bytes_recv; i++, j++)
 						{
+							// Copia byte a byte el contenido del mensaje
 							clients[fd].msg[j] = recv_buffer[i];
+
+							// si ese byte es salto de linea
 							if (clients[fd].msg[j] == '\n')
 							{
+								// temrina la cadena copiada
 								clients[fd].msg[j] = '\0';
+
+								// Imprime el mensaje enviado
 								sprintf(send_buffer, "client %d: %s\n", clients[fd].id, clients[fd].msg);
+								
+								// Lo notifica a todos los clientes conectados
 								send_broadcast(fd);
+
+								// Limpieza
 								bzero(clients[fd].msg, strlen(clients[fd].msg));
+
+								// 
 								j = -1;
 							}
 						}

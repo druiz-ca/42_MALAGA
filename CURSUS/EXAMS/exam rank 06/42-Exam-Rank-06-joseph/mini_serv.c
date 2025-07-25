@@ -113,8 +113,8 @@ int main(int ac, char **av)
 				}
 				else
 				{
-					int ret = recv(fd, recv_buffer, MAX_MSG_SIZE, 0);
-					if (ret <= 0)
+					int bytes_recv = recv(fd, recv_buffer, MAX_MSG_SIZE, 0);
+					if (bytes_recv <= 0)
 					{
 						sprintf(send_buffer, "server: client %d just left\n", clients[fd].id);
 						send_broadcast(fd);
@@ -123,7 +123,7 @@ int main(int ac, char **av)
 					}
 					else
 					{
-						for (int i = 0, j = strlen(clients[fd].msg); i < ret; i++, j++)
+						for (int i = 0, j = strlen(clients[fd].msg); i < bytes_recv; i++, j++)
 						{
 							clients[fd].msg[j] = recv_buffer[i];
 							if (clients[fd].msg[j] == '\n')
