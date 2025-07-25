@@ -60,6 +60,7 @@ void	send_broadcast(int accepted)
 
 int main(int ac, char **av)
 {
+	// ============================ CONFIGURACIÓN =========================== //
 	if (ac != 2)
 		err("Wrong number of arguments\n");
 
@@ -103,40 +104,77 @@ int main(int ac, char **av)
 	if (listen(sockfd, 10) != 0)
 		err(NULL);
 
+	// ==================== FIN DE LA CONFIGURACIÓN ====================== //
+
 	while (1)
 	{
 		read_set = current;
 		write_set = current;
+
+		// Detecta 1 fds están listos (para enviar o recibir datos)
+			// modifica los conjuntos para indicar qué fds están listos
+			// Va aumentado el maxfd cada vez que slecciona un fd nuevo
 		if (select(maxfd + 1, &read_set, &write_set, NULL, NULL) == -1)
 			err(NULL);
 		for (int fd = 0; fd <= maxfd; fd++)
 		{
+			// Comprueba si un fd está listo para aceptar nueva conexión
 			if (FD_ISSET(fd, &read_set))
 			{
 				if (fd == sockfd) // si el fd es del servidor
 				{
+					// Para almacenar la info de la dir. del cliente conectado
 					struct sockaddr_in cli;
+
+					// Limpieza de la estructura
 					bzero(&cli, sizeof(cli));
+
+					// Obtengo la longitud
 					socklen_t len = sizeof(cli);
+
+					// Acepto la conexión -> devuelvo fd de cliente conectado
+						// Asigna el nº de fd + bajo disponible
 					client_fd = accept(sockfd, (struct sockaddr *)&cli, &len);
+
+					// Comprobaciones
 					if (client_fd < 0)
 						err(NULL);
+					
+					// Actualizo maxfd
 					if (client_fd > maxfd)
 						maxfd = client_fd;
+
+					// Asigno la id actual
 					clients[client_fd].id = current_id;
+
+					// Incremento la id actual
 					current_id++;
+
+					// Agrega el fd del cliente al conjunto
 					FD_SET(client_fd, &current);
+
+					// Imprime mensaje
 					sprintf(send_buffer, "server: client %d just arrived\n", clients[client_fd].id);
+					
+					// Notifica a todos los clientes (menos este) q alguien se ha contectado
 					send_broadcast(client_fd);
 				}
 				else // si el fd es del cliente
 				{
+					// recibe los datos enviados x el cliente (recovery)
 					int ret = recv(fd, recv_buffer, MAX_MSG_SIZE, 0);
-					if (ret <= 0)
+					 
+					if (ret <= 0) // cliente desconectado
 					{
 						sprintf(send_buffer, "server: client %d just left\n", clients[fd].id);
+						
+						// Notifico a todos los clientes que se ha desconectado
 						send_broadcast(fd);
+
+						// Elimino el fd del cliente del conjunto
 						FD_CLR(fd, &current);
+
+						// Cierro el fd
 						close(fd);
 					}
 					else
