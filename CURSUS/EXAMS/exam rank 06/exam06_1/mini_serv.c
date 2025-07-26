@@ -1,15 +1,16 @@
+// 8 includes
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 
-#include <errno.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <sys/select.h>
+#include <errno.h> // Para errores del sistema
+//#include <netdb.h> // NO SE USA
+#include <netinet/in.h> // Estructuras para sockets (SOCKADDR_IN)
+#include <sys/socket.h> // socket, bind, listen, accept, send, recv
+#include <sys/select.h> // para select, FD_SET, FD_ISSET, FD_ZERO
 
-#define MAX_MSG_SIZE 1000000
+#define MAX_MSG_SIZE 1000000 // 1M
 #define MAX_CLIENTS 1024
 
 typedef struct s_client
@@ -20,15 +21,15 @@ typedef struct s_client
 
 t_client clients[MAX_CLIENTS];
 
-int current_id = 0;
-int maxfd = 0;
-
 fd_set read_set;
 fd_set write_set;
 fd_set current;
 
-char	send_buffer[MAX_MSG_SIZE];
-char	recv_buffer[MAX_MSG_SIZE];
+char send_buffer[MAX_MSG_SIZE];
+char recv_buffer[MAX_MSG_SIZE];
+
+int current_id = 0;
+int maxfd = 0;
 
 void putstr(int fd, char *str)
 {
@@ -64,6 +65,8 @@ int main(int ac, char **av)
 	// ============================ CONFIGURACIÓN =========================== //
 	if (ac != 2)
 		err("Wrong number of arguments\n");
+
+
 
 	int sockfd;
 	int client_fd; // fd del socket del cliente para nueva conexión
