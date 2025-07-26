@@ -1,11 +1,12 @@
 #include <stdio.h>
-#include <errno.h>
-#include <string.h>
-#include <unistd.h>
-#include <netdb.h>
 #include <stdlib.h>
-#include <sys/socket.h>
+#include <unistd.h>
+#include <string.h>
+
+#include <errno.h>
+#include <netdb.h>
 #include <netinet/in.h>
+#include <sys/socket.h>
 #include <sys/select.h>
 
 #define MAX_MSG_SIZE 1000000
@@ -84,18 +85,19 @@ int main(int ac, char **av)
 	// Limpiar conjunto de fd
 	FD_ZERO(&current);
 
-	// Establece el sockfd del servidor al conjunto de fds (current)
+	// Agrega el sockfd del servidor al conjunto de fds (current)
 	FD_SET(sockfd, &current);
 	
-	// Establece IP, PORT 
+	// Establece la fam de dir. q usará el socket, la IP, el Puerto ... 
 	servaddr.sin_family = AF_INET; // fam. de direcc. q usará para el socket
 	servaddr.sin_addr.s_addr = htonl(2130706433); //127.0.0.1
+	//servaddr.sin_addr.s_addr = inet_addr("127.0.0.1"); <-- USAR ESTA!!
 	servaddr.sin_port = htons(atoi(av[1]));  // 8080
 	
-	// Establece el actual sockfd como el maximo fd
-	maxfd = sockfd;
+	// Establece el actual sockfd como el num maximo fd
+	maxfd = sockfd; // 3
 
-	// Asocia el socket a una IP y un puerto (bind : enlazar)
+	// Enlaza el socket a una IP y un puerto 
 	if ((bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr))) != 0)
 		err(NULL);
 
@@ -121,7 +123,13 @@ int main(int ac, char **av)
 			// Comprueba si un fd está listo para aceptar nueva conexión
 			if (FD_ISSET(fd, &read_set))
 			{
-				if (fd == sockfd) // si el fd es del servidor
+				// si el evento detectado x select coincide con el del servidor
+				// (si fd sirve para identificar si es del servidor o no, es decir
+				// fd se usa para compararlo, si es igual al socket es que lo que
+				// ha sucedido es en el socket del servidor)
+				// - detectada una conexión entrante!
+				// este bloque solo prepara y configura la nueva conexión entrante
+				if (fd == sockfd) 
 				{
 					// Para almacenar la info de la dir. del cliente conectado
 					struct sockaddr_in cli;
@@ -159,11 +167,15 @@ int main(int ac, char **av)
 					// Notifica a todos los clientes (menos este) q alguien se ha contectado
 					send_broadcast(client_fd);
 				}
-				else // si el fd es del cliente
+				
+				// si el fd detectado x select corresponde al del cliente
+				// - el cliente conectado ya ha enviado datos al servidor
+				else // Procesa los datos recibidos x el cliente
 				{
 					// recibe los datos enviados x el cliente (recovery)
 					int bytes_recv = recv(fd, recv_buffer, MAX_MSG_SIZE, 0);
 					 
+					// Comprueba que el cliente siga conectado
 					if (bytes_recv <= 0) // cliente desconectado
 					{
 						sprintf(send_buffer, "server: client %d just left\n", clients[fd].id);
@@ -185,10 +197,10 @@ int main(int ac, char **av)
 							// Copia byte a byte el contenido del mensaje
 							clients[fd].msg[j] = recv_buffer[i];
 
-							// si ese byte es salto de linea
+							// Cuando llega al salto de linea
 							if (clients[fd].msg[j] == '\n')
 							{
-								// temrina la cadena copiada
+								// termina la cadena copiada
 								clients[fd].msg[j] = '\0';
 
 								// Imprime el mensaje enviado
@@ -207,8 +219,6 @@ int main(int ac, char **av)
 					}
 				}
 			}
-		
 		}
 	}
-	
 }
