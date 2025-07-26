@@ -23,7 +23,7 @@ t_client clients[MAX_CLIENTS];
 
 fd_set read_set;
 fd_set write_set;
-fd_set current;
+fd_set monitored_fds;
 
 char send_buffer[MAX_MSG_SIZE];
 char recv_buffer[MAX_MSG_SIZE];
@@ -82,14 +82,15 @@ int main(int ac, char **av)
 	if (sockfd == -1)
 		err(NULL);
 
+	// =========== LIMPIEZA ============
 	// limpieza de la estructura servaddr
 	bzero(&servaddr, sizeof(servaddr)); 
+	// Limpiar EL conjunto de fd
+	FD_ZERO(&monitored_fds);
+	// =================================
 
-	// Limpiar conjunto de fd
-	FD_ZERO(&current);
-
-	// Agrega el sockfd del servidor al conjunto de fds (current)
-	FD_SET(sockfd, &current);
+	// Agrega el sockfd del servidor al conjunto de fds (monitored_fds)
+	FD_SET(sockfd, &monitored_fds);
 	
 	// Establece la fam de dir. q usará el socket, la IP, el Puerto ... 
 	servaddr.sin_family = AF_INET; // fam. de direcc. q usará para el socket
@@ -113,8 +114,8 @@ int main(int ac, char **av)
 
 	while (1)
 	{
-		read_set = current;
-		write_set = current;
+		read_set = monitored_fds;
+		write_set = monitored_fds;
 
 		// Detecta 1 fds están listos (para enviar o recibir datos)
 			// modifica los conjuntos para indicar qué fds están listos
@@ -162,7 +163,7 @@ int main(int ac, char **av)
 					current_id++;
 
 					// Agrega el fd del cliente al conjunto
-					FD_SET(client_fd, &current);
+					FD_SET(client_fd, &monitored_fds);
 
 					// Imprime mensaje
 					sprintf(send_buffer, "server: client %d just arrived\n", clients[client_fd].id);
@@ -187,7 +188,7 @@ int main(int ac, char **av)
 						send_broadcast(fd);
 
 						// Elimino el fd del cliente del conjunto
-						FD_CLR(fd, &current);
+						FD_CLR(fd, &monitored_fds);
 
 						// Cierro el fd
 						close(fd);
