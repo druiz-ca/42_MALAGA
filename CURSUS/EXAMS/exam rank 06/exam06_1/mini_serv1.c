@@ -34,12 +34,29 @@ int main(int argc, char **argv)
 	if (argc != 2)
 		ft_error("Wrong number of arguments\n");
 	int socket_fd = 0;
-	if ((socket_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-		ft_error(NULL);
+	if (socket_fd = socket(AF_INET, SOCK_STREAM, 0) == -1)
+		ft_error("Wrong number of arguments\n");
 	FD_ZERO(&monitored_fds);
 	FD_SET(socket_fd, &monitored_fds);
+		
+	struct sockaddr_in server_config;
+	bzero(&server_config, sizeof(server_config));
+	server_config.sin_family = AF_INET;
+	server_config.sin_addr.s_addr = ("127.0.0.1");
+	server_config.sin_port = htonl(argv[1]);
 
-	struct sockaddr_in server_address;
-	
+	max_fd = socket_fd;
+
+	if ((bind(socket_fd, (const struct sockaddr *)&server_config, sizeof(server_config))) != 0)
+		ft_error(NULL);
+	if (listen(socket_fd, 10) != 0)
+		ft_error(NULL);
+
+	int fd_client;
+
+	while (1)
+	{
+		
+	}
 
 }
