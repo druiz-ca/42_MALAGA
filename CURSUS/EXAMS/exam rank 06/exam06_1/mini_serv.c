@@ -13,11 +13,12 @@
 #define MAX_MSG_SIZE 1000000 // 1M
 #define MAX_CLIENTS 1024
 
-typedef struct s_client
+typedef struct s_client // s -> struct
 {
 	int	id;
 	char	msg[MAX_MSG_SIZE];
-}t_client;
+}t_client; // t -> typedef
+// sino uso t_client(alias) tendria que poner typedef struct siempre
 
 t_client clients[MAX_CLIENTS];
 
@@ -65,52 +66,55 @@ int main(int ac, char **av)
 	// ============================ CONFIGURACIÓN =========================== //
 	if (ac != 2)
 		err("Wrong number of arguments\n");
-
-
-
+	
+	// ==================== SOCKET ========================= //
 	int sockfd;
-	int client_fd; // fd del socket del cliente para nueva conexión
-	struct sockaddr_in servaddr; // almacena la IP y puerto del serv.
-
 	// Creación del socket
 		// AFINET-> dir IP en formato IPv4 (127.0.0.1)
+			// address family internet
 		// SOCK:STREAM -> indica socket orientado a conexión
-						// con protocolo TCP (maneja control d errores)
+			// con protocolo TCP (maneja control d errores)
+			// Socket stream(flujo)
 	sockfd = socket(AF_INET, SOCK_STREAM, 0); // 3 
-
 	// Verificación del socket
 	if (sockfd == -1)
 		err(NULL);
-
-	// =========== LIMPIEZA ============
-	// limpieza de la estructura servaddr
-	bzero(&servaddr, sizeof(servaddr)); 
 	// Limpiar EL conjunto de fd
 	FD_ZERO(&monitored_fds);
-	// =================================
-
+	// =====================================================
 	// Agrega el sockfd del servidor al conjunto de fds (monitored_fds)
 	FD_SET(sockfd, &monitored_fds);
+
+	// ==================== FIN SOCKET ====================== //
+	
+	// ================== SERVERADDR & MONITORED ===================== //
+	struct sockaddr_in server_config; // almacena la IP y puerto del serv.
+	// limpieza de la estructura server_config
+	bzero(&server_config, sizeof(server_config)); 
 	
 	// Establece la fam de dir. q usará el socket, la IP, el Puerto ... 
-	servaddr.sin_family = AF_INET; // fam. de direcc. q usará para el socket
-	servaddr.sin_addr.s_addr = htonl(2130706433); //127.0.0.1
-	//servaddr.sin_addr.s_addr = inet_addr("127.0.0.1"); <-- USAR ESTA!!
-	servaddr.sin_port = htons(atoi(av[1]));  // 8080
+	server_config.sin_family = AF_INET; // fam. de direcc. q usará para el socket
+	server_config.sin_addr.s_addr = htonl(2130706433); //127.0.0.1
+	//server_config.sin_addr.s_addr = inet_addr("127.0.0.1"); <-- USAR ESTA!!
+	server_config.sin_port = htons(atoi(av[1]));  // 8080
+	
+	// ================== FIN SERVERADDR & MONITORED =================== //
 	
 	// Establece el actual sockfd como el num maximo fd
 	maxfd = sockfd; // 3
 
+	
 	// Enlaza el socket a una IP y un puerto 
-	if ((bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr))) != 0)
+	if ((bind(sockfd, (const struct sockaddr *)&server_config, sizeof(server_config))) != 0)
 		err(NULL);
 
-	// convierte el socket a pasivo -> xra q pueda aceptar conexiones
-	// escuchará hasta 10 clientes pendientes de accept
+		// convierte el socket a pasivo -> xra q pueda aceptar conexiones
+		// escuchará hasta 10 clientes pendientes de accept
 	if (listen(sockfd, 10) != 0)
 		err(NULL);
-
-	// ==================== FIN DE LA CONFIGURACIÓN ====================== //
+		
+		// ==================== FIN DE LA CONFIGURACIÓN ====================== //
+	int client_fd; // fd del socket del cliente para nueva conexión
 
 	while (1)
 	{
