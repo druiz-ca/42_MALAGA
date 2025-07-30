@@ -130,13 +130,15 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
         }
         case(9):
         { // si solo hay un mensaje cout no hace nada, si hay más cosas dentro entonces lo imprime!?!!?
-            cout << "Tareas guardadas correctamente." << endl;
             ofstream archivo("archivo_de_tareas.txt");
+            cout << "Archivo creado!" << endl;
             for (int i = 0; i < vector_Tareas.size(); i++)
-                archivo << vector_Tareas[i].num << " - "\
-                << vector_Tareas[i].descripcion << " - "\
-                << vector_Tareas[i].completada << endl;
+            archivo << vector_Tareas[i].num << " - "\
+            << vector_Tareas[i].descripcion << " - "\
+            << vector_Tareas[i].completada << endl;
             archivo.close();
+            cout << "Tareas guardadas correctamente." << endl;
+            break;
         }
     }
 }
