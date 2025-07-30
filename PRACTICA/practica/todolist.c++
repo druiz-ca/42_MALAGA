@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream> // para manejar archivos
 
 using namespace std;
 
@@ -22,7 +23,8 @@ void MostrarMenu()
     cout << "6: marcar todas como completadas" << endl;
     cout << "7: mostrar solo tareas pendientes" << endl;
     cout << "8: cuantas tareas pendientes hay" << endl;
-    cout << "9: salir" << endl;
+    cout << "9: Guardar tareas en un archivo" << endl;
+    cout << "10: salir" << endl;
 }
 
 void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
@@ -126,6 +128,16 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             cout << "Quedan " << num << " tareas pendientes." << endl;
             break;
         }
+        case(9):
+        { // si solo hay un mensaje cout no hace nada, si hay más cosas dentro entonces lo imprime!?!!?
+            cout << "Tareas guardadas correctamente." << endl;
+            ofstream archivo("archivo_de_tareas.txt");
+            for (int i = 0; i < vector_Tareas.size(); i++)
+                archivo << vector_Tareas[i].num << " - "\
+                << vector_Tareas[i].descripcion << " - "\
+                << vector_Tareas[i].completada << endl;
+            archivo.close();
+        }
     }
 }
 
@@ -155,7 +167,9 @@ int main()
             opciones(7, vector_Tareas);
         else if(opcion == 8)
             opciones(8, vector_Tareas);
-        else if (opcion == 9)
+        else if(opcion == 9)
+            opciones(9, vector_Tareas);
+        else if (opcion == 10)
             break;
         else
             cout << "Opción errónea" << endl;
