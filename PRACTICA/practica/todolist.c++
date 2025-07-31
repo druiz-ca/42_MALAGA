@@ -12,6 +12,10 @@ struct struct_Tarea
     bool completada;
 };
 
+/*
+- Ahora que cuando escoja un opcion y la muestre pregunte que quiere hacer en vez
+de mostrar directamente el menu*/
+
 void MostrarMenu()
 {
     cout << "Menu opciones:" << endl;
@@ -24,12 +28,14 @@ void MostrarMenu()
     cout << "7: mostrar solo tareas pendientes" << endl;
     cout << "8: cuantas tareas pendientes hay" << endl;
     cout << "9: Guardar tareas en un archivo" << endl;
-    cout << "10: salir" << endl;
+    cout << "10: Cargar tareas de un archivo" << endl;
+    cout << "11: salir" << endl;
 }
 
 void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
 {
     struct_Tarea Nueva_tarea;
+    int eleccion = 0;
     switch(opcion)
     {
         case(1):
@@ -41,7 +47,12 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             vector_Tareas.push_back(Nueva_tarea);
             cout << "Tareas añadida" << endl;
             cout << endl;
-            break;
+            cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
+            cin >> eleccion;
+            if (eleccion == 1)
+                break;
+            else
+                exit(0);
             
         case(2):
             if (vector_Tareas.empty())
@@ -62,8 +73,10 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             else
                 cout << "num erroneo" << endl;
             cout << endl;
-            break;
-
+            if (eleccion == 1)
+                break;
+            else
+                exit(0);
         case(3):
             if (vector_Tareas.empty())
             {
@@ -73,8 +86,10 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             for(int i=0; i < vector_Tareas.size(); i++)
                 cout << vector_Tareas[i].num << " - " << vector_Tareas[i].descripcion << " - " << boolalpha << (bool)vector_Tareas[i].completada << endl;
             cout << endl;
-            break;
-
+            if (eleccion == 1)
+                break;
+            else
+                exit(0);
         case(4):
         {
 
@@ -87,8 +102,10 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
                 break;
             }
             vector_Tareas.erase(vector_Tareas.begin() + num1);
-            break;
-        
+            if (eleccion == 1)
+                break;
+            else
+                exit(0);        
         }
         case(5):
         {
@@ -100,14 +117,20 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             cout << "como quiere que se llame ahora: " << endl;
             cin >> cadena;
             vector_Tareas[num2].descripcion = cadena;
-            break;
+            if (eleccion == 1)
+                break;
+            else
+                exit(0);        
         }
         case (6):
         {
             for (int i = 0; i < vector_Tareas.size(); i++)
                 if (vector_Tareas[i].completada == false)
                     vector_Tareas[i].completada = true;
-            break;
+            if (eleccion == 1)
+                break;
+            else
+                exit(0);
         }
         case(7):
         {
@@ -116,7 +139,10 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
                 if (vector_Tareas[i].completada == false)
                     cout << vector_Tareas[i].num << " - " << vector_Tareas[i].descripcion << " - " << boolalpha << vector_Tareas[i].completada << endl;
             }
-            break;
+            if (eleccion == 1)
+                break;
+            else
+                exit(0);
         }
         case(8):
         {
@@ -126,10 +152,13 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
                 if (vector_Tareas[i].completada == false)
                     num++;
             cout << "Quedan " << num << " tareas pendientes." << endl;
-            break;
+            if (eleccion == 1)
+                break;
+            else
+                exit(0);
         }
         case(9):
-        { // si solo hay un mensaje cout no hace nada, si hay más cosas dentro entonces lo imprime!?!!?
+        {
             ofstream archivo("archivo_de_tareas.txt");
             cout << "Archivo creado!" << endl;
             for (int i = 0; i < vector_Tareas.size(); i++)
@@ -138,7 +167,14 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             << vector_Tareas[i].completada << endl;
             archivo.close();
             cout << "Tareas guardadas correctamente." << endl;
-            break;
+            if (eleccion == 1)
+                break;
+            else
+                exit(0);        
+        }
+        case(10):
+        {
+
         }
     }
 }
@@ -171,7 +207,9 @@ int main()
             opciones(8, vector_Tareas);
         else if(opcion == 9)
             opciones(9, vector_Tareas);
-        else if (opcion == 10)
+        else if(opcion == 10)
+            opciones(10, vector_Tareas);
+        else if (opcion == 11)
             break;
         else
             cout << "Opción errónea" << endl;
