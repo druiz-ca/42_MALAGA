@@ -133,6 +133,16 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
 
             int num2 = 0;
             string cadena;
+            if (vector_Tareas.size() == 0)
+            {
+                cout << "Aún no hay ninguna tarea" << endl;
+                cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
+                cin >> eleccion;
+                if (eleccion == 1)
+                    break;
+                else
+                    exit(0);   
+            }
             cout << "que tarea quiere modificar:" << endl;
             cin >> num2;
             cout << "como quiere que se llame ahora: " << endl;
@@ -205,7 +215,22 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
         }
         case(10):
         {
+            string nombre;
+            cout << "Introduce el nombre del archivo que deseas cargar: " << endl;
+            cin >> nombre;
+            ifstream archivo(nombre);
 
+            string linea;
+            while (getline(archivo, linea))
+                cout << linea << endl;
+            cout << endl;
+            archivo.close();
+            cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
+            cin >> eleccion;
+            if (eleccion == 1)
+                break;
+            else
+                exit(0); 
         }
     }
 }
@@ -240,7 +265,7 @@ int main()
             opciones(9, vector_Tareas);
         else if(opcion == 10)
             opciones(10, vector_Tareas);
-        else if (opcion == 11)
+        else if(opcion == 11)
             break;
         else
             cout << "Opción errónea" << endl;
