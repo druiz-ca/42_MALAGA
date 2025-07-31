@@ -35,7 +35,7 @@ void MostrarMenu()
 void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
 {
     struct_Tarea Nueva_tarea;
-    int eleccion = 0;
+    int eleccion = -1;
     switch(opcion)
     {
         case(1):
@@ -53,12 +53,16 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
                 break;
             else
                 exit(0);
-            
         case(2):
             if (vector_Tareas.empty())
             {
                 cout << "no hay tareas aún" << endl;
-                return ;
+                cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
+                cin >> eleccion;
+                if (eleccion == 1)
+                    break;
+                else
+                    exit(0);
             }
             cout << "que tarea ha completado: " << endl;
 
@@ -73,6 +77,9 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             else
                 cout << "num erroneo" << endl;
             cout << endl;
+
+            cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
+            cin >> eleccion;
             if (eleccion == 1)
                 break;
             else
@@ -81,15 +88,22 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             if (vector_Tareas.empty())
             {
                 cout << "no hay tareas aún" << endl;
-                return ;
+                cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
+                cin >> eleccion;
+                if (eleccion == 1)
+                    break;
+                else
+                    exit(0);
             }
             for(int i=0; i < vector_Tareas.size(); i++)
                 cout << vector_Tareas[i].num << " - " << vector_Tareas[i].descripcion << " - " << boolalpha << (bool)vector_Tareas[i].completada << endl;
             cout << endl;
+            cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
+            cin >> eleccion;
             if (eleccion == 1)
                 break;
             else
-                exit(0);
+                exit(0);    
         case(4):
         {
 
@@ -99,13 +113,20 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             if (num1 <= 0 || num1 >= vector_Tareas.size())
             {
                 cout << "num erroneo" << endl;
-                break;
+                cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
+                cin >> eleccion;
+                if (eleccion == 1)
+                    break;
+                else
+                    exit(0);
             }
             vector_Tareas.erase(vector_Tareas.begin() + num1);
+            cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
+            cin >> eleccion;
             if (eleccion == 1)
                 break;
             else
-                exit(0);        
+                exit(0);       
         }
         case(5):
         {
@@ -117,16 +138,20 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             cout << "como quiere que se llame ahora: " << endl;
             cin >> cadena;
             vector_Tareas[num2].descripcion = cadena;
+            cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
+            cin >> eleccion;
             if (eleccion == 1)
                 break;
             else
-                exit(0);        
+                exit(0);      
         }
         case (6):
         {
             for (int i = 0; i < vector_Tareas.size(); i++)
                 if (vector_Tareas[i].completada == false)
                     vector_Tareas[i].completada = true;
+            cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
+            cin >> eleccion;
             if (eleccion == 1)
                 break;
             else
@@ -139,6 +164,8 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
                 if (vector_Tareas[i].completada == false)
                     cout << vector_Tareas[i].num << " - " << vector_Tareas[i].descripcion << " - " << boolalpha << vector_Tareas[i].completada << endl;
             }
+            cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
+            cin >> eleccion;
             if (eleccion == 1)
                 break;
             else
@@ -152,6 +179,8 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
                 if (vector_Tareas[i].completada == false)
                     num++;
             cout << "Quedan " << num << " tareas pendientes." << endl;
+            cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
+            cin >> eleccion;
             if (eleccion == 1)
                 break;
             else
@@ -167,10 +196,12 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             << vector_Tareas[i].completada << endl;
             archivo.close();
             cout << "Tareas guardadas correctamente." << endl;
+            cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
+            cin >> eleccion;
             if (eleccion == 1)
                 break;
             else
-                exit(0);        
+                exit(0);     
         }
         case(10):
         {
