@@ -183,8 +183,18 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
                 ft_consulta_eleccion();
             }
             string linea;
+            struct_Tarea vector_tarea_aux;
+            vector_Tareas.clear();
             while (getline(archivo, linea))
-                cout << linea << endl;
+            {
+                int pos1 = linea.find(" - ");
+                int pos2 = linea.find(" - ");
+                
+                vector_tarea_aux.num = stoi(linea.substr(0, pos1));
+                vector_tarea_aux.descripcion = linea.substr(pos1 + 3, pos2 - pos1 - 3);
+                //vector_tarea_aux.completada = stoi(linea.substr(pos2, linea.end()))
+                vector_Tareas.push_back(vector_tarea_aux);
+            }
             cout << endl;
             archivo.close();
             ft_consulta_eleccion();
