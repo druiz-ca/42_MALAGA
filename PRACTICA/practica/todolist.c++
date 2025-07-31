@@ -13,8 +13,7 @@ struct struct_Tarea
 };
 
 /*
-- Ahora que cuando escoja un opcion y la muestre pregunte que quiere hacer en vez
-de mostrar directamente el menu*/
+- mostrar todo con colores simbolos etc */
 
 void MostrarMenu()
 {
@@ -39,6 +38,7 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
     switch(opcion)
     {
         case(1):
+        {
             cout << "Escribe la descripción de la tareaa: ";
             cin >> Nueva_tarea.descripcion;
             cin.ignore();
@@ -50,22 +50,24 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
             cin >> eleccion;
             if (eleccion == 1)
-                break;
+            break;
             else
-                exit(0);
+            exit(0);
+        }
         case(2):
+        {
             if (vector_Tareas.empty())
             {
                 cout << "no hay tareas aún" << endl;
                 cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
                 cin >> eleccion;
                 if (eleccion == 1)
-                    break;
+                break;
                 else
-                    exit(0);
+                exit(0);
             }
             cout << "que tarea ha completado: " << endl;
-
+            
             int num_tarea;
             cin >> num_tarea;
             cin.ignore();
@@ -75,38 +77,40 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
                 cout << "Tarea marcada como terminada" << endl;
             }
             else
-                cout << "num erroneo" << endl;
+            cout << "num erroneo" << endl;
             cout << endl;
-
+            
             cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
             cin >> eleccion;
             if (eleccion == 1)
-                break;
+            break;
             else
-                exit(0);
+            exit(0);
+        }
         case(3):
+        {
             if (vector_Tareas.empty())
             {
                 cout << "no hay tareas aún" << endl;
                 cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
                 cin >> eleccion;
                 if (eleccion == 1)
-                    break;
+                break;
                 else
-                    exit(0);
+                exit(0);
             }
             for(int i=0; i < vector_Tareas.size(); i++)
-                cout << vector_Tareas[i].num << " - " << vector_Tareas[i].descripcion << " - " << boolalpha << (bool)vector_Tareas[i].completada << endl;
+            cout << vector_Tareas[i].num << " - " << vector_Tareas[i].descripcion << " - " << boolalpha << (bool)vector_Tareas[i].completada << endl;
             cout << endl;
             cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
             cin >> eleccion;
             if (eleccion == 1)
-                break;
+            break;
             else
-                exit(0);    
+            exit(0);    
+        }
         case(4):
-        {
-
+        {        
             int num1 = 0;
             cout <<  "que tarea quieres eliminar" << endl;
             cin >> num1;
@@ -155,7 +159,7 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             else
                 exit(0);      
         }
-        case (6):
+        case(6):
         {
             for (int i = 0; i < vector_Tareas.size(); i++)
                 if (vector_Tareas[i].completada == false)
@@ -198,7 +202,7 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
         }
         case(9):
         {
-            ofstream archivo("archivo_de_tareas.txt");
+            ofstream archivo("tareas.txt");
             cout << "Archivo creado!" << endl;
             for (int i = 0; i < vector_Tareas.size(); i++)
             archivo << vector_Tareas[i].num << " - "\
@@ -218,13 +222,24 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             string nombre;
             cout << "Introduce el nombre del archivo que deseas cargar: " << endl;
             cin >> nombre;
+            nombre += ".txt";
             ifstream archivo(nombre);
-
+            if (!archivo)
+            {
+                cout << "El archivo no existe!" << endl;
+                cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
+                cin >> eleccion;
+                if (eleccion == 1)
+                    break;
+                else
+                    exit(0); 
+            }
             string linea;
             while (getline(archivo, linea))
                 cout << linea << endl;
             cout << endl;
             archivo.close();
+
             cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
             cin >> eleccion;
             if (eleccion == 1)
