@@ -13,8 +13,12 @@ struct struct_Tarea
 };
 int eleccion;
 /*
-- mostrar todo con colores simbolos etc */
+- mostrar todo con colores simbolos etc 
+- Cuando responda: no hay tareas aún, sugerir, (UX) quieres crear la primera ahora?
+- controlar si el nombre de archivo a crear ya existe, en ese caso, preguntar un nuevo nombre o sobreescribir
+*/
 
+void opciones(int opcion, vector<struct_Tarea> &vector_Tareas);
 
 void MostrarMenu()
 {
@@ -35,10 +39,21 @@ void MostrarMenu()
     cout << "=========================" << endl;
 }
 
-void ft_consulta_eleccion()
+void ft_crearnuevatarea(vector<struct_Tarea> &vector_Tareas)
 {
+    string crearla;
     eleccion = -1;
-    cout << "Ahora, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
+    cout << "Quieres crearla ahora?" << endl;
+    cin >> crearla;
+    if (crearla == "si")
+        opciones(1, vector_Tareas);
+    else
+        ft_consulta_eleccion();
+}
+
+void ft_consulta_eleccion()
+{   
+    cout << "Entonces, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
     cin >> eleccion;
     if (eleccion == 1)
         return;
@@ -70,7 +85,7 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             if (vector_Tareas.empty())
             {
                 cout << "no hay tareas aún" << endl;
-                ft_consulta_eleccion();
+                ft_crearnuevatarea(vector_Tareas);
                 break;
             }
             // Ejecucín de la solicitud de complegar tarea
@@ -95,7 +110,7 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             if (vector_Tareas.empty())
             {
                 cout << "no hay tareas aún" << endl;
-                ft_consulta_eleccion();
+                ft_crearnuevatarea(vector_Tareas);
                 break;
             }
 
@@ -111,7 +126,7 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             if (vector_Tareas.size() == 0)
             {
                 cout << "Aún no hay ninguna tarea" << endl;
-                ft_consulta_eleccion();
+                ft_crearnuevatarea(vector_Tareas);
                 break;
             }   
             int num1 = 0;
@@ -134,7 +149,7 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             if (vector_Tareas.size() == 0)
             {
                 cout << "Aún no hay ninguna tarea" << endl;
-                ft_consulta_eleccion();
+                ft_crearnuevatarea(vector_Tareas);
                 break;
             }
             cout << "que tarea quiere modificar:" << endl;
@@ -151,7 +166,7 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             if (vector_Tareas.size() == 0)
             {
                 cout << "Aún no hay ninguna tarea" << endl;
-                ft_consulta_eleccion();
+                ft_crearnuevatarea(vector_Tareas);
                 break;
             }
             for (int i = 0; i < vector_Tareas.size(); i++)
@@ -166,7 +181,7 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             if (vector_Tareas.size() == 0)
             {
                 cout << "Aún no hay ninguna tarea" << endl;
-                ft_consulta_eleccion();
+                ft_crearnuevatarea(vector_Tareas);
                 break;
             }
             // Ejecutar la solicitud de mostrar pendientes
@@ -184,7 +199,7 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             if (vector_Tareas.size() == 0)
             {
                 cout << "Aún no hay ninguna tarea" << endl;
-                ft_consulta_eleccion();
+                ft_crearnuevatarea(vector_Tareas);
                 break;
             }
             int num = 0;
@@ -201,15 +216,29 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             if (vector_Tareas.size() == 0)
             {
                 cout << "Aún no hay ninguna tarea" << endl;
-                ft_consulta_eleccion();
+                ft_crearnuevatarea(vector_Tareas);
                 break;
             }
             ofstream archivo("tareas.txt");
             cout << "Archivo creado!" << endl;
+
+
             for (int i = 0; i < vector_Tareas.size(); i++)
             archivo << vector_Tareas[i].num << " - "\
             << vector_Tareas[i].descripcion << " - "\
             << vector_Tareas[i].completada << endl;
+
+            /* archivo << "[" << endl;
+            for (int i = 0; i < vector_Tareas.size(); i++) {
+                archivo << "  {" << endl;
+                archivo << "    \"num\": " << vector_Tareas[i].num << "," << endl;
+                archivo << "    \"descripcion\": \"" << vector_Tareas[i].descripcion << "\"," << endl;
+                archivo << "    \"completada\": " << (vector_Tareas[i].completada ? "true" : "false") << endl;
+                archivo << "  }" << (i < vector_Tareas.size() - 1 ? "," : "") << endl;
+            }
+            archivo << "]" << endl;   */  
+            
+            
             archivo.close();
             cout << "Tareas guardadas correctamente." << endl;
             ft_consulta_eleccion(); 
@@ -225,7 +254,7 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             if (!archivo)
             {
                 cout << "El archivo no existe!" << endl;
-                ft_consulta_eleccion();
+                ft_crearnuevatarea(vector_Tareas);
                 break;
             }
             string linea;
@@ -234,7 +263,7 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             while (getline(archivo, linea))
             {
                 int pos1 = linea.find(" - ");
-                int pos2 = linea.find(" - ");
+                int pos2 = linea.rfind(" - ");
                 
                 vector_tarea_aux.num = stoi(linea.substr(0, pos1));
                 vector_tarea_aux.descripcion = linea.substr(pos1 + 3, pos2 - pos1 - 3);
