@@ -18,18 +18,21 @@ int eleccion;
 
 void MostrarMenu()
 {
-    cout << "Menu opciones:" << endl;
-    cout << "1: Añadir tarea" << endl;
-    cout << "2: completar tareas" << endl;
-    cout << "3: mostrar todas las tareas" << endl;
-    cout << "4: eliminar tarea de la lista" << endl;
-    cout << "5: modificar una tarea" << endl;
-    cout << "6: marcar todas como completadas" << endl;
-    cout << "7: mostrar solo tareas pendientes" << endl;
-    cout << "8: cuantas tareas pendientes hay" << endl;
-    cout << "9: Guardar tareas en un archivo" << endl;
-    cout << "10: Cargar tareas de un archivo" << endl;
-    cout << "11: salir" << endl;
+    cout << "=========================" << endl;
+    cout << "       MENU OPCIONES     " << endl;
+    cout << "=========================" << endl;
+    cout << "[1] Añadir tarea         " << endl;
+    cout << "[2] Completar tarea      " << endl;
+    cout << "[3] Mostrar tareas       " << endl;
+    cout << "[4] Eliminar tarea       " << endl;
+    cout << "[5] Modificar tarea      " << endl;
+    cout << "[6] Marcar todas completadas" << endl;
+    cout << "[7] Mostrar pendientes   " << endl;
+    cout << "[8] Tareas pendientes    " << endl;
+    cout << "[9] Guardar tareas       " << endl;
+    cout << "[10] Cargar tareas       " << endl;
+    cout << "[11] Salir               " << endl;
+    cout << "=========================" << endl;
 }
 
 void ft_consulta_eleccion()
@@ -63,13 +66,15 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
         }
         case(2):
         {
+            // Comprobar primero si ya hay tareas
             if (vector_Tareas.empty())
             {
                 cout << "no hay tareas aún" << endl;
                 ft_consulta_eleccion();
+                break;
             }
+            // Ejecucín de la solicitud de complegar tarea
             cout << "que tarea ha completado: " << endl;
-            
             int num_tarea;
             cin >> num_tarea;
             cin.ignore();
@@ -86,11 +91,14 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
         }
         case(3):
         {
+            // Comprobar primero si ya hay tareas
             if (vector_Tareas.empty())
             {
                 cout << "no hay tareas aún" << endl;
                 ft_consulta_eleccion();
+                break;
             }
+
             for(int i=0; i < vector_Tareas.size(); i++)
             cout << vector_Tareas[i].num << " - " << vector_Tareas[i].descripcion << " - " << boolalpha << (bool)vector_Tareas[i].completada << endl;
             cout << endl;
@@ -98,7 +106,14 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             break;
         }
         case(4):
-        {        
+        {     
+            // Consultar primero si ya hay tareas
+            if (vector_Tareas.size() == 0)
+            {
+                cout << "Aún no hay ninguna tarea" << endl;
+                ft_consulta_eleccion();
+                break;
+            }   
             int num1 = 0;
             cout <<  "que tarea quieres eliminar" << endl;
             cin >> num1;
@@ -115,10 +130,12 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
         {
             int num2 = 0;
             string cadena;
+            // Consultar primero si ya hay tareas
             if (vector_Tareas.size() == 0)
             {
                 cout << "Aún no hay ninguna tarea" << endl;
                 ft_consulta_eleccion();
+                break;
             }
             cout << "que tarea quiere modificar:" << endl;
             cin >> num2;
@@ -130,6 +147,13 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
         }
         case(6):
         {
+            // Consultar primero si ya hay tareas
+            if (vector_Tareas.size() == 0)
+            {
+                cout << "Aún no hay ninguna tarea" << endl;
+                ft_consulta_eleccion();
+                break;
+            }
             for (int i = 0; i < vector_Tareas.size(); i++)
                 if (vector_Tareas[i].completada == false)
                     vector_Tareas[i].completada = true;
@@ -138,6 +162,14 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
         }
         case(7):
         {
+            // Consultar primero si ya hay tareas
+            if (vector_Tareas.size() == 0)
+            {
+                cout << "Aún no hay ninguna tarea" << endl;
+                ft_consulta_eleccion();
+                break;
+            }
+            // Ejecutar la solicitud de mostrar pendientes
             for (int i = 0; i < vector_Tareas.size();i++)
             {
                 if (vector_Tareas[i].completada == false)
@@ -148,8 +180,14 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
         }
         case(8):
         {
+            // Consultar primero si ya hay tareas
+            if (vector_Tareas.size() == 0)
+            {
+                cout << "Aún no hay ninguna tarea" << endl;
+                ft_consulta_eleccion();
+                break;
+            }
             int num = 0;
-
             for (int i = 0; i < vector_Tareas.size(); i++)
                 if (vector_Tareas[i].completada == false)
                     num++;
@@ -159,6 +197,13 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
         }
         case(9):
         {
+            // Consultar primero si ya hay tareas
+            if (vector_Tareas.size() == 0)
+            {
+                cout << "Aún no hay ninguna tarea" << endl;
+                ft_consulta_eleccion();
+                break;
+            }
             ofstream archivo("tareas.txt");
             cout << "Archivo creado!" << endl;
             for (int i = 0; i < vector_Tareas.size(); i++)
@@ -181,6 +226,7 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             {
                 cout << "El archivo no existe!" << endl;
                 ft_consulta_eleccion();
+                break;
             }
             string linea;
             struct_Tarea vector_tarea_aux;
