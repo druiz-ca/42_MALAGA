@@ -14,11 +14,11 @@ struct struct_Tarea
 int eleccion;
 /*
 - mostrar todo con colores simbolos etc 
-- Cuando responda: no hay tareas aún, sugerir, (UX) quieres crear la primera ahora?
 - controlar si el nombre de archivo a crear ya existe, en ese caso, preguntar un nuevo nombre o sobreescribir
 */
 
 void opciones(int opcion, vector<struct_Tarea> &vector_Tareas);
+void ft_consulta_eleccion();
 
 void MostrarMenu()
 {
@@ -43,7 +43,7 @@ void ft_crearnuevatarea(vector<struct_Tarea> &vector_Tareas)
 {
     string crearla;
     eleccion = -1;
-    cout << "Quieres crearla ahora?" << endl;
+    cout << "Quieres crearla ahora? si o no" << endl;
     cin >> crearla;
     if (crearla == "si")
         opciones(1, vector_Tareas);
@@ -212,6 +212,7 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
         }
         case(9):
         {
+            string nombre_archivo;
             // Consultar primero si ya hay tareas
             if (vector_Tareas.size() == 0)
             {
@@ -219,7 +220,10 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
                 ft_crearnuevatarea(vector_Tareas);
                 break;
             }
-            ofstream archivo("tareas.txt");
+            cout << "¿Cómo quieres que se llame tu archivo?" << endl;
+            cin >> nombre_archivo;
+            nombre_archivo += ".txt";
+            ofstream archivo(nombre_archivo);
             cout << "Archivo creado!" << endl;
 
 
