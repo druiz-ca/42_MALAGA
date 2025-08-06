@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <fstream> // para manejar archivos
+#include <cstdio> // para borrar archivos
 
 using namespace std;
 
@@ -54,6 +55,9 @@ void ft_crearnuevatarea(vector<struct_Tarea> &vector_Tareas)
 void ft_consulta_eleccion()
 {   
     cout << "Entonces, ¿Qué quieres hacer?: 1 - Mostrar menú , 2 - Salir" << endl;
+    cin >> eleccion;
+    if (eleccion > 2)
+        cout << "Opción errónea, tan solo puede ser 1 o 2" << endl;
     cin >> eleccion;
     if (eleccion == 1)
         return;
@@ -212,6 +216,7 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
         }
         case(9):
         {
+            string eleccion;
             string nombre_archivo;
             // Consultar primero si ya hay tareas
             if (vector_Tareas.size() == 0)
@@ -223,6 +228,20 @@ void opciones(int opcion, vector<struct_Tarea> &vector_Tareas)
             cout << "¿Cómo quieres que se llame tu archivo?" << endl;
             cin >> nombre_archivo;
             nombre_archivo += ".txt";
+
+            if (ifstream(nombre_archivo))
+            {
+                cout << "El archivo ya existe, ¿Quieres sobreescribirlo? (si/no)" << endl;
+                cin >> eleccion;
+                if (eleccion == "si")
+                    remove(nombre_archivo.c_str());
+                else
+                {
+                    cout << "Entonces, ¿cómo quieres que se llame?" << endl;
+                    cin >> nombre_archivo;
+                    nombre_archivo += ".txt";
+                }
+            }
             ofstream archivo(nombre_archivo);
             cout << "Archivo creado!" << endl;
 
