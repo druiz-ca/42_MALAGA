@@ -24,7 +24,7 @@ t_client clients[MAX_CLIENTS];
 
 fd_set read_set;
 fd_set write_set;
-fd_set monitored_fds;
+fd_set monitored_fds;	
 
 char send_buffer[MAX_MSG_SIZE];
 char recv_buffer[MAX_MSG_SIZE];
@@ -69,6 +69,7 @@ int main(int ac, char **av)
 	
 	// ==================== SOCKET ========================= //
 	int sockfd;
+
 	// Creación del socket
 		// AFINET-> dir IP en formato IPv4 (127.0.0.1)
 			// address family internet
