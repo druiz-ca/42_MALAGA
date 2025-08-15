@@ -112,7 +112,7 @@ int main(int ac, char **av)
 		// convierte el socket a pasivo -> xra q pueda aceptar conexiones
 		// escuchará hasta 10 clientes pendientes de accept
 	if (listen(sockfd, 10) != 0)
-		err(NULL);
+		err(NULL);  
 		
 		// ==================== FIN DE LA CONFIGURACIÓN ====================== //
 	int client_fd; // fd del socket del cliente para nueva conexión

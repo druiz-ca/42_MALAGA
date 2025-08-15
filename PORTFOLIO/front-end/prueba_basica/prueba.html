@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Botones que hacen cosas - Vanilla JS</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+</head>
+<body>
+  <h1>Vanilla JS — botones que hacen cosas</h1>
+
+  <div class="controls">
+    <h2 id="contador">0</h2>
+    <button id="inc">Incrementar</button>
+    <button id="dec">Decrementar</button>
+    <button id="reset">Resetear</button>
+    <button id="toggleColor">Cambiar color</button>
+  </div>
+
+  <hr style="width:60%; margin:20px auto" />
+
+  <div>
+    <input id="texto" type="text" placeholder="Escribe algo y pulsa añadir" />
+    <button id="add">Añadir a la lista</button>
+  </div>
+
+  <div class="preview" id="preview" style="background:#ffffff; color:#000000; font-size:24px">
+    Vista previa en vivo
+  </div>
+
+  <ul id="lista"></ul>
+
+  <script>
+    const contadorEl = document.getElementById('contador');
+    const preview = document.getElementById('preview');
+    const listaEl = document.getElementById('lista');
+    const textoInput = document.getElementById('texto');
+
+    let contador = 0;
+    let colorT = 'black';
+    const colores = ['black', 'tomato', 'seagreen', 'royalblue'];
+
+    document.getElementById('inc').addEventListener('click', () => {
+      contador++;
+      renderContador();
+    });
+    document.getElementById('dec').addEventListener('click', () => {
+      contador--;
+      renderContador();
+    });
+    document.getElementById('reset').addEventListener('click', () => {
+      contador = 0;
+      renderContador();
+    });
+    document.getElementById('toggleColor').addEventListener('click', () => {
+      // rota colores
+      const idx = colores.indexOf(colorT);
+      colorT = colores[(idx + 1) % colores.length];
+      preview.style.color = colorT;
+    });
+
+    document.getElementById('add').addEventListener('click', () => 
+    {
+      const txt = textoInput.value.trim();
+      if (!txt) return;
+      const li = document.createElement('li');
+      li.textContent = txt;
+      listaEl.appendChild(li);
+      textoInput.value = '';
+    });
+
+    function renderContador() {
+      contadorEl.textContent = contador;
+      preview.textContent = `Contador: ${contador}`;
+    }
+
+    // inicial
+    renderContador();
+  </script>
+</body>
+</html>
