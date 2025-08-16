@@ -96,7 +96,7 @@ int main(int ac, char **av)
 	// Establece la fam de dir. q usará el socket, la IP, el Puerto ... 
 	server_config.sin_family = AF_INET; // fam. de direcc. q usará para el socket
 	//server_config.sin_addr.s_addr = htonl(2130706433); //127.0.0.1
-	server_config.sin_addr.s_addr = inet_addr("127.0.0.1");USAR ESTA!!
+	server_config.sin_addr.s_addr = inet_addr("127.0.0.1");//USAR ESTA!!
 	server_config.sin_port = htons(atoi(av[1]));  // 8080
 	
 	// ================== FIN SERVERADDR & MONITORED =================== //
