@@ -60,11 +60,10 @@ int main(int argc, char** argv)
 				{
 					struct sockaddr_in client_config;
 					bzero(&client_config, sizeof(client_config));
-					if(accept(socket_fd, (const struct sockaddr*)&client_config, sizeof(client_config))!= 0)
+					if(accept(socket_fd, (struct sockaddr*)&client_config, sizeof(client_config))!= 0)
 						ft_error(NULL);
 					if(max_fd < client_fd)
 						max_fd = client_fd;
-					clientes[client_fd].id = current_id;
 					sprintf(send_buffer, "server: lient %d has conected, clientes[client_fd].id = current_id");
 					send_broadcast(client_fd);
 				}

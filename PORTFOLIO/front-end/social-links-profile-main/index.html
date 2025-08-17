@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- displays site properly based on user's device -->
+
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/images/favicon-32x32.png">
+  
+  <title>Frontend Mentor | Social links profile</title>
+
+  <!-- Feel free to remove these styles or customise in your own stylesheet 👍 -->
+  <style>
+    .attribution { font-size: 11px; text-align: center; }
+    .attribution a { color: hsl(228, 45%, 44%); }
+    /* color de fondo*/
+    html, body{
+      height: 100%;
+      margin: 0;
+      background: #0f0f0f;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #fff; /*color de la fuente*/
+      display: flex;
+      flex-direction: column; /*un div debajo de otro*/
+      align-items: center;
+      justify-content: center;
+      gap: 24px; /*separacion entre divs*/ 
+    }
+    .card{
+      width: 280px;
+      height: 510px;
+      background: #1f1f1f;
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      text-align: center;
+    }
+    img{
+      width:72px;
+      height: 72;
+      border-radius: 50%;
+      margin:0;
+      margin:0 auto 29px;
+      display: block;
+    }
+    .p1 {
+      margin: 0 0 10px;
+      color: #cfe73a;
+      font-weight: 600;
+    }
+    .p2{
+      margin:30px 0 28px;
+      color: #bfbfbf;
+      font-size: 14px;
+    }
+    button{
+      display: block; /*en bloque, 1 encima de otro*/
+      width: 100%;
+      margin: 15px auto; /*el auto los centra*/
+      padding: 15px;
+      border-radius: 8px;
+      border: none;
+      background-color: #333;
+      color: #fff; /*color de la fuente*/
+      font-weight: 400;
+      font-family: inherit;
+      font-size: 12px;
+      cursor: pointer
+    }
+    h1{
+      font-size: 27px;
+      font-weight: 1400;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img src="./assets/images/avatar-jessica.jpeg">
+    <h1 style="margin: 8px;">Jessica Randall</h1>
+    <p class="p1">London, United Kingdom</p>
+    <p class="p2">"Front-end developer and avid reader."</p>
+    <button>GitHub</button>
+    <button>Frontend Mentor</button>
+    <button>LinkedIn</button>
+    <button>Twitter</button>
+    <button>Instagram</button>
+  </div>
+  <div class="attribution">
+    Challenge by <a href="https://www.frontendmentor.io?ref=challenge" target="_blank">Frontend Mentor</a>. 
+    Coded by <a href="#">Your Name Here</a>.
+  </div>
+</body>
+</html>

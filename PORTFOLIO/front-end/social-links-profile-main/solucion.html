@@ -1,0 +1,51 @@
+// ...existing code...
+  <style>
+-    .attribution { font-size: 11px; text-align: center; }
+-    .attribution a { color: hsl(228, 45%, 44%); }
++    /* Fondo igual al preview y tarjeta centrada */
++    html, body {
++      height: 100%;
++      margin: 0;
++      background: #0f0f0f; /* color del fondo (ajusta si quieres otro) */
++      font-family: Arial, Helvetica, sans-serif;
++      color: #fff;
++      display: flex;
++      align-items: center;
++      justify-content: center;
++    }
++    .card {
++      width: 360px;
++      background: #1f1f1f; /* color de la tarjeta */
++      padding: 32px;
++      border-radius: 12px;
++      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
++      text-align: center;
++    }
++    .attribution { font-size: 11px; text-align: center; color: #aaa; margin-top: 18px; }
++    .attribution a { color: hsl(228, 45%, 44%); }
+  </style>
+// ...existing code...
+
+<body>
+
+-  Jessica Randall
+-  London, United Kingdom
+-  "Front-end developer and avid reader."
+-
+-  GitHub
+-  Frontend Mentor
+-  LinkedIn
+-  Twitter
+-  Instagram
++  <div class="card">
++    <img src="./assets/images/image-victor.jpg" alt="avatar" style="width:72px;height:72px;border-radius:50%;margin:0 auto 12px;display:block;">
++    <h1 style="margin:8px 0 4px;font-size:20px;">Jessica Randall</h1>
++    <p style="margin:0 0 10px;color:#cfe73a;font-weight:600;">London, United Kingdom</p>
++    <p style="margin:0 0 18px;color:#bfbfbf;">"Front-end developer and avid reader."</p>
++
++    <button style="display:block;width:100%;margin:8px 0;padding:10px;border-radius:8px;border:none;background:#333;color:#fff;">GitHub</button>
++    <button style="display:block;width:100%;margin:8px 0;padding:10px;border-radius:8px;border:none;background:#333;color:#fff;">Frontend Mentor</button>
++    <button style="display:block;width:100%;margin:8px 0;padding:10px;border-radius:8px;border:none;background:#333;color:#fff;">LinkedIn</button>
++    <button style="display:block;width:100%;margin:8px 0;padding:10px;border-radius:8px;border:none;background:#333;color:#fff;">Twitter</button>
++    <button style="display:block;width:100%;margin:8px 0;padding:10px;border-radius:8px;border:none;background:#333;color:#fff;">Instagram</button>
++  </div>

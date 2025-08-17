@@ -11,6 +11,7 @@ struct struct_Tarea
     int num;
     string descripcion;
     bool completada;
+    int prioridad;
 };
 int eleccion;
 /*
