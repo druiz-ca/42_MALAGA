@@ -9,8 +9,9 @@
 #include <netinet/in.h> // Estructuras para sockets (SOCKADDR_IN)
 #include <sys/socket.h> // socket, bind, listen, accept, send, recv
 #include <sys/select.h> // para select, FD_SET, FD_ISSET, FD_ZERO
+#include <arpa/inet.h>
 
-#define MAX_MSG_SIZE 1000000 // 1M
+#define MAX_MSG_SIZE 10000 // 1M
 #define MAX_CLIENTS 1024
 
 typedef struct s_client // s -> struct
@@ -21,43 +22,30 @@ typedef struct s_client // s -> struct
 // sino uso t_client(alias) tendria que poner typedef struct siempre
 
 t_client clients[MAX_CLIENTS];
+fd_set read_set, write_set, monitored_fds;	
+char send_buffer[MAX_MSG_SIZE], recv_buffer[MAX_MSG_SIZE];
+int current_id = 0, maxfd = 0;
 
-fd_set read_set;
-fd_set write_set;
-fd_set monitored_fds;	
-
-char send_buffer[MAX_MSG_SIZE];
-char recv_buffer[MAX_MSG_SIZE];
-
-int current_id = 0;
-int maxfd = 0;
-
-void putstr(int fd, char *str)
+void err(char *str)
 {
-	int i = 0;
-	while (str[i] != '\0')
-	{
-		write(fd, &str[i], 1);
-		i++;
-	}
-}
-
-void err(char *msg)
-{
-	if (!msg)
-		putstr(2, "Fatal error\n");
+	if(str)
+		write(2, str, strlen(str));
 	else
-		putstr(2, msg);
+		write(2, "Fatal error", 11);
+	write(2, "\n", 1);
 	exit(1);
 }
-
-void	send_broadcast(int accepted)
+// Para enviar el mensaje a todos los clientes menos al que lo envía
+void	enviar_comunicado(int accepted)
 {
 	for (int fd = 0; fd <= maxfd; fd++)
-	{
+	{	//comrueba q fd's están listos para escritura (q se les pueda 
+		// enviar un mensaje)
 		if (FD_ISSET(fd, &write_set) && fd != accepted)
+		{
 			if (send(fd, send_buffer, strlen(send_buffer), 0) == -1)
 				err(NULL);
+		}
 	}
 }
 
@@ -68,7 +56,7 @@ int main(int ac, char **av)
 		err("Wrong number of arguments\n");
 	
 	// ==================== SOCKET ========================= //
-	int sockfd;
+	int server_fd;
 
 	// Creación del socket
 		// AFINET-> dir IP en formato IPv4 (127.0.0.1)
@@ -76,15 +64,15 @@ int main(int ac, char **av)
 		// SOCK:STREAM -> indica socket orientado a conexión
 			// con protocolo TCP (maneja control d errores)
 			// Socket stream(flujo)
-	sockfd = socket(AF_INET, SOCK_STREAM, 0); // 3 
+	server_fd = socket(AF_INET, SOCK_STREAM, 0); // 3 
 	// Verificación del socket
-	if (sockfd == -1)
+	if (server_fd == -1)
 		err(NULL);
 	// Limpiar EL conjunto de fd
 	FD_ZERO(&monitored_fds);
 	// =====================================================
 	// Agrega el sockfd del servidor al conjunto de fds (monitored_fds)
-	FD_SET(sockfd, &monitored_fds);
+	FD_SET(server_fd, &monitored_fds);
 
 	// ==================== FIN SOCKET ====================== //
 	
@@ -92,7 +80,7 @@ int main(int ac, char **av)
 	struct sockaddr_in server_config; // almacena la IP y puerto del serv.
 	// limpieza de la estructura server_config
 	bzero(&server_config, sizeof(server_config)); 
-	
+	bzero(&clients, sizeof(clients));
 	// Establece la fam de dir. q usará el socket, la IP, el Puerto ... 
 	server_config.sin_family = AF_INET; // fam. de direcc. q usará para el socket
 	//server_config.sin_addr.s_addr = htonl(2130706433); //127.0.0.1
@@ -102,16 +90,16 @@ int main(int ac, char **av)
 	// ================== FIN SERVERADDR & MONITORED =================== //
 	
 	// Establece el actual sockfd como el num maximo fd
-	maxfd = sockfd; // 3
+	maxfd = server_fd; // 3
 
 	
 	// Enlaza el socket a una IP y un puerto 
-	if ((bind(sockfd, (const struct sockaddr *)&server_config, sizeof(server_config))) != 0)
+	if ((bind(server_fd, (const struct sockaddr *)&server_config, sizeof(server_config))) != 0)
 		err(NULL);
 
 		// convierte el socket a pasivo -> xra q pueda aceptar conexiones
 		// escuchará hasta 10 clientes pendientes de accept
-	if (listen(sockfd, 10) != 0)
+	if (listen(server_fd, 10) != 0)
 		err(NULL);  
 		
 		// ==================== FIN DE LA CONFIGURACIÓN ====================== //
@@ -119,14 +107,13 @@ int main(int ac, char **av)
 
 	while (1)
 	{
-		read_set = monitored_fds;
-		write_set = monitored_fds;
+		read_set = write_set = monitored_fds;
 
 		// Detecta 1 fds están listos (para enviar o recibir datos)
 			// modifica los conjuntos para indicar qué fds están listos
 			// Va aumentado el maxfd cada vez que slecciona un fd nuevo
 		if (select(maxfd + 1, &read_set, &write_set, NULL, NULL) == -1)
-			err(NULL);
+			continue;
 		for (int fd = 0; fd <= maxfd; fd++)
 		{
 			// Comprueba si un fd está listo para aceptar nueva conexión
@@ -138,7 +125,7 @@ int main(int ac, char **av)
 				// ha sucedido es en el socket del servidor)
 				// - detectada una conexión entrante!
 				// este bloque solo prepara y configura la nueva conexión entrante
-				if (fd == sockfd) 
+				if (fd == server_fd) 
 				{
 					// Para almacenar la info de la dir. del cliente conectado
 					struct sockaddr_in cli;
@@ -151,11 +138,11 @@ int main(int ac, char **av)
 
 					// Acepto la conexión -> devuelvo fd de cliente conectado
 						// Asigna el nº de fd + bajo disponible
-					client_fd = accept(sockfd, (struct sockaddr *)&cli, &len);
+					client_fd = accept(server_fd, (struct sockaddr *)&cli, &len);
 
 					// Comprobaciones
 					if (client_fd < 0)
-						err(NULL);
+						continue; // nuevo
 					
 					// Actualizo maxfd
 					if (client_fd > maxfd)
@@ -174,7 +161,8 @@ int main(int ac, char **av)
 					sprintf(send_buffer, "server: client %d just arrived\n", clients[client_fd].id);
 					
 					// Notifica a todos los clientes (menos este) q alguien se ha contectado
-					send_broadcast(client_fd);
+					enviar_comunicado(client_fd);
+					break; // nuevo
 				}
 				
 				// si el fd detectado x select corresponde al del cliente
@@ -190,13 +178,14 @@ int main(int ac, char **av)
 						sprintf(send_buffer, "server: client %d just left\n", clients[fd].id);
 						
 						// Notifico a todos los clientes que se ha desconectado
-						send_broadcast(fd);
+						enviar_comunicado(fd);
 
 						// Elimino el fd del cliente del conjunto
 						FD_CLR(fd, &monitored_fds);
 
 						// Cierro el fd
 						close(fd);
+						break; // nuevo
 					}
 					else // cliente conectado
 					{
@@ -216,12 +205,11 @@ int main(int ac, char **av)
 								sprintf(send_buffer, "client %d: %s\n", clients[fd].id, clients[fd].msg);
 								
 								// Lo notifica a todos los clientes conectados
-								send_broadcast(fd);
+								enviar_comunicado(fd);
 
 								// Limpieza
 								bzero(clients[fd].msg, strlen(clients[fd].msg));
-
-								// 
+														// 
 								j = -1;
 							}
 						}

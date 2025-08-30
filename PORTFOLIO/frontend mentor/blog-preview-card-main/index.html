@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- displays site properly based on user's device -->
+
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/images/favicon-32x32.png">
+  <link rel="preload" href="assets/fonts/Figtree-VariableFont_wght.ttf"
+  
+  
+
+  <!-- Feel free to remove these styles or customise in your own stylesheet 👍 -->
+  <style>
+    .attribution { font-size: 11px; text-align: center; }
+    .attribution a { color: hsl(228, 45%, 44%); }
+    body{
+      background-color: hsl(47, 88%, 63%);
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+      display: flex;
+      align-items: center;
+      padding: 600px;
+    }
+    .card{
+      background-color: azure;
+      border-radius: 30px;
+      width: 600px;
+      box-shadow: 10px 6px 0 black;
+      padding: 20px 0 10px 0;/*el padding NO a la img sino al div*/
+      border: 1px solid;
+    }
+    .card img{
+      border-radius: 20px;
+      width: 100%;
+      margin: 0 0 14px 0;
+    }
+    .card .etiqueta{
+      margin: 10px 40px;
+      display: flex; /*para */
+      gap: 12px; /**/
+      align-items: center;
+      font-size: 1rem;
+      flex-direction: column;
+      align-items: flex-start; /*alinea la colum a izq*/
+    }
+    .card .tag{
+      background: hsl(47, 88%, 63%);
+      border-radius: 5px;
+      font-weight: 700;
+      font-size: 1.5rem; /*rem para */
+      padding: 6px 10px;/*si solo hay 2: vert. hor.*/
+    }
+    .card .etiqueta time{
+      color: #6b6b6b;
+      font-size: 1.1rem;
+    }
+
+    .card h1{
+      font-size: 2.1rem;
+      margin:38px;
+    }
+
+    .card .texto{
+      color: #6b6b6b;
+      font-size: 20px;
+      margin: 38px;
+    }
+    .card .autor{
+      display: flex;/*lo pone al lado*/
+      gap: 10px;
+      margin-top: 15px;
+      font-size: 1.2rem;
+      font-weight: 900; /*en .name no va*/ 
+    }
+    .card .autor img{
+      width: 50px;
+      margin-left: 35px;
+    }
+    .card .autor .name{
+      margin: 13px;
+    }
+  </style>
+</head>
+<body>
+  <article class="card">
+    <figure>
+      <img src="assets/images/illustration-article.svg">
+    </figure>
+    <div class="etiqueta">
+      <span class="tag">Learning</span>
+      <time datetime="2023-12-21">Published 21 Dec 2023</time>
+    </div>
+    <h1>HTML & CSS foundations</h1>
+    <p class="texto">These languages are the backbone of every website, defining structure, content, and presentation.</p>
+    <footer class="autor">
+      <img src="assets/images/image-avatar.webp">
+      <span class="name">Greg Hooper</span>
+    </footer>
+  </div>
+  <div class="attribution">
+    Challenge by <a href="https://www.frontendmentor.io?ref=challenge" target="_blank">Frontend Mentor</a>. 
+    Coded by <a href="#">Your Name Here</a>.
+  </div>
+</body>
+</html>
