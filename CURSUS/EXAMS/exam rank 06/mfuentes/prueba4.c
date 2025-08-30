@@ -34,6 +34,7 @@ void ft_error(char *str)
 
 void enviar_comunicado(int client_fd)
 {
+    printf("%s", comunicado);
     for(int fd = 0; fd <= max_fd; fd++)
     {
         if(FD_ISSET(fd, &write_fd) && fd != client_fd)
@@ -56,7 +57,7 @@ int main(int argc, char **argv)
     max_fd = server_fd;
 
     struct sockaddr_in server_config;
-    bzero(server_config, sieof(server_config));
+    bzero(&server_config, sizeof(server_config));
     server_config.sin_port = htons(atoi(argv[1]));
     server_config.sin_family = AF_INET;
     server_config.sin_addr.s_addr = inet_addr("127.0.0.1");
@@ -69,7 +70,7 @@ int main(int argc, char **argv)
     while(1)
     {
         read_fd = write_fd = monitored_fd;
-        if(select(server_fd, &read_fd, &write_fd, 0, 0) == -1)
+        if(select(max_fd+1, &read_fd, &write_fd, 0, 0) == -1)
             continue;
         for(int fd = 0; fd <= max_fd; fd++)
         {
@@ -79,12 +80,9 @@ int main(int argc, char **argv)
                 {
                     struct sockaddr_in client_config;
                     bzero(&client_config, sizeof(client_config));
-                    client_config.sin_port = htons(atoi(argv[1]));
-                    client_config.sin_family = AF_INET;
-                    client_config.sin_addr.s_addr = inet_addr("127.0.0.1");
                     socklen_t len = sizeof(struct sockaddr_in);
                     if((client_fd=accept(server_fd, (struct sockaddr*)&server_config, &len))==-1)
-                        ft_error(NULL);
+                        continue;
                     if (max_fd < client_fd)
                         max_fd = client_fd;
                     clientes[client_fd].id = current_id++;
@@ -92,7 +90,13 @@ int main(int argc, char **argv)
                     sprintf(comunicado, "client %d has connected\n", clientes[client_fd].id);
                     enviar_comunicado(client_fd);
                 }else{
+                    int bytes_leidos = recv(fd, recv_buffer, sizeof(recv_buffer), 0);
+                    if(bytes_leidos <= 0)
+                    {
 
+                    }else{
+                        
+                    }
                 }
             }
         }
