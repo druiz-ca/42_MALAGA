@@ -65,4 +65,36 @@ int main(int argc, char **argv)
         ft_error(NULL);
     if(listen(server_fd, 10)==-1)
         ft_error(NULL);
+    int client_fd = 0;
+    while(1)
+    {
+        read_fd = write_fd = monitored_fd;
+        if(select(server_fd, &read_fd, &write_fd, 0, 0) == -1)
+            continue;
+        for(int fd = 0; fd <= max_fd; fd++)
+        {
+            if(FD_ISSET(fd, &read_fd))
+            {
+                if(fd == server_fd)
+                {
+                    struct sockaddr_in client_config;
+                    bzero(&client_config, sizeof(client_config));
+                    client_config.sin_port = htons(atoi(argv[1]));
+                    client_config.sin_family = AF_INET;
+                    client_config.sin_addr.s_addr = inet_addr("127.0.0.1");
+                    socklen_t len = sizeof(struct sockaddr_in);
+                    if((client_fd=accept(server_fd, (struct sockaddr*)&server_config, &len))==-1)
+                        ft_error(NULL);
+                    if (max_fd < client_fd)
+                        max_fd = client_fd;
+                    clientes[client_fd].id = current_id++;
+                    FD_SET(client_fd, &monitored_fd);
+                    sprintf(comunicado, "client %d has connected\n", clientes[client_fd].id);
+                    enviar_comunicado(client_fd);
+                }else{
+
+                }
+            }
+        }
+    }
 }
