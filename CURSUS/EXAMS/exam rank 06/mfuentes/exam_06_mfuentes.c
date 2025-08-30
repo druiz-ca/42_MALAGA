@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include <sys/socket.h>
+#include <sys/select.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
@@ -23,8 +24,8 @@ void err(char *msg) {
     write(2, msg, strlen(msg));
   else
     write(2, "Fatal error", 11);
-  write(2, "\n", 1);
-  exit(1);
+  write(2, "\n", 1); // sin esto falla
+  exit(1); // sin esto falla
 }
 
 // Send message to all clients
@@ -33,7 +34,7 @@ void send_to_all(int except) {
   for (int fd = 0; fd <= maxfd; fd++) {
     if (FD_ISSET(fd, &write_set) && fd != except) {
       if (send(fd, send_buffer, strlen(send_buffer), 0) == -1)
-        err(NULL);
+        err(NULL);            // x poner sizeof no iba!!!!
     }
   }
 }
