@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <sys/socket.h>
 #include <sys/select.h>
-#include <netinet/in.h>
+#include <sys/socket.h>
 #include <arpa/inet.h>
+#include <netinet/in.h>
 
 #define MAX_CLIENTS 1024
 #define MAX_MSG_LEN 1000000
@@ -18,9 +18,9 @@ typedef struct s_client
 }t_client;
 t_client clientes[MAX_CLIENTS];
 
-fd_set read_fd, write_fd, monitored_fd;
-char comunicado[MAX_MSG_LEN], recv_buffer[MAX_MSG_LEN];
-int max_fd = 0, current_id = 0;
+fd_set write_fd, read_fd, monitored_fds;
+int current_id = 0, max_fd = 0;
+char recv_buffer[MAX_MSG_LEN], comunicado[MAX_MSG_LEN];
 
 void ft_error(char *str)
 {
@@ -34,26 +34,18 @@ void ft_error(char *str)
 
 void enviar_comunicado(int client_fd)
 {
-    printf("%s", comunicado);
-    for(int fd = 0; fd <= max_fd; fd++)
-    {
-        if(FD_ISSET(fd, &write_fd) && fd != client_fd)
-        {
-            if(send(fd, comunicado, strlen(comunicado), 0)==-1)
-                ft_error(NULL);
-        }
-    }
+
 }
 
 int main(int argc, char **argv)
 {
     if(argc!= 2)
-        ft_error("wrong number");
+        ft_error("wrong num");
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if(server_fd == -1)
         ft_error(NULL);
-    FD_ZERO(&monitored_fd);
-    FD_SET(server_fd, &monitored_fd);
+    FD_ZERO(&monitored_fds);
+    FD_SET(server_fd, &monitored_fds);
     max_fd = server_fd;
 
     struct sockaddr_in server_config;
@@ -67,37 +59,17 @@ int main(int argc, char **argv)
     if(listen(server_fd, 10)==-1)
         ft_error(NULL);
     int client_fd = 0;
+
     while(1)
     {
-        read_fd = write_fd = monitored_fd;
-        if(select(max_fd+1, &read_fd, &write_fd, 0, 0) == -1)
+        read_fd = write_fd = monitored_fds;
+        if(select(max_fd+1, &read_fd, &write_fd, 0, 0)==-1)
             continue;
         for(int fd = 0; fd <= max_fd; fd++)
         {
             if(FD_ISSET(fd, &read_fd))
             {
-                if(fd == server_fd)
-                {
-                    struct sockaddr_in client_config;
-                    bzero(&client_config, sizeof(client_config));
-                    socklen_t len = sizeof(struct sockaddr_in);
-                    if((client_fd=accept(server_fd, (struct sockaddr*)&server_config, &len))==-1)
-                        continue;
-                    if (max_fd < client_fd)
-                        max_fd = client_fd;
-                    clientes[client_fd].id = current_id++;
-                    FD_SET(client_fd, &monitored_fd);
-                    sprintf(comunicado, "client %d has connected\n", clientes[client_fd].id);
-                    enviar_comunicado(client_fd);
-                }else{
-                    int bytes_leidos = recv(fd, recv_buffer, sizeof(recv_buffer), 0);
-                    if(bytes_leidos <= 0)
-                    {
-
-                    }else{
-                        
-                    }
-                }
+                
             }
         }
     }
