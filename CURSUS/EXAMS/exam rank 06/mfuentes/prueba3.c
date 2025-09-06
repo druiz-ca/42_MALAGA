@@ -60,7 +60,7 @@ int main(int argc, char **argv)
     bzero(&server_config, sizeof(server_config));
     server_config.sin_port = htons(atoi(argv[1]));
     server_config.sin_family = AF_INET;
-    server_config.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server_config.sin_addr.s_addr = htonl(2130706433);
 
     if(bind(server_fd, (const struct sockaddr*)&server_config, sizeof(server_config))==-1)
         ft_error(NULL);
@@ -93,7 +93,7 @@ int main(int argc, char **argv)
                     sprintf(comunicado, "client %d has connected\n", clientes[client_fd].id);
                     enviar_comunicado(client_fd);
                     //break;
-                }else{
+                }else{                                      // CON STRLEN PETA!!!
                     int bytes_leidos = recv(fd, recv_buffer, sizeof(recv_buffer), 0);
                     if(bytes_leidos <= 0)
                     {

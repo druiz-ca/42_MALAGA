@@ -6,8 +6,11 @@ Funciones permitidas: write, close, select, socket, accept, listen, send, recv, 
 Escriba un programa que escuche si el cliente se conecta a un puerto específico en 127.0.0.1 y permita que los clientes se comuniquen entre sí.
 
 Este programa tomará como primer argumento el puerto al que se vinculará.
+
 Si no se proporciona ningún argumento, debe escribir en la salida estándar "Número incorrecto de argumentos" seguido de \n y salir con el estado 1.
+
 Si una llamada al sistema devuelve un error antes de que el programa comience a aceptar la conexión, debe escribir en la salida estándar "Error fatal" seguido de \n y salir con el estado 1.
+
 Si no se puede asignar memoria, debe escribir en la salida estándar "Error fatal" seguido de \n y salir con el estado 1. Error" seguido de \n y salida con estado 1.
 
 Su programa debe ser no bloqueante, pero el cliente puede ser perezoso y, si no lee su mensaje, NO debe desconectarlo.
