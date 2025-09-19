@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Probar API Usuarios</title>
+    <style>
+    body {
+      background-color: #1e1e1e;
+      color: #d4d4d4;
+      font-family: 'Segoe UI', 'Fira Code', 'Consolas', monospace;
+      margin: 0;
+      padding: 2em;
+    }
+    input, button {
+      background: #252526;
+      color: #d4d4d4;
+      border: 1px solid #333;
+      padding: 0.5em;
+      margin: 0.2em 0;
+      border-radius: 4px;
+    }
+    button {
+      cursor: pointer;
+    }
+    pre {
+      background: #252526;
+      color: #d4d4d4;
+      padding: 1em;
+      border-radius: 4px;
+      border: 1px solid #333;
+      overflow-x: auto;
+    }
+    h1, h2 {
+      color: #d7ba7d;
+    }
+  </style>
+</head>
+<body>
+  <h1>Registro de usuario</h1>
+  <input id="username" placeholder="Usuario">
+  <input id="email" placeholder="Email">
+  <button onclick="registerUser()">Registrar</button>
+  <pre id="result"></pre>
+
+  <h2>Listar usuarios</h2>
+  <button onclick="listUsers()">Ver usuarios</button>
+  <pre id="users"></pre>
+
+  <script>
+    function registerUser() 
+    {
+      fetch('http://localhost:3000/users/register', 
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
+        {
+          username: document.getElementById('username').value,
+          email: document.getElementById('email').value
+        })
+      })
+      .then(res => res.json())
+      .then(data => document.getElementById('result').textContent = JSON.stringify(data, null, 2));
+    }
+
+    function listUsers() {
+      fetch('http://localhost:3000/users')
+        .then(res => res.json())
+        .then(data => document.getElementById('users').textContent = JSON.stringify(data, null, 2));
+    }
+  </script>
+</body>
+</html>

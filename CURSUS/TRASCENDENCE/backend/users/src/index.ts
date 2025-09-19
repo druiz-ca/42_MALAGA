@@ -1,9 +1,8 @@
-import express from 'express';
-import cors from 'cors';
+import Fastify from 'fastify';
+import cors from '@fastify/cors';
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+const fastify = Fastify();
+await fastify.register(cors);
 
 // Array para guardar usuarios en memoria
 interface User {
@@ -15,33 +14,34 @@ let users: User[] = [];
 let nextId = 1;
 
 // Ruta para registrar usuario
-app.post('/users/register', (req, res) => {
-  const { username, email } = req.body;
-  if (!username || !email) {
-    return res.status(400).json({ error: 'Faltan datos' });
-  }
+fastify.post('/users/register', async (request, reply) => {
+  const { username, email } = request.body as { username: string; email: string };
+  if (!username || !email) 
+    return reply.status(400).send({ error: 'Faltan datos' });
   const user: User = { id: nextId++, username, email };
   users.push(user);
-  res.status(201).json(user);
+  reply.status(201).send(user);
 });
 
 // Ruta para listar usuarios
-app.get('/users', (req, res) => {
-  res.json(users);
+fastify.get('/users', async (request, reply) => {
+  reply.send(users);
 });
 
 // Ruta para ver perfil de usuario por id
-app.get('/users/:id', (req, res) => {
-  const user = users.find(u => u.id === Number(req.params.id));
-  if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
-  res.json(user);
+fastify.get('/users/:id', async (request, reply) => {
+  const id = Number((request.params as { id: string }).id);
+  const user = users.find(u => u.id === id);
+  if (!user) return reply.status(404).send({ error: 'Usuario no encontrado' });
+  reply.send(user);
 });
 
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+// Ruta de salud
+fastify.get('/health', async (request, reply) => {
+  reply.send({ status: 'ok' });
 });
 
-app.listen(3000, () => {
+fastify.listen({ port: 3000 }, (err, address) => {
+  if (err) throw err;
   console.log('API running on port 3000');
 });
-

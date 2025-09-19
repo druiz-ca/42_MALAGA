@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Practica con APIs</title>
+        <style>
+            body{
+                background-color: #1e1e1e;
+                color: #d4d4d4;
+                padding: 2em;
+                font-family: 'Segoe UI', 'Fira Code', 'Consolas', monospace;
+            }
+            input, button{
+                background-color: #252526;
+                color: beige;
+                border: 1px solid #333;
+                border-radius: 4px;
+                padding: 0.5em;
+                margin: 0.2em;
+            }
+        </style>
+    </head>
+    <body>
+    <h1>Registro de usuario</h1>
+    <input id="username" placeholder="Usuario">
+    <input id="email" placeholder="Email">
+    <button onclick="registerUser()">Registrar</button>
+    <pre id="result"></pre>
+
+    <h2>Listar usuarios</h2>
+    <button onclick="listarUsuarios()">Ver usuarios</button>
+    <pre id="listar"></pre>
+
+    <script>
+        function registerUser() 
+        {// fetch envía la petición a la API
+        fetch('http://localhost:3001/users/register', 
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify
+            ({
+            username: document.getElementById('username').value,
+            email: document.getElementById('email').value
+            })
+        })
+        .then(res => res.json())
+        .then(data => document.getElementById('result').textContent = JSON.stringify(data, null, 2));
+        }
+
+        function listarUsuarios()
+        {
+            fetch('http://localhost:3001/users')
+            .then(res => res.json())
+            .then(data => document.getElementById('listar').textContent = JSON.stringify(data, null, 2));
+        }
+        </script>
+    </body>
+</html>

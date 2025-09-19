@@ -6,9 +6,19 @@ async function main()
 {
   const fastify = Fastify();
 
-  fastify.post('prueba_post', () => {
+  interface USUARIOS{
+    username: string;
+  }
+
+  let usuarios: USUARIOS[] = [];
   
-    
+  fastify.post('/prueba_post', (request, reply) => {
+    let {username} = request.body as {username: string};
+    if(!username)
+        return reply.send({error: 'faltan datos'});
+    const user: USUARIOS = {username};
+    usuarios.push(user);
+    reply.send({recibido: username});
   });
 
   fastify.get('/prueba', (request, reply) => 
@@ -25,6 +35,7 @@ async function main()
   {
       console.log('funciona');
   });
+  
 }
 
 
