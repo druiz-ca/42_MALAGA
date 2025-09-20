@@ -8,6 +8,7 @@ async function main() {
         if (!username)
             return reply.send({ error: 'faltan datos' });
         const user = { username };
+        usuarios.push(user);
         reply.send({ recibido: username });
     });
     fastify.get('/prueba', (request, reply) => {
