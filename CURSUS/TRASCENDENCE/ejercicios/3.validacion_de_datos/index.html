@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <style>
+            body{
+                background-color: black;
+                color: antiquewhite;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Guardar nombre</h1>
+        <input id="nombre">
+        <button onclick="enviar()">Enviar</button>
+
+        <h1>Consultar nombres</h1>
+        <button onclick="consultar()">Consultar</button>
+        <p id="resultado"></p>
+        <script>
+            function enviar()
+            {
+                const nombre = document.getElementById('nombre').value;
+                fetch('http://localhost:3000/post', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({nombre})
+                });
+            }
+            function consultar(){
+                fetch('http://localhost:3000/get')
+                .then(respuesta => respuesta.text())
+                .then(valorDevuelto => document.getElementById('resultado').innerText = valorDevuelto);
+            }
+        </script>
+    </body>
+</html>

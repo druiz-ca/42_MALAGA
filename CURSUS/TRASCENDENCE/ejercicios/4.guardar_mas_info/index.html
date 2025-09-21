@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <style>
+            body{
+                background-color: black;
+                color: aliceblue;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Rellenar campos</h1>
+        <input id="nombre">
+        <input id="email">
+        <button onclick="enviar()">Enviar</button>
+        <p id="confirmacion"></p>
+
+        <h2>Ver usuarios</h2>
+        <button onclick="ver()">Ver</button>
+        <p id="resultado"></p>
+
+        <script>
+            function enviar(){
+                const nombre = document.getElementById('nombre').value;
+                const email = document.getElementById('email').value;
+                fetch('http://localhost:3000/post', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({nombre, email})
+                });
+            }
+
+            function ver(){
+                fetch('http://localhost:3000/get')
+                .then(respuesta => respuesta.text())
+                .then(respText => document.getElementById('resultado').innerText = respText);
+            }
+        </script>
+    </body>
+</html>
