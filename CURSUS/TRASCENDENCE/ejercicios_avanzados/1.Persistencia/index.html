@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <style>
+            body {
+                background-color: black;
+                color: aliceblue;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Rellenar campos</h1>
+        <input id="nombre">
+        <input id="email">
+        <button onclick="guardar()">Guardar</button>
+
+        <button onclick="consultar()">Consultar</button>
+        <p id="resultado"></p>
+
+        <script>
+            function guardar(){
+                const nombre = document.getElementById('nombre').value;
+                const email = document.getElementById('email').value;
+                fetch('http://localhost:3000/post', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({nombre, email})
+                });
+            }
+
+            function consultar(){
+                fetch('http://localhost:3000/get')
+                .then(respuesta => respuesta.text())
+                .then(restText => document.getElementById('resultado').innerText = restText);
+            }
+        </script>
+    </body>
+</html>
