@@ -3,7 +3,9 @@ import cors from '@fastify/cors';
 
 async function main(){
     const fastify = Fastify();
-    await fastify.register(cors);
+    await fastify.register(cors, {
+        methods: ['GET', 'POST', 'DELETE', 'PUT']
+    });
 
     interface interUsuarios {
         nombre: string;

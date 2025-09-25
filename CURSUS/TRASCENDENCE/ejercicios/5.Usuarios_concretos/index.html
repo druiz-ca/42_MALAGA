@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <style>
+            body {
+                background-color: black;
+                color: aliceblue;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Rellenar campos</h1>
+        <input id="nombre">
+        <input id="email">
+        <button onclick="enviar()">Enviar</button>
+        <p id="confirmacion"></p>
+
+        <h1>Buscar Usuario</h1>
+        <input id="nombreBuscar">
+        <button onclick="buscar()">Buscar</button>
+        <p id="respuestaBuscar"></p>
+
+        <h1>Borrar Usuario</h1>
+        <input id="nombreBorrar">
+        <button onclick="borrar()">Borrar</button>
+        <p id="respuestaBorrar"></p>
+
+        <h1>Actualizar Email</h1>
+        <input id="nombre">
+        <input id="emailActualizar">
+        <button onclick="actualizarEmail()">Actualizar</button>
+        <p id="respuestaActualizar"></p>
+
+        <h2>Ver usuarios</h2>
+        <button onclick="ver()">Ver</button>
+        <p id="resultado"></p>
+
+        <script>
+            function enviar(){
+                const nombre = document.getElementById('nombre').value;
+                const email = document.getElementById('email').value;
+                fetch('http://localhost:3000/post', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({nombre, email})
+                });
+            }
+
+            function ver(){
+                fetch('http://localhost:3000/get')
+                .then(respuesta => respuesta.text())
+                .then(respText => document.getElementById('resultado').innerText = respText);
+            }   // cuando el serv responda, haz esto => 
+
+            function buscar(){
+                const nombre = document.getElementById('nombreBuscar').value;
+                fetch('http://localhost:3000/get/' + encodeURIComponent(nombre)) 
+                    .then(respuesta => respuesta.text())
+                    .then(respText => document.getElementById('respuestaBuscar').innerText = respText);
+            }
+
+            function borrar(){
+                const nombre = document.getElementById('nombreBorrar').value;
+                fetch('http://localhost:3000/delete/' + encodeURIComponent(nombre), {
+                    method: 'DELETE'
+                })
+                .then(respuesta => respuesta.text())
+                .then(respText => document.getElementById('respuestaBorrar').innerText = respText);
+            }
+
+            function actualizarEmail(){
+                const nombre = document.getElementById('nombre').value;
+                const email = document.getElementById('emailActualizar').value;
+                fetch('http://localhost:3000/put/' + encodeURIComponent(nombre), {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email})
+                })
+                .then(respuesta => respuesta.text())
+                .then(respText => document.getElementById('respuestaActualizar').innerHTML = respText);
+            }
+        </script>
+    </body>
+</html>
