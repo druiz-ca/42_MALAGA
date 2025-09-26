@@ -1,5 +1,5 @@
-import Fastify from 'fastify';
-import cors from '@fastify/cors'
+import Fastify from "fastify";
+import cors from '@fastify/cors';
 import {promises as fs} from 'fs';
 
 async function main(){
@@ -7,26 +7,22 @@ async function main(){
     await fastify.register(cors, {methods: ['GET', 'POST', 'DELETE', 'PUT']});
 
     interface interUsuarios{
-        nombre : string;
+        nombre: string;
         email: string;
     }
 
-    // Carga el archivo con los usuarios guardados antes de empezar
     let arrayUsuarios: interUsuarios[] = await leerUsuarios();
-    
+
     async function leerUsuarios(): Promise<interUsuarios[]> {
-        try {
-            const datos = await fs.readFile('usuarios.json', 'utf-8');
-            return JSON.parse(datos);
-        }catch (e) {
-            return [];
-        }
+        const datosLeidos = await fs.readFile('usuarios.json', 'utf-8');
+        return JSON.parse(datosLeidos);
     }
 
-    async function guardarUsuarios(arrayUsuarios: interUsuarios[]){
+    async function guardarUsuarios(arrayUsuarios: interUsuarios[]) {
         await fs.writeFile('usuarios.json', JSON.stringify(arrayUsuarios, null, 2));
     }
 
+    // el async en post, get, etc no va al principio sino aqui:
     fastify.post('/post', async (solicitud, respuesta) => {
         const {nombre, email} = solicitud.body as interUsuarios;
         arrayUsuarios.push({nombre, email});
@@ -36,10 +32,10 @@ async function main(){
 
     fastify.get('/get', (solicitud, respuesta) => {
         respuesta.send(arrayUsuarios);
-    })
+    });
 
-    fastify.listen({port:3000}, () =>{
-        console.log('API escuchando');
+    fastify.listen({port:3000}, () => {
+        console.log('API is listening');
     });
 }
 
