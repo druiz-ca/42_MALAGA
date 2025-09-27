@@ -5,12 +5,14 @@ async function main() {
     const fastify = Fastify();
     await fastify.register(cors, { methods: ['GET', 'POST', 'DELETE', 'PUT'] });
     // Carga el archivo con los usuarios guardados antes de empezar
+    // de ese modo se trabaja con el array y se va guardando en el archivo
     let arrayUsuarios = await leerUsuarios();
     // siempre que necesites usar await la ft se declara como async
-    //fs.readFile = ft(file system) asincrona para leer archivos q devuelve promesa
+    // fs.readFile = ft(file system) asincrona para leer archivos q devuelve promesa
     // el Promise... = cuando la promesa se resuelva la ft devolvera un
     // array de objetos de tipo interUsuarios
-    // al poner: Promise, obliga a que la ft sea async y tenga return
+    // Opcionalmente puedes especificar el tipo de dato que debe devolver:
+    // ...Usuarios(): Promise <interUsuarios[]> {....
     // NODE.js por defecto usa ft asincronas x si maneja muchas conexiones
     // al mismo tiempo, para que no bloquee, permite controlar quien espera
     // y quien no con async - await
@@ -34,13 +36,32 @@ async function main() {
     }
     // usas async cada vez que vayas a necesitar q en esa ft haya
     // algún punto en el que quieras que espere a que termine (await)
+    // Siempre q se usen FILES se necesita async - await
     // En las funciones "callback/flecha(=>)" el 'async' va después del metodo (post)
+    // Se usa .body para extrar datos enviados en la petición
     fastify.post('/post', async (solicitud, respuesta) => {
         const { nombre, email } = solicitud.body;
         arrayUsuarios.push({ nombre, email });
         // espera a que termine la función guardar...
         await guardarUsuarios(arrayUsuarios);
         respuesta.send('Guardado');
+    });
+    // Se usa .params para extraer datos de la URL (put/:nombre)
+    fastify.put('/put/:nombre', async (solicitud, respuesta) => {
+        // Le dices a TS que esperas un objeto q teng una propiedad 'nombre'
+        // .nombre extrae el valor de esa propiedad especificado en la URL:
+        // 'put/:nombre'
+        const nombreBuscado = solicitud.params.nombre;
+        const { email } = solicitud.body;
+        //Busco el usuario en el array
+        const usuario = arrayUsuarios.find(objeto => objeto.nombre === nombreBuscado);
+        if (!usuario)
+            return respuesta.status(404).send('No existe');
+        //Actualizo el email
+        usuario.email = email;
+        // Al usar archivos tienes que guardar cada cambio:
+        await guardarUsuarios(arrayUsuarios);
+        respuesta.send('Email actualizado');
     });
     fastify.get('/get', (solicitud, respuesta) => {
         respuesta.send(arrayUsuarios);

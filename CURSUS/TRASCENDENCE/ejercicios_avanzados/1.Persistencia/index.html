@@ -14,6 +14,11 @@
         <input id="email">
         <button onclick="guardar()">Guardar</button>
 
+        <h1>Actualizar email</h1>
+        <input id="nombreAct">
+        <input id="emailAct">
+        <button onclick="actualizar()">Actualizar</button>
+
         <button onclick="consultar()">Consultar</button>
         <p id="resultado"></p>
 
@@ -25,6 +30,16 @@
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({nombre, email})
+                });
+            }
+
+            function actualizar(){
+                const nombre = document.getElementById('nombreAct').value;
+                const email = document.getElementById('emailAct').value;
+                fetch('http://localhost:3000/put/' + encodeURIComponent(nombre), {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email})
                 });
             }
 

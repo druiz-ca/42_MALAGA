@@ -12,6 +12,7 @@ async function main(){
     }
 
     // Carga el archivo con los usuarios guardados antes de empezar
+    // de ese modo se trabaja con el array y se va guardando en el archivo
     let arrayUsuarios: interUsuarios[] = await leerUsuarios();
     
     // siempre que necesites usar await la ft se declara como async
@@ -47,6 +48,7 @@ async function main(){
     // algún punto en el que quieras que espere a que termine (await)
     // Siempre q se usen FILES se necesita async - await
     // En las funciones "callback/flecha(=>)" el 'async' va después del metodo (post)
+    // Se usa .body para extrar datos enviados en la petición
     fastify.post('/post', async (solicitud, respuesta) => {
         const {nombre, email} = solicitud.body as interUsuarios;
         arrayUsuarios.push({nombre, email});
@@ -55,7 +57,25 @@ async function main(){
         respuesta.send('Guardado');
     });
 
-    fastify.put('/put', )
+    // Se usa .params para extraer datos de la URL (put/:nombre)
+    fastify.put('/put/:nombre', async (solicitud, respuesta) => {
+        // Le dices a TS que esperas un objeto q teng una propiedad 'nombre'
+        // .nombre extrae el valor de esa propiedad especificado en la URL:
+        // 'put/:nombre'
+        const nombreBuscado = (solicitud.params as {nombre: string}).nombre;
+        const {email} = solicitud.body as {email:string};
+
+        //Busco el usuario en el array
+        const usuario = arrayUsuarios.find(objeto => objeto.nombre === nombreBuscado);
+        if(!usuario)
+            return respuesta.status(404).send('No existe');
+
+        //Actualizo el email
+        usuario.email = email;
+        // Al usar archivos tienes que guardar cada cambio:
+        await guardarUsuarios(arrayUsuarios);
+        respuesta.send('Email actualizado');
+    });
 
     fastify.get('/get', (solicitud, respuesta) => {
         respuesta.send(arrayUsuarios);

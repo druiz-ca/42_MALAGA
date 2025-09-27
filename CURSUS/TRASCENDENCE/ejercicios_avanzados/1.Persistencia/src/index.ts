@@ -1,5 +1,5 @@
-import Fastify from "fastify";
-import cors from '@fastify/cors';
+import Fastify from 'fastify';
+import cors from '@fastify/cors'
 import {promises as fs} from 'fs';
 
 async function main(){
@@ -7,18 +7,22 @@ async function main(){
     await fastify.register(cors, {methods: ['GET', 'POST', 'DELETE', 'PUT']});
 
     interface interUsuarios{
-        nombre: string;
+        nombre : string;
         email: string;
     }
 
     let arrayUsuarios: interUsuarios[] = await leerUsuarios();
-
-    async function leerUsuarios(): Promise<interUsuarios[]> {
-        const datosLeidos = await fs.readFile('usuarios.json', 'utf-8');
-        return JSON.parse(datosLeidos);
+    
+    async function leerUsuarios() {
+        try {  
+            const datos = await fs.readFile('usuarios.json', 'utf-8');
+            return JSON.parse(datos);
+        }catch (e) {
+            return []; 
+        }
     }
 
-    async function guardarUsuarios(arrayUsuarios: interUsuarios[]) {
+    async function guardarUsuarios(arrayUsuarios: interUsuarios[]){
         await fs.writeFile('usuarios.json', JSON.stringify(arrayUsuarios, null, 2));
     }
 
@@ -29,12 +33,23 @@ async function main(){
         respuesta.send('Guardado');
     });
 
-    fastify.get('/get', (solicitud, respuesta) => {
-        respuesta.send(arrayUsuarios);
+    fastify.put('/put/:nombre', async (solicitud, respuesta) => {
+        const nombreBuscado = (solicitud.params as {nombre: string}).nombre;
+        const {email} = solicitud.body as {email:string};
+        const usuario = arrayUsuarios.find(objeto => objeto.nombre === nombreBuscado);
+        if(!usuario)
+            return respuesta.status(404).send('No existe');
+        usuario.email = email;
+        await guardarUsuarios(arrayUsuarios);
+        respuesta.send('Email actualizado');
     });
 
-    fastify.listen({port:3000}, () => {
-        console.log('API is listening');
+    fastify.get('/get', (solicitud, respuesta) => {
+        respuesta.send(arrayUsuarios);
+    })
+
+    fastify.listen({port:3000}, () =>{
+        console.log('API escuchando');
     });
 }
 
