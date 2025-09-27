@@ -33,7 +33,8 @@ async function main() {
         await fs.writeFile('usuarios.json', JSON.stringify(arrayUsuarios, null, 2));
     }
     // usas async cada vez que vayas a necesitar q en esa ft haya
-    // algún punto en el que quieras que espere a que termine
+    // algún punto en el que quieras que espere a que termine (await)
+    // En las funciones "callback/flecha(=>)" el 'async' va después del metodo (post)
     fastify.post('/post', async (solicitud, respuesta) => {
         const { nombre, email } = solicitud.body;
         arrayUsuarios.push({ nombre, email });

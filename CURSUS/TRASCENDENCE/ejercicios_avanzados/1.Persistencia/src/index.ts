@@ -22,7 +22,6 @@ async function main(){
         await fs.writeFile('usuarios.json', JSON.stringify(arrayUsuarios, null, 2));
     }
 
-    // el async en post, get, etc no va al principio sino aqui:
     fastify.post('/post', async (solicitud, respuesta) => {
         const {nombre, email} = solicitud.body as interUsuarios;
         arrayUsuarios.push({nombre, email});
