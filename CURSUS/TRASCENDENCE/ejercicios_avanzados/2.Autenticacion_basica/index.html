@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <title></title>
+        <style>
+            body{
+                background-color: black;
+                color: whitesmoke;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Rellenar campos</h1>
+        <input id="nombre">
+        <input id="email">
+        <button onclick="guardar()">Guardar</button>
+
+        <h1>Actualizar email</h1>
+        <input id="nombreAct">
+        <input id="emailAct">
+        <button onclick="actualizar()">Actualizar</button>
+
+        <h1>Borrar Usuario</h1>
+        <input id="nombreBorrar">
+        <button onclick="borrar()">Borrar</button>
+        <p id="respBorrar"></p>
+        
+        <button onclick="consultar()">Consultar</button>
+        <p id="resultado"></p>
+        
+        <script>
+            function guardar(){
+                const nombre = document.getElementById('nombre').value;
+                const email = document.getElementById('email').value;
+                fetch('http://localhost:3000/post', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({nombre, email})
+                });
+            }
+
+            function consultar(){
+                fetch('http://localhost:3000/get')
+                .then(respuesta => respuesta.text())
+                .then(respText => document.getElementById('resultado').innerText = respText)
+            }
+
+            function borrar(){
+                const nombre = document.getElementById('nombreBorrar').value;
+                fetch('http://localhost:3000/delete/' + encodeURIComponent(nombre), {
+                    method: 'DELETE',
+                    headers: {
+                        // envío el token (ficha, símbolo, o parte más pequeña
+                        //de un texto) al BACK y soloa actúa tras comprobarlo
+                        'Authorization': 'mi_token'
+                    }
+                })
+                .then(respuesta => respuesta.text())// text sin () no va!!!
+                .then(respText => document.getElementById('respBorrar').innerHTML = respText)
+            }
+        </script>
+    </body>
+</html>
