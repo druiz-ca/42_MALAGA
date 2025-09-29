@@ -55,8 +55,8 @@
             function buscar(){
                 const nombre = document.getElementById('nombreBuscar').value;
                 fetch('http://localhost:3000/get/' + encodeURIComponent(nombre)) 
-                    .then(respuesta => respuesta.text())
-                    .then(respText => document.getElementById('respuestaBuscar').innerText = respText);
+                .then(respuesta => respuesta.text())
+                .then(respText => document.getElementById('respuestaBuscar').innerText = respText);
             }
 
             function borrar(){
