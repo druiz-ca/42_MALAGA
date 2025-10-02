@@ -24,6 +24,11 @@
         <input id="nombreBorrar">
         <button onclick="borrar()">Borrar</button>
         <p id="respBorrar"></p>
+
+        <h1>Buscar Posts de un Usuario</h1>
+        <input id="nombreBuscar">
+        <button onclick="buscarPosts()">Buscar</button>
+        <p id="respBuscar"></p>
         
         <button onclick="consultar()">Consultar</button>
         <p id="resultado"></p>
@@ -38,25 +43,33 @@
                     body: JSON.stringify({nombre, email})
                 });
             }
-
-            function consultar(){
-                fetch('http://localhost:3000/get')
-                .then(respuesta => respuesta.text())
-                .then(respText => document.getElementById('resultado').innerText = respText)
-            }
-
+            
             function borrar(){
                 const nombre = document.getElementById('nombreBorrar').value;
                 fetch('http://localhost:3000/delete/' + encodeURIComponent(nombre), {
                     method: 'DELETE',
                     headers: {
                         // envío el token (ficha, símbolo, o parte más pequeña
-                        //de un texto) al BACK y soloa actúa tras comprobarlo
+                        //de un texto) al
+                        //  BACK y soloa actúa tras comprobarlo
                         'Authorization': 'mi_token'
                     }
                 })
                 .then(respuesta => respuesta.text())// text sin () no va!!!
                 .then(respText => document.getElementById('respBorrar').innerHTML = respText)
+            }
+
+            function buscarPosts(){
+                const nombreBuscado = document.getElementById('nombreBuscar').value;
+                fetch('http://localhost:3000/get/' + encodeURIComponent(nombreBuscado))
+                .then(respuesta => respuesta.text())
+                .then(respText => document.getElementById('respBuscar').innerText = respText)
+            }
+
+            function consultar(){
+                fetch('http://localhost:3000/get')
+                .then(respuesta => respuesta.text())
+                .then(respText => document.getElementById('resultado').innerText = respText)
             }
         </script>
     </body>

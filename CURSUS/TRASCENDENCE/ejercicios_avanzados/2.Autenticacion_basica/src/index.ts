@@ -15,7 +15,7 @@ async function main(){
 
     interface interUsuarios{
         nombre: string;
-        email:string;
+        email: string;
     }
 
     // esta ft tiene que estar antes de ser llamada sino no carga
@@ -42,6 +42,11 @@ async function main(){
         respuesta.send('Guardado');
     })
 
+    fastify.get('/posts/:nombre', async (solicitud, respuesta) => {
+    const nombre = (solicitud.params as {nombre: string}).nombre;
+    const postsUsuario = arrayUsuarios.filter(post => post.nombre === nombre);
+    respuesta.send(postsUsuario);
+    });
     // defino una constante TOKEN para que tenga que comprobarlo el back
     const TOKEN = 'mi_token';
 

@@ -32,6 +32,12 @@ async function main() {
         await guardarUsuarios(arrayUsuarios);
         respuesta.send('Guardado');
     });
+    fastify.get('/posts/:nombre', async (solicitud, respuesta) => {
+        const nombre = solicitud.params.nombre;
+        const postsUsuario = arrayUsuarios.filter(post => post.nombre === nombre);
+        respuesta.send(postsUsuario);
+    });
+    // defino una constante TOKEN para que tenga que comprobarlo el back
     const TOKEN = 'mi_token';
     fastify.delete('/delete/:nombre', async (solicitud, respuesta) => {
         const token = solicitud.headers['authorization'];
