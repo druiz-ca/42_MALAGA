@@ -67,6 +67,12 @@
                 .then(respText => document.getElementById('respBorrar').innerHTML = respText)
             }
 
+            function crearPost(){
+                const nombre = document.getElementById('nombre').value;
+                const email = document.getElementById('email').value;
+                fetch('http://localhost:3000/post')
+            }
+
             function buscarPosts(){
                 const nombreBuscado = document.getElementById('nombre').value;
                 fetch('http://localhost:3000/get/' + encodeURIComponent(nombreBuscado))
@@ -74,14 +80,8 @@
                 .then(respText => document.getElementById('resultado').innerText = respText)
             }
 
-            function crearPost(){
-                const nombre = document.getElementById('nombre').value;
-                const email = document.getElementById('email').value;
-                fetch('http://localhost:3000/post')
-            }
-
             function borrarPost(){
-
+                
             }
 
             function consultar(){
