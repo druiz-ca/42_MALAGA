@@ -8,20 +8,21 @@ async function main(){
         methods: ['GET', 'POST', 'DELETE', 'PUT']
     });
 
-    // INTERFACE + ARRAY de usuarios
+    // INTERFACE + ARRAY de datos de usuarios (nombre, email, etc)
     interface interUsuarios{
         nombre: string;
         email: string;
     }
     let arrayUsuarios: interUsuarios[] = await leerUsuarios();
     
-    // INTERFACE + ARRAY de posts
+    // INTERFACE + ARRAY de posts de cada usuario
     interface interPosts{
         usuario: string;
         contenido: string;
     }
     let arrayPosts: interPosts[] = [];
 
+    // GESTION DEL ARCHIVO
     async function leerUsuarios(){
         const datos = await fs.readFile('usuarios.json', 'utf-8');
         return JSON.parse(datos);
@@ -29,6 +30,8 @@ async function main(){
     async function guardarUsuarios(arrayUsuarios: interUsuarios[]){
         await fs.writeFile('usuarios.json', JSON.stringify(arrayUsuarios, null, 2));
     }
+    // ---------------------
+
 
     fastify.post('/post', async (solicitud, respuesta) => {
         // cuando extraes + de 1 parámetro necesitas {}
@@ -59,10 +62,9 @@ async function main(){
         // Solicitud.params equivale a :nombre + es de tipo string
         // Extrae el nombre (.nombre) del parámetro del objeto recibido 
         // en la solicitud
-        const nombreBuscado = (solicitud.params as {nombre:string}).nombre;
-
+        const nombreUsuario = (solicitud.params as {nombre:string}).nombre;
         //Filtra los posts que pertenecen a este usuario
-        const postsUsuario = arrayUsuarios.filter(post => post.nombre === nombreBuscado);
+        const postsUsuario = arrayPosts.filter(post => post.usuario === nombreUsuario);
         respuesta.send(postsUsuario);        
     })
 
@@ -70,8 +72,8 @@ async function main(){
     // en  la URL y en el normal no
     fastify.post('/posts/:nombre', async (solicitud, respuesta) => {
         const nombrePosteador = (solicitud.params as {nombre:string}).nombre;
-        const {email} = solicitud.body as {email:string};
-        arrayUsuarios.push({nombre: nombrePosteador, email})
+        const {contenido} = solicitud.body as {contenido:string};
+        arrayPosts.push({usuario: nombrePosteador, contenido});
         respuesta.send('Post creado para el usuario ' + nombrePosteador);
     })
 }

@@ -7,6 +7,8 @@ async function main() {
         methods: ['GET', 'POST', 'DELETE', 'PUT']
     });
     let arrayUsuarios = await leerUsuarios();
+    let arrayPosts = [];
+    // GESTION DEL ARCHIVO
     async function leerUsuarios() {
         const datos = await fs.readFile('usuarios.json', 'utf-8');
         return JSON.parse(datos);
@@ -14,6 +16,7 @@ async function main() {
     async function guardarUsuarios(arrayUsuarios) {
         await fs.writeFile('usuarios.json', JSON.stringify(arrayUsuarios, null, 2));
     }
+    // ---------------------
     fastify.post('/post', async (solicitud, respuesta) => {
         // cuando extraes + de 1 parámetro necesitas {}
         // as inter... especifica q debe contener el objeto
@@ -39,17 +42,17 @@ async function main() {
         // Solicitud.params equivale a :nombre + es de tipo string
         // Extrae el nombre (.nombre) del parámetro del objeto recibido 
         // en la solicitud
-        const nombreBuscado = solicitud.params.nombre;
+        const nombreUsuario = solicitud.params.nombre;
         //Filtra los posts que pertenecen a este usuario
-        const postsUsuario = arrayUsuarios.filter(post => post.nombre === nombreBuscado);
+        const postsUsuario = arrayPosts.filter(post => post.usuario === nombreUsuario);
         respuesta.send(postsUsuario);
     });
     // Esta función es identíca a crear nuevo usuario + post pero aquí especificas el usuario 
     // en  la URL y en el normal no
     fastify.post('/posts/:nombre', async (solicitud, respuesta) => {
         const nombrePosteador = solicitud.params.nombre;
-        const { email } = solicitud.body;
-        arrayUsuarios.push({ nombre: nombrePosteador, email });
+        const { contenido } = solicitud.body;
+        arrayPosts.push({ usuario: nombrePosteador, contenido });
         respuesta.send('Post creado para el usuario ' + nombrePosteador);
     });
 }
