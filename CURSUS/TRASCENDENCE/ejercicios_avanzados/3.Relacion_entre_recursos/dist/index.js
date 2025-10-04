@@ -6,11 +6,11 @@ async function main() {
     await fastify.register(cors, {
         methods: ['GET', 'POST', 'DELETE', 'PUT']
     });
+    let arrayUsuarios = await leerUsuarios();
     async function leerUsuarios() {
         const datos = await fs.readFile('usuarios.json', 'utf-8');
         return JSON.parse(datos);
     }
-    let arrayUsuarios = await leerUsuarios();
     async function guardarUsuarios(arrayUsuarios) {
         await fs.writeFile('usuarios.json', JSON.stringify(arrayUsuarios, null, 2));
     }
@@ -43,6 +43,14 @@ async function main() {
         //Filtra los posts que pertenecen a este usuario
         const postsUsuario = arrayUsuarios.filter(post => post.nombre === nombreBuscado);
         respuesta.send(postsUsuario);
+    });
+    // Esta función es identíca a crear nuevo usuario + post pero aquí especificas el usuario 
+    // en  la URL y en el normal no
+    fastify.post('/posts/:nombre', async (solicitud, respuesta) => {
+        const nombrePosteador = solicitud.params.nombre;
+        const { email } = solicitud.body;
+        arrayUsuarios.push({ nombre: nombrePosteador, email });
+        respuesta.send('Post creado para el usuario ' + nombrePosteador);
     });
 }
 main();

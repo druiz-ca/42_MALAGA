@@ -34,7 +34,7 @@
         <input id="nombreBuscar">
         <button onclick="borrarPost()">Borrar</button>
         <!--------------------------------------------->
-
+        
         <button onclick="consultar()">Consultar</button>
         <p id="resultado"></p>
         
@@ -84,6 +84,7 @@
                 const nombre = document.getElementById('nombreCrear').value;
                 const email = document.getElementById('email').value;
                 // se añade una s (posts) al gestionar varios post de un user (es lo habitual)
+                // se puede usar la misma ruta a buscar pq uno es get y el otro post en el back
                 fetch('http://localhost:3000/posts/' + encodeURIComponent(nombre), {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},

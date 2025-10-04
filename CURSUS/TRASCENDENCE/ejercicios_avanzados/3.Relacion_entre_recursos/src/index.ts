@@ -8,18 +8,24 @@ async function main(){
         methods: ['GET', 'POST', 'DELETE', 'PUT']
     });
 
+    // INTERFACE + ARRAY de usuarios
     interface interUsuarios{
         nombre: string;
         email: string;
     }
+    let arrayUsuarios: interUsuarios[] = await leerUsuarios();
+    
+    // INTERFACE + ARRAY de posts
+    interface interPosts{
+        usuario: string;
+        contenido: string;
+    }
+    let arrayPosts: interPosts[] = [];
 
     async function leerUsuarios(){
         const datos = await fs.readFile('usuarios.json', 'utf-8');
         return JSON.parse(datos);
     }
-
-    let arrayUsuarios: interUsuarios[] = await leerUsuarios();
-
     async function guardarUsuarios(arrayUsuarios: interUsuarios[]){
         await fs.writeFile('usuarios.json', JSON.stringify(arrayUsuarios, null, 2));
     }
@@ -58,6 +64,15 @@ async function main(){
         //Filtra los posts que pertenecen a este usuario
         const postsUsuario = arrayUsuarios.filter(post => post.nombre === nombreBuscado);
         respuesta.send(postsUsuario);        
+    })
+
+    // Esta función es identíca a crear nuevo usuario + post pero aquí especificas el usuario 
+    // en  la URL y en el normal no
+    fastify.post('/posts/:nombre', async (solicitud, respuesta) => {
+        const nombrePosteador = (solicitud.params as {nombre:string}).nombre;
+        const {email} = solicitud.body as {email:string};
+        arrayUsuarios.push({nombre: nombrePosteador, email})
+        respuesta.send('Post creado para el usuario ' + nombrePosteador);
     })
 }
 
