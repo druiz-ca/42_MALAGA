@@ -30,8 +30,8 @@
         <input id="contenidoPost">
         <button onclick="crearPosts()">Crear</button>
 
-        <h1>Borrar Post de un Usuario</h1>
-        <input id="nombreBorrar">
+        <h1>Borrar Post de un Usuario por su ID</h1>
+        <input id="id_delpost">
         <button onclick="borrarPost()">Borrar</button>
         
         <h1>Consultar posts de un usuario</h1>
@@ -105,9 +105,21 @@
 
 
             function borrarPost(){
-                
+                const id_aborrar = document.getElementById('id_delpost').value;
+                fetch('http://localhost:3001/posts/' + encodeURIComponent(id_aborrar), {
+                    method: 'DELETE'
+                })
+                .then(respuesta => respuesta.text)
+                .then(respText => document.getElementById('respuestaPosts').innerText = respText);
             }
 
         </script>
     </body>
 </html>
+
+<!-- PARA PODER COLAPASAR UN CONJUNTO DE LINEAS QUE NO SEAN UNA FUNCION:
+    // #region USUARIOS
+        function guardar(){ ... }
+        function borrar(){ ... }
+    // #endregion
+-->

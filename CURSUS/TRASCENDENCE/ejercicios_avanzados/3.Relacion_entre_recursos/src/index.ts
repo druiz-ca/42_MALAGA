@@ -16,7 +16,7 @@ async function main(){
     /* ------------------------------------------------------------------
                         USUARIOS: INTERFACE + ARCHIVADO
     ------------------------------------------------------------------ */
-        // Interface + array de datos de usuarios (nombre, email, etc)
+        // Interface
             interface interUsuarios{
                 nombre: string;
                 email: string;}
@@ -30,10 +30,10 @@ async function main(){
                 await fs.writeFile('usuarios.json', JSON.stringify(arrayUsuarios, null, 2));}
         // =========================================================== //
 
-        // ARRAY USUARIOS
+        // ============= ARRAY USUARIOS (nombre, email, tel, etc)
             let arrayUsuarios: interUsuarios[] = await leerUsuarios();
 
-        // ============ FUNCIONES DE USUARIOS ======================== //
+        // ============ FUNCIONES DEl ARRAY USUARIOS ================= //
             fastify.post('/post', async (solicitud, respuesta) => {
                 // cuando extraes + de 1 parámetro necesitas {}
                 // as inter... especifica q debe contener el objeto
@@ -46,34 +46,40 @@ async function main(){
                     // para + seguridad, desestructurar -> {nombre, email}
                 arrayUsuarios.push(objeto); 
                 await guardarUsuarios(arrayUsuarios);
-                respuesta.send('Guardado');})
+                respuesta.send('Guardado');
+            })
 
-            // Ft CONSULTAR
             fastify.get('/get', async(solicitud, respuesta) => {
                 respuesta.send(arrayUsuarios);})
 
     /* ------------------------------------------------------------------
                         POSTS: INTERFACE + ARCHIVADO
-    ------------------------------------------------------------------ */    // INTERFACE + ARRAY de posts de cada usuario
+    ------------------------------------------------------------------ */    
+        // =============== INTERFACE ===============
         interface interPosts{
             id : number;
             usuario: string;
-            contenido: string;}
+            contenido: string;
+        }
         
-        // GESTION DEL ARCHIVO POSTS
+        // =========  GESTION DEL ARCHIVO POSTS =============
         async function leerPosts(){
             try{
                 const datos = await fs.readFile('posts.json', 'utf-8');
                 if(!datos.trim()) return [];
                 return JSON.parse(datos);
             }catch{
-                return [];}}
+                return [];
+            }}
         
         async function guardarPosts(arrayPosts: interPosts[]){
-            await fs.writeFile('posts.json', JSON.stringify(arrayPosts, null, 2));}
+            await fs.writeFile('posts.json', JSON.stringify(arrayPosts, null, 2));
+        }
         
+        // ARRAY de posts para cada usuario
         let arrayPosts: interPosts[] = await leerPosts();
 
+        // =============== FUNCIONES PARA GESTION DE POSTS ===============
         // CREAR POST (en html)
             // Esta función es identíca a crear nuevo usuario + post pero aquí especificas el usuario 
             // en  la URL y en el normal no
@@ -86,11 +92,13 @@ async function main(){
             if (arrayPosts.length === 0) {
                 id = 1;
             } else {
-                id = arrayPosts[arrayPosts.length - 1].id + 1;
+                // sin los ? falla
+                id = (arrayPosts[arrayPosts.length - 1]?.id ?? 0) + 1;
             }
             arrayPosts.push({id, usuario: nombrePosteador, contenido});
             await guardarPosts(arrayPosts);
-            respuesta.send('Post creado para el usuario ' + nombrePosteador);})
+            respuesta.send('Post creado para el usuario ' + nombrePosteador);
+        })
 
         // CONSULTAR POSTS
         fastify.get('/posts/:nombre', async (solicitud, respuesta) => {
@@ -100,16 +108,35 @@ async function main(){
             const nombreUsuario = (solicitud.params as {nombre:string}).nombre;
             //Filtra los posts que pertenecen a este usuario
             const postsUsuario = arrayPosts.filter(post => post.usuario === nombreUsuario);
-            respuesta.send(postsUsuario);})
+            respuesta.send(postsUsuario);
+        })
 
+        // BORRAR POST
         fastify.delete('/posts/:id', async (solicitud, respuesta) => {
+            // 1. Extraigo el parámetro id de la solicitud
+            const param_id = Number((solicitud.params as {id: string}).id);
+
+            // 2. Busco el índice del post con ese id en el array
+            const index = arrayPosts.findIndex(post => post.id === param_id);
+
+            // 3. Si el post existe (índice != -1)
+            if(index !== -1){
+                // 4. Elimina el post del array
+                arrayPosts.splice(index, 1);
+
+                // 5. Guarda el archivo con el array actualizado 
+                await guardarPosts(arrayPosts);
+            }else{
+                respuesta.status(404).send('No existe ese post');
+            }
 
         });
 
     /* ------------------------------------------------------------------
                                     LISTEN
-    ------------------------------------------------------------------ */    fastify.listen({port:3001}, () => {
-    console.log('API is listening');})
+    ------------------------------------------------------------------ */    
+    fastify.listen({port:3001}, () => {
+        console.log('API is listening');})
 }
 
 main();

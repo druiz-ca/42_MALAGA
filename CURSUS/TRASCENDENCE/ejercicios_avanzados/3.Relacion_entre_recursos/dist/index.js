@@ -21,7 +21,7 @@ async function main() {
         await fs.writeFile('usuarios.json', JSON.stringify(arrayUsuarios, null, 2));
     }
     // =========================================================== //
-    // ARRAY USUARIOS
+    // ============= ARRAY USUARIOS
     let arrayUsuarios = await leerUsuarios();
     // ============ FUNCIONES DE USUARIOS ======================== //
     fastify.post('/post', async (solicitud, respuesta) => {
@@ -70,7 +70,8 @@ async function main() {
             id = 1;
         }
         else {
-            id = arrayPosts[arrayPosts.length - 1].id + 1;
+            // sin los ? falla
+            id = (arrayPosts[arrayPosts.length - 1]?.id ?? 0) + 1;
         }
         arrayPosts.push({ id, usuario: nombrePosteador, contenido });
         await guardarPosts(arrayPosts);
@@ -86,11 +87,27 @@ async function main() {
         const postsUsuario = arrayPosts.filter(post => post.usuario === nombreUsuario);
         respuesta.send(postsUsuario);
     });
+    // BORRAR POST
     fastify.delete('/posts/:id', async (solicitud, respuesta) => {
+        // 1. Extraigo el parámetro id de la solicitud
+        const param_id = Number(solicitud.params.id);
+        // 2. Busco el índice del post con ese id en el array
+        const index = arrayPosts.findIndex(post => post.id === param_id);
+        // 3. Si el post existe (índice != -1)
+        if (index !== -1) {
+            // 4. Elimina el post del array
+            arrayPosts.splice(index, 1);
+            // 5. Guarda el archivo con el array actualizado 
+            await guardarPosts(arrayPosts);
+        }
+        else {
+            respuesta.status(404).send('No existe ese post');
+        }
     });
     /* ------------------------------------------------------------------
                                     LISTEN
-    ------------------------------------------------------------------ */ fastify.listen({ port: 3001 }, () => {
+    ------------------------------------------------------------------ */
+    fastify.listen({ port: 3001 }, () => {
         console.log('API is listening');
     });
 }

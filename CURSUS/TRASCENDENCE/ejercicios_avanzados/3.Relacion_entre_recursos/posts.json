@@ -124,21 +124,6 @@
   {
     "id": 1,
     "usuario": "1",
-    "contenido": "1"
-  },
-  {
-    "id": 1,
-    "usuario": "1",
-    "contenido": "1"
-  },
-  {
-    "id": 1,
-    "usuario": "1",
-    "contenido": "1"
-  },
-  {
-    "id": 1,
-    "usuario": "1",
     "contenido": "112"
   },
   {
@@ -165,10 +150,5 @@
     "id": 1,
     "usuario": "1",
     "contenido": "333333333333333333333"
-  },
-  {
-    "id": 2,
-    "usuario": "1",
-    "contenido": "2222222222222"
   }
 ]
