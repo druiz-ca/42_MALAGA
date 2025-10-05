@@ -21,30 +21,31 @@
         <button onclick="borrar()">Borrar</button>
         <p id="respBorrar"></p>
 
+        <button onclick="consultarUsuarios()">Consultar Usuarios</button>
+        <p id="resultado"></p>
+
         <!------- FUNCIONES PARA GESTIÓN DE POSTS -------- --> 
         <h1>Crear Post a un Usuario</h1>
         <input id="nombreCrear">
         <input id="contenidoPost">
         <button onclick="crearPosts()">Crear</button>
 
-        <h1>Buscar Posts de un Usuario</h1>
-        <input id="nombreBuscar">
-        <button onclick="buscarPosts()">Buscar</button>
-
         <h1>Borrar Post de un Usuario</h1>
         <input id="nombreBorrar">
         <button onclick="borrarPost()">Borrar</button>
-<!------------------------           --------------------->
         
-        <button onclick="consultar()">Consultar</button>
-        <p id="resultado"></p>
+        <h1>Consultar posts de un usuario</h1>
+        <input id="nombrePosteador">
+        <button onclick="consultarPosts()">Consultar Posts</button>
+        <p id="resultadoPosts"></p>
         
+        <!------------------------           --------------------->
         <script>
             // --------- FUNCIONES PARA GESTIÓN DE USUARIOS ---------
             function guardar(){
                 const nombre = document.getElementById('nombre').value;
                 const email = document.getElementById('email').value;
-                fetch('http://localhost:3000/post', {
+                fetch('http://localhost:3001/post', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({nombre, email})
@@ -53,7 +54,7 @@
             
             function borrar(){
                 const nombre = document.getElementById('nombreBorrar').value;
-                fetch('http://localhost:3000/delete/' + encodeURIComponent(nombre), {
+                fetch('http://localhost:3001/delete/' + encodeURIComponent(nombre), {
                     method: 'DELETE',
                     headers: {
                         // envío el token (ficha, símbolo, o parte más pequeña
@@ -66,8 +67,8 @@
                 .then(respText => document.getElementById('respBorrar').innerHTML = respText)
             }
 
-            function consultar(){
-                fetch('http://localhost:3000/get')
+            function consultarUsuarios(){
+                fetch('http://localhost:3001/get')
                 .then(respuesta => respuesta.text())
                 .then(respText => document.getElementById('resultado').innerText = respText)
             }
@@ -79,7 +80,7 @@
                 const contenido = document.getElementById('contenidoPost').value;
                 // se añade una s (posts) al gestionar varios post de un user (es lo habitual)
                 // se puede usar la misma ruta a buscar pq uno es get y el otro post en el back
-                fetch('http://localhost:3000/posts/' + encodeURIComponent(nombre), {
+                fetch('http://localhost:3001/posts/' + encodeURIComponent(nombre), {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     // Como el usuario existe solo envio el email q quiero añadir
@@ -90,12 +91,17 @@
             // no post( de postear, sino de varios posts) aunque uses un GET
             function buscarPosts(){
                 const nombreBuscado = document.getElementById('nombreBuscar').value;
-                fetch('http://localhost:3000/posts/' + encodeURIComponent(nombreBuscado))
+                fetch('http://localhost:3001/posts/' + encodeURIComponent(nombreBuscado))
                 .then(respuesta => respuesta.json()) // no olvidar los ()
                 .then(posts => document.getElementById('resultado').innerText = JSON.stringify(posts, null, 2));
             }
             
-            
+            function consultarPosts(){
+                const nombreBuscado = document.getElementById('nombrePosteador').value;
+                fetch('http://localhost:3001/posts/' + encodeURIComponent(nombreBuscado))
+                .then(respuesta => respuesta.text()) // SIN LOS () NO VA!!!!!
+                .then(respText => document.getElementById('resultadoPosts').innerText = respText);
+            }
 
 
             function borrarPost(){
