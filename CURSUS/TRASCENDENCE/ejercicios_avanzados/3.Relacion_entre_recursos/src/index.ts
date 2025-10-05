@@ -80,11 +80,14 @@ async function main(){
         fastify.post('/posts/:nombre', async (solicitud, respuesta) => {
             const nombrePosteador = (solicitud.params as {nombre:string}).nombre;
             const {contenido} = solicitud.body as {contenido:string};
-            let id : number;
-            if(arrayPosts.length === 0)
+            let id: number;
+
+            // Aumentar en 1 el id por cada nuevo post
+            if (arrayPosts.length === 0) {
                 id = 1;
-            else
-                id = arrayPosts[arrayPosts.length-1].id + 1;
+            } else {
+                id = arrayPosts[arrayPosts.length - 1].id + 1;
+            }
             arrayPosts.push({id, usuario: nombrePosteador, contenido});
             await guardarPosts(arrayPosts);
             respuesta.send('Post creado para el usuario ' + nombrePosteador);})

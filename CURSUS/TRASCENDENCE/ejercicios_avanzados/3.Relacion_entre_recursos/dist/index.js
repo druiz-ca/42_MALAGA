@@ -65,10 +65,13 @@ async function main() {
         const nombrePosteador = solicitud.params.nombre;
         const { contenido } = solicitud.body;
         let id;
-        if (arrayPosts.length === 0)
+        // Aumentar en 1 el id por cada nuevo post
+        if (arrayPosts.length === 0) {
             id = 1;
-        else
+        }
+        else {
             id = arrayPosts[arrayPosts.length - 1].id + 1;
+        }
         arrayPosts.push({ id, usuario: nombrePosteador, contenido });
         await guardarPosts(arrayPosts);
         respuesta.send('Post creado para el usuario ' + nombrePosteador);
