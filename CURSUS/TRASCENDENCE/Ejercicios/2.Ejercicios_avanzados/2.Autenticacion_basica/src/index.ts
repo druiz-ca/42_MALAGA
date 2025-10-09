@@ -42,6 +42,8 @@ async function main(){
         respuesta.send('Guardado');
     })
 
+    // Para buscar los posts de un usuario creo nueva ruta (posts)
+        // en API rest cuando se gestionan varios post se suele usar en plural
     fastify.get('/posts/:nombre', async (solicitud, respuesta) => {
     const nombre = (solicitud.params as {nombre: string}).nombre;
     const postsUsuario = arrayUsuarios.filter(post => post.nombre === nombre);
@@ -63,7 +65,6 @@ async function main(){
             respuesta.send('Usuario eliminado');
         }
         respuesta.status(404).send('Doesn`t exist');
-
     });
 
     fastify.get('/get', async (solicitud, respuesta) => {

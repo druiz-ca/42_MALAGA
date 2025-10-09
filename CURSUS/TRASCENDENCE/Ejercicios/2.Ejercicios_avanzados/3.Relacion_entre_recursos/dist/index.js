@@ -21,9 +21,9 @@ async function main() {
         await fs.writeFile('usuarios.json', JSON.stringify(arrayUsuarios, null, 2));
     }
     // =========================================================== //
-    // ============= ARRAY USUARIOS
+    // ============= ARRAY USUARIOS (nombre, email, tel, etc)
     let arrayUsuarios = await leerUsuarios();
-    // ============ FUNCIONES DE USUARIOS ======================== //
+    // ============ FUNCIONES DEl ARRAY USUARIOS ================= //
     fastify.post('/post', async (solicitud, respuesta) => {
         // cuando extraes + de 1 parámetro necesitas {}
         // as inter... especifica q debe contener el objeto
@@ -38,11 +38,10 @@ async function main() {
         await guardarUsuarios(arrayUsuarios);
         respuesta.send('Guardado');
     });
-    // Ft CONSULTAR
     fastify.get('/get', async (solicitud, respuesta) => {
         respuesta.send(arrayUsuarios);
     });
-    // GESTION DEL ARCHIVO POSTS
+    // =========  GESTION DEL ARCHIVO POSTS =============
     async function leerPosts() {
         try {
             const datos = await fs.readFile('posts.json', 'utf-8');
@@ -57,7 +56,9 @@ async function main() {
     async function guardarPosts(arrayPosts) {
         await fs.writeFile('posts.json', JSON.stringify(arrayPosts, null, 2));
     }
+    // ARRAY de posts para cada usuario
     let arrayPosts = await leerPosts();
+    // =============== FUNCIONES PARA GESTION DE POSTS ===============
     // CREAR POST (en html)
     // Esta función es identíca a crear nuevo usuario + post pero aquí especificas el usuario 
     // en  la URL y en el normal no

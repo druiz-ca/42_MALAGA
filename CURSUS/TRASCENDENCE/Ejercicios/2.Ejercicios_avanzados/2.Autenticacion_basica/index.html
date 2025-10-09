@@ -15,11 +15,6 @@
         <input id="email">
         <button onclick="guardar()">Guardar</button>
 
-        <h1>Actualizar email</h1>
-        <input id="nombreAct">
-        <input id="emailAct">
-        <button onclick="actualizar()">Actualizar</button>
-
         <h1>Borrar Usuario</h1>
         <input id="nombreBorrar">
         <button onclick="borrar()">Borrar</button>
@@ -57,13 +52,6 @@
                 })
                 .then(respuesta => respuesta.text())// text sin () no va!!!
                 .then(respText => document.getElementById('respBorrar').innerHTML = respText)
-            }
-
-            function buscarPosts(){
-                const nombreBuscado = document.getElementById('nombreBuscar').value;
-                fetch('http://localhost:3000/get/' + encodeURIComponent(nombreBuscado))
-                .then(respuesta => respuesta.text())
-                .then(respText => document.getElementById('respBuscar').innerText = respText)
             }
 
             function consultar(){

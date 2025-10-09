@@ -16,41 +16,41 @@ async function main(){
     /* ------------------------------------------------------------------
                         USUARIOS: INTERFACE + ARCHIVADO
     ------------------------------------------------------------------ */
-        // Interface
-            interface interUsuarios{
-                nombre: string;
-                email: string;}
-        
-        // ============= Gestion del archivo de usuarios ============== //
-            async function leerUsuarios(){
-                const datos = await fs.readFile('usuarios.json', 'utf-8');
-                return JSON.parse(datos);}
+    // --- Interface ------//
+        interface interUsuarios{
+            nombre: string;
+            email: string;}
+    
+    // ============= Gestion del archivo de usuarios ============== //
+        async function leerUsuarios(){
+            const datos = await fs.readFile('usuarios.json', 'utf-8');
+            return JSON.parse(datos);}
 
-            async function guardarUsuarios(arrayUsuarios: interUsuarios[]){
-                await fs.writeFile('usuarios.json', JSON.stringify(arrayUsuarios, null, 2));}
-        // =========================================================== //
+        async function guardarUsuarios(arrayUsuarios: interUsuarios[]){
+            await fs.writeFile('usuarios.json', JSON.stringify(arrayUsuarios, null, 2));}
 
-        // ============= ARRAY USUARIOS (nombre, email, tel, etc)
-            let arrayUsuarios: interUsuarios[] = await leerUsuarios();
+    // ------- ARRAY USUARIOS (nombre, email, tel, etc) -------- //
+        let arrayUsuarios: interUsuarios[] = await leerUsuarios();
 
-        // ============ FUNCIONES DEl ARRAY USUARIOS ================= //
-            fastify.post('/post', async (solicitud, respuesta) => {
-                // cuando extraes + de 1 parámetro necesitas {}
-                // as inter... especifica q debe contener el objeto
-                // DESESTRUCTURACIÓN DEL OBJETO:
-                // en vez de: const objeto -> objeto.nombre / objeto.email
-                // lo desestructuras: {nombre, email}
-                // útil para q compruebe q exactamente recibe esos parámtros
-                // pq si es objeto = ... no controla lo que recibe!!
-                const objeto = solicitud.body as interUsuarios;
-                    // para + seguridad, desestructurar -> {nombre, email}
-                arrayUsuarios.push(objeto); 
-                await guardarUsuarios(arrayUsuarios);
-                respuesta.send('Guardado');
-            })
+    // ============ FUNCIONES DEl ARRAY USUARIOS ================= //
+        fastify.post('/post', async (solicitud, respuesta) => {
+            // cuando extraes + de 1 parámetro necesitas {}
+            // as inter... especifica q debe contener el objeto
+            // DESESTRUCTURACIÓN DEL OBJETO:
+            // en vez de: const objeto -> objeto.nombre / objeto.email
+            // lo desestructuras: {nombre, email}
+            // útil para q compruebe q exactamente recibe esos parámtros
+            // pq si es objeto = ... no controla lo que recibe!!
+            const objeto = solicitud.body as interUsuarios;
+                // para + seguridad, desestructurar -> {nombre, email} pq 'objeto'
+                // no comprueba que se esté recibiendo concretamente esos datos
+            arrayUsuarios.push(objeto); 
+            await guardarUsuarios(arrayUsuarios);
+            respuesta.send('Guardado');
+        })
 
-            fastify.get('/get', async(solicitud, respuesta) => {
-                respuesta.send(arrayUsuarios);})
+        fastify.get('/get', async(solicitud, respuesta) => {
+            respuesta.send(arrayUsuarios);})
 
     /* ------------------------------------------------------------------
                         POSTS: INTERFACE + ARCHIVADO
@@ -70,13 +70,13 @@ async function main(){
                 return JSON.parse(datos);
             }catch{
                 return [];
-            }}
+        }}
         
         async function guardarPosts(arrayPosts: interPosts[]){
             await fs.writeFile('posts.json', JSON.stringify(arrayPosts, null, 2));
         }
         
-        // ARRAY de posts para cada usuario
+        // --------- ARRAY de posts para cada usuario
         let arrayPosts: interPosts[] = await leerPosts();
 
         // =============== FUNCIONES PARA GESTION DE POSTS ===============
