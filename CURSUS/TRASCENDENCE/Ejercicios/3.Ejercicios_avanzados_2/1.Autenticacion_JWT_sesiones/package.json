@@ -1,0 +1,23 @@
+{
+  "name": "1.autenticacion_jwt_sesiones",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@fastify/cors": "^11.1.0",
+    "bcrypt": "^6.0.0",
+    "fastify": "^5.6.1"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/node": "^24.7.0",
+    "typescript": "^5.9.3"
+  }
+}
