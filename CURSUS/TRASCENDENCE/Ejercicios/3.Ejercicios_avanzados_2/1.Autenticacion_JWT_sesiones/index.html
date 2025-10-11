@@ -6,18 +6,22 @@
                 background-color: black;
                 color: whitesmoke;
             }
+            input, button{
+                display: block;
+                margin-bottom: 10px;
+            }
         </style>
     </head>
     <body>
-        <h1>Registrarse</h1>
-        <input id="nombre">
-        <input id="email">
-        <input id="password">
+        <h1>Registro</h1>
+        <input id="nombre" placeholder="nombre">
+        <input id="email" placeholder="email">
+        <input id="password" placeholder="password">
         <button onclick="registrarse()">registrarse</button>
 
         <h1>Login</h1>
-        <input id="emailLogin">
-        <input id="passLogin">
+        <input id="emailLogin" placeholder="email">
+        <input id="passLogin" placeholder="password">
         <button onclick="login()">Login</button>
 
         <p id="respuesta"></p>

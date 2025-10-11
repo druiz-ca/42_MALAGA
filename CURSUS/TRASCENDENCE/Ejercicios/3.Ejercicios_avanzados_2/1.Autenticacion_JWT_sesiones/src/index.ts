@@ -69,6 +69,22 @@ async function main(){
             {expiresIn: '1h'} // el token caduca en 1 hora
         );
 
+        function verificarJWT(req, res){
+            const auth = req.headers['authorizacion'];
+            if(!auth){
+                res.status(401).send('No autorizado');
+                return null;
+            }
+            try {
+                const decoded = jwt.verify(auth, 'clave_secreta');
+                return decoded;
+            }catch{
+                res.status(401).send('Token inválido');
+                return null;
+            }
+        }
+
+
         // Enviar el token al Front en la respuesta
         res.send({token});
     });
