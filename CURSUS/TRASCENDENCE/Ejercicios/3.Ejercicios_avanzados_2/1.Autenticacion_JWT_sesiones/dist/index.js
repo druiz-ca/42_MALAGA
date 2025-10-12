@@ -44,9 +44,42 @@ async function main() {
         if (!match)
             return res.status(401).send('Contraseña incorrecta');
         // Generar un JWT con los datos del ususario (menos el pass)
-        const token = jwt.sign({ nombre: checkUser.nombre, email: checkUser.email }, 'clave_secreta', { expiresIn: '1h' });
-        // Enviar el token al Front en la respuesta
+        const token = jwt.sign({ nombre: checkUser.nombre, email: checkUser.email }, 'clave_secreta', // clave con la que se firma el token
+        { expiresIn: '1h' } // el token caduca en 1 hora
+        );
+        // Enviar el token al Front en la respuesta y este lo almacena
+        //en localStorage
         res.send({ token });
+    });
+    // (Equivalente al middelware)
+    // Verifica q el user que hace la petición tiene un token válido
+    function verificarJWT(req, res) {
+        // Lee el token de la cabecera
+        const auth = req.headers['authorization'];
+        // sino tiene token : mensaje no autroizado
+        if (!auth) {
+            res.status(401).send('No autorizado');
+            return null;
+        }
+        try {
+            // Si el token es correcto devuelve los datos q contiene
+            const decoded = jwt.verify(auth, 'clave_secreta');
+            return decoded;
+            // Si el token es incorrecto mensaje de error
+        }
+        catch {
+            res.status(401).send('Token inválido');
+            return null;
+        }
+    }
+    // Ruta accesible solo a user autenticados
+    fastify.get('/profile', async (req, res) => {
+        // Verifica el token
+        const usuario = verificarJWT(req, res);
+        if (!usuario)
+            return;
+        // si es correcto devuelve los datos del usuario
+        res.send({ mensaje: 'Perfil privado', usuario });
     });
     fastify.listen({ port: 3000 }, () => {
         console.log('API is listening');

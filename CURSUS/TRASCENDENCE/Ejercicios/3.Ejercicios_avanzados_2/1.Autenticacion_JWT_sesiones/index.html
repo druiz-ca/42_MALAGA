@@ -23,8 +23,13 @@
         <input id="emailLogin" placeholder="email">
         <input id="passLogin" placeholder="password">
         <button onclick="login()">Login</button>
-
+        
         <p id="respuesta"></p>
+
+
+        <h1>Ver Perfil</h1>
+        <button onclick="verPerfil()">Ver Perfil</button>
+        
 
         <script>
             function registrarse(){
@@ -49,15 +54,51 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({email, password})
                 })
+                /* // si espuera respuesta entonces se usa '.then'
                 .then(respuesta => respuesta.text())
                 .then(respText => document.getElementById('respuesta').innerText = respText);
 
-                const data = await respuesta.json();
-                if(data.token){
-                    localStorage.setItem('token', data.token);
+                // Recibe el token del back
+                    // Convierte la respuesta a JSON para poder
+                    // acceder a sus propiedades
+                const respuestaText = await respuesta.json();
+                if(respuestaText.token){
+                    // guarda el token en el almacenamineto local del navegador
+                    // para no tener que generar un nuevo token en cada solicitud/
+                    localStorage.setItem('token', respuestaText.token);
                     alert('Login correcto');
                 } else {
                     alert('Login fallido');
+                } */
+
+                let data;
+                try {
+                    data = await respuesta.json();
+                } catch {
+                    document.getElementById('respuesta').innerText = "Login fallido";
+                    return;
+                }
+
+                if(data.token){
+                    localStorage.setItem('token', data.token);
+                    document.getElementById('respuesta').innerText = "Login correcto";
+                    alert('Login correcto');
+                } else {
+                    document.getElementById('respuesta').innerText = data || "Login fallido";
+                    alert('Login fallido');
+                }
+            }
+        
+            async function verPerfil(){
+                const token = localStorage.getItem('token');
+                const respuesta = await fetch('http://localhost:3000/profile', {
+                    headers: {'Authorization': token}});
+
+                if(respuesta.ok){
+                    const datos = await respuesta.json();
+                    alert('Perfil: ' + JSON.stringify(datos));
+                }else{
+                    alert('No autorizado o token inválido');
                 }
             }
         </script>

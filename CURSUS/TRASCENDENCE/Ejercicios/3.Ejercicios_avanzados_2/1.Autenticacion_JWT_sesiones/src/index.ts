@@ -68,26 +68,48 @@ async function main(){
             'clave_secreta', // clave con la que se firma el token
             {expiresIn: '1h'} // el token caduca en 1 hora
         );
-
-        function verificarJWT(req, res){
-            const auth = req.headers['authorizacion'];
-            if(!auth){
-                res.status(401).send('No autorizado');
-                return null;
-            }
-            try {
-                const decoded = jwt.verify(auth, 'clave_secreta');
-                return decoded;
-            }catch{
-                res.status(401).send('Token inválido');
-                return null;
-            }
-        }
-
-
-        // Enviar el token al Front en la respuesta
+        
+        // Enviar el token al Front en la respuesta y este lo almacena
+        //en localStorage
         res.send({token});
     });
+
+
+    // (Equivalente al middelware)
+    // Verifica q el user que hace la petición tiene un token válido
+    function verificarJWT(req: any, res: any) {
+        // Lee el token de la cabecera
+        const auth = req.headers['authorization'];
+
+        // sino tiene token : mensaje no autroizado
+        if(!auth){
+            res.status(401).send('No autorizado');
+            return null;}
+
+        try {
+            // Si el token es correcto devuelve los datos q contiene el token
+            const decoded = jwt.verify(auth, 'clave_secreta');
+            return decoded;
+
+        // Si el token es incorrecto mensaje de error
+        }catch{
+            res.status(401).send('Token inválido');
+            return null;
+        }
+    }
+
+    // Ruta accesible solo a user autenticados
+    fastify.get('/profile', async(req, res) => {
+
+        // Verifica el token
+        const usuario = verificarJWT(req, res);
+        if(!usuario)
+            return;
+
+        // si es correcto devuelve los datos del usuario
+        res.send({ mensaje: 'Perfil privado', usuario });
+    });
+
 
     fastify.listen({port:3000}, ()=> {
         console.log('API is listening');

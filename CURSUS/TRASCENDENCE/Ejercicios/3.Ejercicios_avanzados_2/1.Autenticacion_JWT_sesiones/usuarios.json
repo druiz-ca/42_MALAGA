@@ -43,5 +43,15 @@
     "nombre": "a",
     "email": "a",
     "password": "$2b$10$lLcjD7D9aeQiQgz/rJEyiukzNJPIqjA1DzsRjQ/j31yxxEVg5fNy."
+  },
+  {
+    "nombre": "aaa",
+    "email": "aaa",
+    "password": "$2b$10$S5sDoCdfh.16qEXyX2xbBeMeHLOfrnSAM6T4y8r6QIulN9x9tB6XK"
+  },
+  {
+    "nombre": "aa",
+    "email": "aa",
+    "password": "$2b$10$xbU28QXlErrcvcu1.1/Hwuhhzt.iRuS21EBafIpKrQmesMqewF2eC"
   }
 ]
